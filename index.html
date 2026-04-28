@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EV Betting Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #080b14;
+    --surface: #0e1320;
+    --surface2: #141929;
+    --border: rgba(255,255,255,0.07);
+    --green: #00e676;
+    --green-dim: rgba(0,230,118,0.12);
+    --amber: #ffab00;
+    --amber-dim: rgba(255,171,0,0.12);
+    --red: #ff5252;
+    --red-dim: rgba(255,82,82,0.12);
+    --blue: #448aff;
+    --text: #e8eaf6;
+    --text2: #7986a3;
+    --text3: #4a5568;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* Top gradient bar */
+  .top-bar {
+    height: 3px;
+    background: linear-gradient(90deg, #00e676, #448aff, #ff5252);
+  }
+
+  header {
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .logo h1 {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: #fff;
+  }
+
+  .logo span {
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: var(--text2);
+    margin-left: 4px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  #last-update {
+    font-size: 0.7rem;
+    color: var(--text3);
+  }
+
+  #countdown {
+    font-size: 0.72rem;
+    color: var(--green);
+    background: var(--green-dim);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(0,230,118,0.2);
+  }
+
+  .main { padding: 1.5rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+  /* Settings bar */
+  .settings-bar {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    flex-wrap: wrap;
+  }
+
+  .setting-group { display: flex; flex-direction: column; gap: 5px; }
+
+  .setting-group label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .setting-group input,
+  .setting-group select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    width: 160px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .setting-group input:focus,
+  .setting-group select:focus {
+    border-color: var(--green);
+  }
+
+  /* Summary cards */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+  }
+
+  .summary-card .s-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .summary-card .s-value {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .summary-card .s-value.green { color: var(--green); }
+  .summary-card .s-value.amber { color: var(--amber); }
+  .summary-card .s-value.blue { color: var(--blue); }
+
+  /* Bet cards */
+  .bet-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: 1fr 120px 130px 140px;
+    gap: 1.5rem;
+    align-items: center;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bet-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--green);
+    border-radius: 3px 0 0 3px;
+  }
+
+  .bet-card:hover {
+    background: var(--surface2);
+    border-color: rgba(255,255,255,0.12);
+  }
+
+  .bet-card.high-ev::before { background: var(--amber); }
+  .bet-card.top-ev::before { background: var(--red); }
+
+  .bet-match {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text3);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .bet-target {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .bet-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .bet-meta .tag {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text2);
+    background: rgba(255,255,255,0.05);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .cell { text-align: center; }
+
+  .cell-label {
+    font-size: 0.6rem;
+    font-weight: 500;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .cell-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .cell-sub {
+    font-size: 0.65rem;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  .ev-value { color: var(--green); }
+  .bet-card.high-ev .ev-value { color: var(--amber); }
+  .bet-card.top-ev .ev-value { color: var(--red); }
+
+  .kelly-cell {
+    background: linear-gradient(135deg, rgba(0,230,118,0.1), rgba(68,138,255,0.1));
+    border: 1px solid rgba(0,230,118,0.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    text-align: center;
+  }
+
+  .kelly-euro {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--green);
+  }
+
+  .kelly-pct {
+    font-size: 0.65rem;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+
+  .kelly-label {
+    font-size: 0.6rem;
+    color: var(--text3);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  #loading {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text2);
+    font-size: 0.85rem;
+  }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #empty {
+    display: none;
+    text-align: center;
+    padding: 4rem;
+    color: var(--text2);
+    font-size: 0.85rem;
+  }
+
+  #error {
+    display: none;
+    color: var(--red);
+    font-size: 0.8rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid rgba(255,82,82,0.2);
+    border-radius: 8px;
+    background: var(--red-dim);
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    header { padding: 1rem; }
+    .main { padding: 1rem; }
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    .bet-card { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+    .kelly-cell { grid-column: span 2; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <h1>EV Analyzer <span>LIVE</span></h1>
+  </div>
+  <div class="header-right">
+    <span id="last-update">—</span>
+    <span id="countdown">Ladataan...</span>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="settings-bar">
+    <div class="setting-group">
+      <label>Bankroll (€)</label>
+      <input type="number" id="bankroll" value="1000" min="10" step="100" />
+    </div>
+    <div class="setting-group">
+      <label>Kelly-fraktio</label>
+      <select id="kelly-frac">
+        <option value="0.1">10% — erittäin varovainen</option>
+        <option value="0.25" selected>25% — varovainen</option>
+        <option value="0.5">50% — normaali</option>
+        <option value="1.0">100% — täysi Kelly</option>
+      </select>
+    </div>
+    <div class="setting-group">
+      <label>Flat bet %</label>
+      <input type="number" id="flat-pct" value="0.75" min="0.25" max="5" step="0.25" />
+    </div>
+  </div>
+
+  <div class="summary-grid" id="summary-grid" style="display:none">
+    <div class="summary-card">
+      <div class="s-label">Kohteet yhteensä</div>
+      <div class="s-value blue" id="s-count">—</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">Paras EV</div>
+      <div class="s-value green" id="s-best">—</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">Keskiarvo EV</div>
+      <div class="s-value green" id="s-avg">—</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">Bankroll</div>
+      <div class="s-value amber" id="s-bankroll">—</div>
+    </div>
+  </div>
+
+  <div id="loading"><div class="spinner"></div>Haetaan dataa...</div>
+  <div id="empty">Ei plus-EV kohteita juuri nyt. Sheet päivittyy 12 tunnin välein.</div>
+  <div id="error"></div>
+  <div id="bets"></div>
+
+</div>
+
+<script>
+const SHEET_ID = "1t8vBG7HNKcR-YZLnQ_BBpI0R8_OtIptY_yomZhwipEo";
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+const REFRESH_SECONDS = 300;
+
+let allBets = [];
+let countdown = REFRESH_SECONDS;
+let timer;
+
+function parseCSV(text) {
+  const lines = text.trim().split("\n");
+  if (lines.length < 2) return [];
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(",").map(c => c.replace(/^"|"$/g, "").trim());
+    if (cols.length >= 7 && cols[0] && cols[0] !== "Ei plus-EV kohteita juuri nyt") {
+      rows.push({
+        match: cols[0],
+        starts: cols[1],
+        target: cols[2],
+        odds: parseFloat(cols[3]) || 0,
+        book: cols[4],
+        pinnPct: parseFloat(cols[5]) / 100,
+        ev: parseFloat(cols[6]) || 0,
+        updated: cols[7] || "",
+      });
+    }
+  }
+  return rows.sort((a, b) => b.ev - a.ev);
+}
+
+function kelly(prob, odds, frac, bankroll) {
+  const b = odds - 1;
+  const q = 1 - prob;
+  const k = Math.max(0, (b * prob - q) / b);
+  return k * frac * bankroll;
+}
+
+function evClass(ev) {
+  if (ev >= 10) return "top-ev";
+  if (ev >= 5) return "high-ev";
+  return "";
+}
+
+function render() {
+  const bankroll = parseFloat(document.getElementById("bankroll").value) || 1000;
+  const kellyFrac = parseFloat(document.getElementById("kelly-frac").value) || 0.25;
+  const flatPct = parseFloat(document.getElementById("flat-pct").value) || 0.75;
+  const flatStake = (bankroll * flatPct) / 100;
+
+  const betsEl = document.getElementById("bets");
+  const emptyEl = document.getElementById("empty");
+  const summaryGrid = document.getElementById("summary-grid");
+
+  if (allBets.length === 0) {
+    emptyEl.style.display = "block";
+    betsEl.innerHTML = "";
+    summaryGrid.style.display = "none";
+    return;
+  }
+
+  emptyEl.style.display = "none";
+  summaryGrid.style.display = "grid";
+
+  const avgEV = (allBets.reduce((a, b) => a + b.ev, 0) / allBets.length).toFixed(1);
+  document.getElementById("s-count").textContent = allBets.length;
+  document.getElementById("s-best").textContent = "+" + allBets[0].ev.toFixed(1) + "%";
+  document.getElementById("s-avg").textContent = "+" + avgEV + "%";
+  document.getElementById("s-bankroll").textContent = bankroll.toLocaleString("fi-FI") + "€";
+
+  betsEl.innerHTML = allBets.map(b => {
+    const kellyStake = kelly(b.pinnPct, b.odds, kellyFrac, bankroll);
+    const recStake = kellyStake > 0 ? Math.min(kellyStake, flatStake * 2) : flatStake;
+    const kellyPct = ((kellyStake / bankroll) * 100).toFixed(2);
+
+    return `
+      <div class="bet-card ${evClass(b.ev)}">
+        <div>
+          <div class="bet-match">${b.match}</div>
+          <div class="bet-target">${b.target}</div>
+          <div class="bet-meta">
+            <span class="tag">${b.starts}</span>
+            <span class="tag">${b.book}</span>
+            <span class="tag">Pinnacle ${(b.pinnPct*100).toFixed(1)}%</span>
+          </div>
+        </div>
+        <div class="cell">
+          <div class="cell-label">Kerroin</div>
+          <div class="cell-value" style="color:#fff">${b.odds.toFixed(2)}</div>
+          <div class="cell-sub">${b.book}</div>
+        </div>
+        <div class="cell">
+          <div class="cell-label">EV</div>
+          <div class="cell-value ev-value">+${b.ev.toFixed(1)}%</div>
+          <div class="cell-sub">Expected value</div>
+        </div>
+        <div class="kelly-cell">
+          <div class="kelly-euro">${recStake.toFixed(0)}€</div>
+          <div class="kelly-pct">Kelly ${kellyPct}%</div>
+          <div class="kelly-label">Suositeltu panos</div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function fetchData() {
+  const errorEl = document.getElementById("error");
+  errorEl.style.display = "none";
+  try {
+    const res = await fetch(CSV_URL + "&t=" + Date.now());
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+    allBets = parseCSV(text);
+    document.getElementById("loading").style.display = "none";
+    render();
+    const updated = allBets[0]?.updated || new Date().toLocaleString("fi-FI");
+    document.getElementById("last-update").textContent = "Päivitetty: " + updated;
+    countdown = REFRESH_SECONDS;
+  } catch(e) {
+    errorEl.style.display = "block";
+    errorEl.textContent = "Virhe datan haussa: " + e.message;
+    document.getElementById("loading").style.display = "none";
+  }
+}
+
+function startCountdown() {
+  clearInterval(timer);
+  timer = setInterval(() => {
+    countdown--;
+    const m = Math.floor(countdown / 60);
+    const s = countdown % 60;
+    document.getElementById("countdown").textContent =
+      `Päivitys: ${m}:${s.toString().padStart(2,"0")}`;
+    if (countdown <= 0) fetchData();
+  }, 1000);
+}
+
+document.getElementById("bankroll").addEventListener("input", render);
+document.getElementById("kelly-frac").addEventListener("change", render);
+document.getElementById("flat-pct").addEventListener("input", render);
+
+fetchData();
+startCountdown();
+</script>
+</body>
+</html>
