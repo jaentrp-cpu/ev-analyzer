@@ -36,8 +36,7 @@ nav { display: flex; gap: 4px; }
 #countdown-badge { font-size: 0.7rem; color: var(--green); background: var(--green-dim); border: 1px solid rgba(0,230,118,0.2); padding: 4px 10px; border-radius: 20px; font-family: 'DM Mono', monospace; }
 #last-update-txt { font-size: 0.68rem; color: var(--text3); }
 main { flex: 1; padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
-.page { display: none; }
-.page.active { display: block; }
+.page { display: none; } .page.active { display: block; }
 .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem; }
 .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; }
 .stat-label { font-size: 0.63rem; font-weight: 500; color: var(--text2); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
@@ -46,8 +45,7 @@ main { flex: 1; padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; width: 
 .settings-bar { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 1rem; padding: 1.25rem 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); flex-wrap: wrap; }
 .setting-group { display: flex; flex-direction: column; gap: 5px; }
 .setting-group label { font-size: 0.63rem; font-weight: 500; color: var(--text2); letter-spacing: 0.08em; text-transform: uppercase; }
-.setting-group input, .setting-group select { background: var(--bg); border: 1px solid var(--border2); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; padding: 8px 12px; border-radius: var(--radius-sm); width: 150px; outline: none; transition: border-color 0.2s; }
-.setting-group input:focus, .setting-group select:focus { border-color: var(--green); }
+.setting-group input, .setting-group select { background: var(--bg); border: 1px solid var(--border2); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; padding: 8px 12px; border-radius: var(--radius-sm); width: 150px; outline: none; }
 .filter-bar { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 1.5rem; padding: 1rem 1.5rem; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); flex-wrap: wrap; }
 .filter-title { font-size: 0.63rem; font-weight: 600; color: var(--text2); letter-spacing: 0.08em; text-transform: uppercase; width: 100%; margin-bottom: 4px; }
 .filter-group { display: flex; flex-direction: column; gap: 4px; }
@@ -56,21 +54,18 @@ main { flex: 1; padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; width: 
 .filter-reset { background: var(--red-dim); border: 1px solid rgba(255,68,68,0.2); color: var(--red); font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 500; padding: 6px 14px; border-radius: var(--radius-sm); cursor: pointer; align-self: flex-end; }
 .filter-count { font-size: 0.7rem; color: var(--text2); align-self: flex-end; padding-bottom: 6px; }
 .filter-count strong { color: var(--green); }
-
-/* BET CARD */
-.bet-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; position: relative; overflow: hidden; transition: border-color 0.2s; }
+.bet-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; position: relative; overflow: hidden; }
 .bet-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--green); }
 .bet-card.ev-high::before { background: var(--amber); }
 .bet-card.ev-top::before { background: var(--red); }
 .bet-card-main { padding: 1rem 1.5rem; display: grid; grid-template-columns: 1fr 110px 120px 150px; gap: 1.5rem; align-items: center; cursor: pointer; transition: background 0.2s; }
 .bet-card-main:hover { background: var(--surface2); }
-
-/* TEAM LOGO in card */
-.match-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-.team-logo-sm { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; background: var(--surface2); border: 1px solid var(--border); padding: 2px; flex-shrink: 0; }
-.team-logo-sm.fallback { display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: var(--text2); font-family: 'DM Mono', monospace; }
-.vs-sm { font-size: 0.55rem; color: var(--text3); font-weight: 600; flex-shrink: 0; }
-.bet-match { font-size: 0.63rem; font-weight: 500; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
+.match-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.logo-sm { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; }
+.logo-sm-round { width: 26px; height: 26px; object-fit: cover; border-radius: 50%; flex-shrink: 0; border: 1px solid var(--border2); }
+.logo-sm-fallback { width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; font-family: 'DM Mono', monospace; flex-shrink: 0; }
+.vs-sm { font-size: 0.5rem; color: var(--text3); font-weight: 700; letter-spacing: 0.05em; }
+.bet-match { font-size: 0.6rem; font-weight: 500; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; }
 .bet-target { font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 6px; }
 .tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .tag { font-size: 0.63rem; color: var(--text2); background: var(--surface2); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); }
@@ -86,16 +81,15 @@ main { flex: 1; padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; width: 
 .kelly-euro { font-size: 1.2rem; font-weight: 700; color: var(--green); font-family: 'DM Mono', monospace; }
 .kelly-pct { font-size: 0.63rem; color: var(--text2); margin-top: 2px; }
 .kelly-lbl { font-size: 0.58rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; }
-
-/* DETAIL */
 .bet-detail { display: none; border-top: 1px solid var(--border); padding: 1.25rem 1.5rem; background: var(--surface2); }
 .bet-detail.open { display: block; }
-.detail-teams { display: flex; align-items: center; justify-content: center; gap: 2rem; margin-bottom: 1.25rem; }
+.detail-teams { display: flex; align-items: center; justify-content: center; gap: 2.5rem; margin-bottom: 1.25rem; }
 .detail-team { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.team-logo-lg { width: 60px; height: 60px; border-radius: 12px; object-fit: contain; background: var(--surface3); border: 1px solid var(--border2); padding: 6px; }
-.team-logo-lg.fallback { display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 700; font-family: 'DM Mono', monospace; }
-.team-name { font-size: 0.8rem; font-weight: 600; color: var(--text); text-align: center; max-width: 100px; }
-.vs-badge { font-size: 0.7rem; color: var(--text3); font-weight: 600; background: var(--surface3); padding: 4px 10px; border-radius: 6px; }
+.logo-lg { width: 64px; height: 64px; object-fit: contain; }
+.logo-lg-round { width: 64px; height: 64px; object-fit: cover; border-radius: 50%; border: 2px solid var(--border2); }
+.logo-lg-fallback { width: 64px; height: 64px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; font-family: 'DM Mono', monospace; border: 1px solid var(--border2); }
+.team-name { font-size: 0.8rem; font-weight: 600; color: var(--text); text-align: center; max-width: 110px; }
+.vs-badge { font-size: 0.7rem; color: var(--text3); font-weight: 700; background: var(--surface3); padding: 4px 10px; border-radius: 6px; letter-spacing: 0.05em; }
 .detail-probs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
 .prob-bar-wrap { text-align: center; }
 .prob-label { font-size: 0.65rem; color: var(--text2); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -108,8 +102,6 @@ main { flex: 1; padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; width: 
 .detail-tag.purple { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(179,136,255,0.2); }
 .detail-tag.blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(77,166,255,0.2); }
 .detail-tag.amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(255,171,0,0.2); }
-
-/* PICKS */
 .pick-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; position: relative; overflow: hidden; }
 .pick-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--purple); }
 .pick-card.three-stars::before { background: var(--green); box-shadow: 0 0 10px var(--green); }
@@ -118,8 +110,8 @@ main { flex: 1; padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; width: 
 .pick-card-main:hover { background: var(--surface2); }
 .pick-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
 .pick-left { flex: 1; }
-.pick-match-logos { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-.pick-match { font-size: 0.63rem; font-weight: 500; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
+.pick-match-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.pick-match { font-size: 0.6rem; font-weight: 500; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; }
 .pick-target { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
 .pick-score-badge { font-size: 0.65rem; color: var(--purple); background: var(--purple-dim); border: 1px solid rgba(179,136,255,0.2); padding: 2px 8px; border-radius: 20px; display: inline-block; font-family: 'DM Mono', monospace; }
 .pick-stars { font-size: 1.2rem; margin-left: 12px; }
@@ -133,8 +125,6 @@ main { flex: 1; padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; width: 
 .conf-meter-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text2); margin-bottom: 6px; }
 .conf-meter-bg { height: 8px; background: var(--surface3); border-radius: 4px; overflow: hidden; }
 .conf-meter-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--purple), var(--blue)); transition: width 0.8s ease; }
-
-/* BETS */
 .add-bet-btn { background: var(--green-dim); border: 1px solid rgba(0,230,118,0.3); color: var(--green); font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 600; padding: 8px 18px; border-radius: var(--radius-sm); cursor: pointer; margin-bottom: 1.5rem; }
 .add-bet-form { display: none; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; }
 .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1rem; }
@@ -147,8 +137,6 @@ main { flex: 1; padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; width: 
 .my-bet-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.5rem; margin-bottom: 8px; display: grid; grid-template-columns: 1fr 80px 80px 100px 120px 110px; gap: 1rem; align-items: center; }
 .my-bet-card.won { border-left: 3px solid var(--green); } .my-bet-card.lost { border-left: 3px solid var(--red); } .my-bet-card.pending { border-left: 3px solid var(--amber); }
 .result-select { background: var(--bg); border: 1px solid var(--border2); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.75rem; padding: 4px 8px; border-radius: var(--radius-sm); outline: none; cursor: pointer; }
-
-/* ANALYTICS */
 .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
 .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
 .chart-title { font-size: 0.75rem; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
@@ -158,8 +146,6 @@ canvas { width: 100% !important; }
 .forecast-row:last-child { border-bottom: none; }
 .forecast-row .label { color: var(--text2); } .forecast-row .value { font-weight: 600; font-family: 'DM Mono', monospace; }
 .forecast-row .value.green { color: var(--green); } .forecast-row .value.amber { color: var(--amber); }
-
-/* CHAT */
 .chat-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; }
 .chat-bubble { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--green), var(--blue)); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; font-family: 'DM Mono', monospace; color: #000; box-shadow: 0 4px 20px rgba(0,230,118,0.3); transition: transform 0.2s; margin-left: auto; }
 .chat-bubble:hover { transform: scale(1.1); }
@@ -179,7 +165,6 @@ canvas { width: 100% !important; }
 .spinner { width: 30px; height: 30px; border: 2px solid var(--border2); border-top-color: var(--green); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .empty-box { text-align: center; padding: 3rem; color: var(--text2); font-size: 0.85rem; }
-
 @media (max-width: 900px) {
   .summary-grid { grid-template-columns: repeat(2,1fr); }
   .bet-card-main { grid-template-columns: 1fr 1fr; }
@@ -234,10 +219,10 @@ canvas { width: 100% !important; }
       <div class="filter-group"><label>Sarja</label>
         <select id="f-sport" onchange="renderEV()">
           <option value="">Kaikki</option>
-          <option value="jalkapallo">⚽ Jalkapallo</option>
-          <option value="tennis">🎾 Tennis</option>
-          <option value="koripallo">🏀 Koripallo</option>
-          <option value="jääkiekko">🏒 Jääkiekko</option>
+          <option value="jalkapallo">Jalkapallo</option>
+          <option value="tennis">Tennis</option>
+          <option value="koripallo">Koripallo</option>
+          <option value="jääkiekko">Jääkiekko</option>
         </select>
       </div>
       <button class="filter-reset" onclick="resetFilters()">Nollaa</button>
@@ -250,7 +235,7 @@ canvas { width: 100% !important; }
       <div class="stat-card"><div class="stat-label">Bankroll</div><div class="stat-value amber" id="ev-bankroll">—</div></div>
     </div>
     <div class="loading-box" id="ev-loading"><div class="spinner"></div>Haetaan EV-kohteita...</div>
-    <div class="empty-box" id="ev-empty" style="display:none">Ei plus-EV kohteita valituilla filtereillä.</div>
+    <div class="empty-box" id="ev-empty" style="display:none">Ei plus-EV kohteita.</div>
     <div id="ev-list"></div>
   </div>
 
@@ -296,7 +281,7 @@ canvas { width: 100% !important; }
         <button class="btn-secondary" onclick="toggleAddForm()">Peruuta</button>
       </div>
     </div>
-    <div id="bets-list"><div class="empty-box">Ei betsejä vielä. Lisää ensimmäinen betsi!</div></div>
+    <div id="bets-list"><div class="empty-box">Ei betsejä vielä.</div></div>
   </div>
 
   <div class="page" id="page-analytics">
@@ -321,7 +306,7 @@ canvas { width: 100% !important; }
       <div><div class="chat-name">Betti Pena</div><div class="chat-status">● Online</div></div>
     </div>
     <div class="chat-messages" id="chat-msgs">
-      <div class="msg bot">Hei! Olen Betti Pena. Kysy minulta EV:stä, Kellystä, ROI:sta tai pickien tulkinnasta!</div>
+      <div class="msg bot">Hei! Olen Betti Pena. Kysy EV:stä, Kellystä, ROI:sta tai pickien tulkinnasta!</div>
     </div>
     <div class="chat-input-row">
       <input class="chat-input" id="chat-input" placeholder="Kysy jotain..." onkeydown="if(event.key==='Enter')sendChat()" />
@@ -342,315 +327,269 @@ let evBets = [], picks = [];
 let myBets = JSON.parse(localStorage.getItem("bettipena_bets") || "[]");
 let countdown = REFRESH, timer;
 
-// ===== TEAM LOGO MAP (Wikipedia Commons - toimii suoraan img tagissa) =====
-const TEAM_LOGOS = {
-  // Premier League
-  "manchester city": "https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_badge.svg/200px-Manchester_City_FC_badge.svg.png",
-  "man city": "https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_badge.svg/200px-Manchester_City_FC_badge.svg.png",
-  "manchester united": "https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Manchester_United_FC_crest.svg/200px-Manchester_United_FC_crest.svg.png",
-  "man united": "https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Manchester_United_FC_crest.svg/200px-Manchester_United_FC_crest.svg.png",
-  "arsenal": "https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Arsenal_FC.svg/200px-Arsenal_FC.svg.png",
-  "chelsea": "https://upload.wikimedia.org/wikipedia/en/thumb/c/cc/Chelsea_FC.svg/200px-Chelsea_FC.svg.png",
-  "liverpool": "https://upload.wikimedia.org/wikipedia/en/thumb/0/0c/Liverpool_FC.svg/200px-Liverpool_FC.svg.png",
-  "tottenham": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b4/Tottenham_Hotspur.svg/200px-Tottenham_Hotspur.svg.png",
-  "tottenham hotspur": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b4/Tottenham_Hotspur.svg/200px-Tottenham_Hotspur.svg.png",
-  "newcastle": "https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Newcastle_United_Logo.svg/200px-Newcastle_United_Logo.svg.png",
-  "newcastle united": "https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Newcastle_United_Logo.svg/200px-Newcastle_United_Logo.svg.png",
-  "aston villa": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f9/Aston_Villa_FC_crest_%282016%29.svg/200px-Aston_Villa_FC_crest_%282016%29.svg.png",
-  "west ham": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c2/West_Ham_United_FC_logo.svg/200px-West_Ham_United_FC_logo.svg.png",
-  "west ham united": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c2/West_Ham_United_FC_logo.svg/200px-West_Ham_United_FC_logo.svg.png",
-  "brighton": "https://upload.wikimedia.org/wikipedia/en/thumb/f/fd/Brighton_%26_Hove_Albion_logo.svg/200px-Brighton_%26_Hove_Albion_logo.svg.png",
-  "everton": "https://upload.wikimedia.org/wikipedia/en/thumb/7/7c/Everton_FC_logo.svg/200px-Everton_FC_logo.svg.png",
-  "brentford": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/Brentford_FC_crest.svg/200px-Brentford_FC_crest.svg.png",
-  "fulham": "https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Fulham_FC_%28shield%29.svg/200px-Fulham_FC_%28shield%29.svg.png",
-  "wolves": "https://upload.wikimedia.org/wikipedia/en/thumb/f/fc/Wolverhampton_Wanderers.svg/200px-Wolverhampton_Wanderers.svg.png",
-  "wolverhampton": "https://upload.wikimedia.org/wikipedia/en/thumb/f/fc/Wolverhampton_Wanderers.svg/200px-Wolverhampton_Wanderers.svg.png",
-  "crystal palace": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/Crystal_Palace_FC_logo_%282022%29.svg/200px-Crystal_Palace_FC_logo_%282022%29.svg.png",
-  "nottingham forest": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e5/Nottingham_Forest_F.C._logo.svg/200px-Nottingham_Forest_F.C._logo.svg.png",
-  "burnley": "https://upload.wikimedia.org/wikipedia/en/thumb/6/62/Burnley_F.C._Logo.svg/200px-Burnley_F.C._Logo.svg.png",
-  "sheffield united": "https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Sheffield_United_FC_logo.svg/200px-Sheffield_United_FC_logo.svg.png",
-  "leeds united": "https://upload.wikimedia.org/wikipedia/en/thumb/5/54/Leeds_United_F.C._logo_2024.svg/200px-Leeds_United_F.C._logo_2024.svg.png",
-  "leeds": "https://upload.wikimedia.org/wikipedia/en/thumb/5/54/Leeds_United_F.C._logo_2024.svg/200px-Leeds_United_F.C._logo_2024.svg.png",
-  // La Liga
-  "real madrid": "https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/200px-Real_Madrid_CF.svg.png",
-  "barcelona": "https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/200px-FC_Barcelona_%28crest%29.svg.png",
-  "fc barcelona": "https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/200px-FC_Barcelona_%28crest%29.svg.png",
-  "atletico madrid": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f4/Atletico_de_Madrid_2017_logo.svg/200px-Atletico_de_Madrid_2017_logo.svg.png",
-  "atletico": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f4/Atletico_de_Madrid_2017_logo.svg/200px-Atletico_de_Madrid_2017_logo.svg.png",
-  "sevilla": "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/Sevilla_FC_logo.svg/200px-Sevilla_FC_logo.svg.png",
-  "real sociedad": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f1/Real_Sociedad_logo.svg/200px-Real_Sociedad_logo.svg.png",
-  "villarreal": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b9/Villarreal_CF_logo-en.svg/200px-Villarreal_CF_logo-en.svg.png",
-  "real betis": "https://upload.wikimedia.org/wikipedia/en/thumb/1/13/Real_betis_logo.svg/200px-Real_betis_logo.svg.png",
-  "athletic bilbao": "https://upload.wikimedia.org/wikipedia/en/thumb/9/98/Club_Athletic_de_Bilbao_logo.svg/200px-Club_Athletic_de_Bilbao_logo.svg.png",
-  "athletic club": "https://upload.wikimedia.org/wikipedia/en/thumb/9/98/Club_Athletic_de_Bilbao_logo.svg/200px-Club_Athletic_de_Bilbao_logo.svg.png",
-  "valencia": "https://upload.wikimedia.org/wikipedia/en/thumb/c/ce/Valenciacf.svg/200px-Valenciacf.svg.png",
-  "getafe": "https://upload.wikimedia.org/wikipedia/en/thumb/4/46/Getafe_CF.svg/200px-Getafe_CF.svg.png",
-  "osasuna": "https://upload.wikimedia.org/wikipedia/en/thumb/d/db/CA_Osasuna_logo.svg/200px-CA_Osasuna_logo.svg.png",
-  "celta vigo": "https://upload.wikimedia.org/wikipedia/en/thumb/5/54/RC_Celta_de_Vigo_logo.svg/200px-RC_Celta_de_Vigo_logo.svg.png",
-  "mallorca": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b9/RCD_Mallorca_logo.svg/200px-RCD_Mallorca_logo.svg.png",
-  "girona": "https://upload.wikimedia.org/wikipedia/en/thumb/6/6b/Girona_FC_logo.svg/200px-Girona_FC_logo.svg.png",
-  "alaves": "https://upload.wikimedia.org/wikipedia/en/thumb/5/50/Deportivo_Alav%C3%A9s_logo.svg/200px-Deportivo_Alav%C3%A9s_logo.svg.png",
-  "rayo vallecano": "https://upload.wikimedia.org/wikipedia/en/thumb/5/5b/Rayo_Vallecano_de_Madrid.svg/200px-Rayo_Vallecano_de_Madrid.svg.png",
-  "espanyol": "https://upload.wikimedia.org/wikipedia/en/thumb/7/76/RCD_Espanyol_logo.svg/200px-RCD_Espanyol_logo.svg.png",
-  // Bundesliga
-  "bayern munich": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282002%E2%80%932017%29.svg/200px-FC_Bayern_M%C3%BCnchen_logo_%282002%E2%80%932017%29.svg.png",
-  "fc bayern": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282002%E2%80%932017%29.svg/200px-FC_Bayern_M%C3%BCnchen_logo_%282002%E2%80%932017%29.svg.png",
-  "borussia dortmund": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Borussia_Dortmund_logo.svg/200px-Borussia_Dortmund_logo.svg.png",
-  "dortmund": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Borussia_Dortmund_logo.svg/200px-Borussia_Dortmund_logo.svg.png",
-  "bayer leverkusen": "https://upload.wikimedia.org/wikipedia/en/thumb/5/59/Bayer_04_Leverkusen_logo.svg/200px-Bayer_04_Leverkusen_logo.svg.png",
-  "leverkusen": "https://upload.wikimedia.org/wikipedia/en/thumb/5/59/Bayer_04_Leverkusen_logo.svg/200px-Bayer_04_Leverkusen_logo.svg.png",
-  "rb leipzig": "https://upload.wikimedia.org/wikipedia/en/thumb/0/04/RB_Leipzig_2014_logo.svg/200px-RB_Leipzig_2014_logo.svg.png",
-  "eintracht frankfurt": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Eintracht_Frankfurt_Logo.svg/200px-Eintracht_Frankfurt_Logo.svg.png",
-  "frankfurt": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Eintracht_Frankfurt_Logo.svg/200px-Eintracht_Frankfurt_Logo.svg.png",
-  "hamburger sv": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Hamburger_SV_logo.svg/200px-Hamburger_SV_logo.svg.png",
-  "hamburger": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Hamburger_SV_logo.svg/200px-Hamburger_SV_logo.svg.png",
-  "freiburg": "https://upload.wikimedia.org/wikipedia/de/thumb/f/f7/SC_Freiburg_Logo.svg/200px-SC_Freiburg_Logo.svg.png",
-  "union berlin": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/1._FC_Union_Berlin_Logo.svg/200px-1._FC_Union_Berlin_Logo.svg.png",
-  "wolfsburg": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Logo-VfL-Wolfsburg.svg/200px-Logo-VfL-Wolfsburg.svg.png",
-  "werder bremen": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/SV-Werder-Bremen-Logo.svg/200px-SV-Werder-Bremen-Logo.svg.png",
-  "stuttgart": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/VfB_Stuttgart_1893_Logo.svg/200px-VfB_Stuttgart_1893_Logo.svg.png",
-  "hoffenheim": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/TSG_Logo_2007.svg/200px-TSG_Logo_2007.svg.png",
-  "augsburg": "https://upload.wikimedia.org/wikipedia/de/thumb/b/b5/Logo_FC_Augsburg.svg/200px-Logo_FC_Augsburg.svg.png",
-  "mainz": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Logo_Mainz_05.svg/200px-Logo_Mainz_05.svg.png",
-  "bochum": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/VfL_Bochum_logo.svg/200px-VfL_Bochum_logo.svg.png",
-  "borussia monchengladbach": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Borussia_M%C3%B6nchengladbach_logo.svg/200px-Borussia_M%C3%B6nchengladbach_logo.svg.png",
-  // Serie A
-  "juventus": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Juventus_FC_2017_icon_%28black%29.svg/200px-Juventus_FC_2017_icon_%28black%29.svg.png",
-  "inter milan": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/FC_Internazionale_Milano_2021.svg/200px-FC_Internazionale_Milano_2021.svg.png",
-  "inter": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/FC_Internazionale_Milano_2021.svg/200px-FC_Internazionale_Milano_2021.svg.png",
-  "ac milan": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/200px-Logo_of_AC_Milan.svg.png",
-  "milan": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/200px-Logo_of_AC_Milan.svg.png",
-  "napoli": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SSC_Napoli.svg/200px-SSC_Napoli.svg.png",
-  "roma": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f7/AS_Roma_logo_%282017%29.svg/200px-AS_Roma_logo_%282017%29.svg.png",
-  "as roma": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f7/AS_Roma_logo_%282017%29.svg/200px-AS_Roma_logo_%282017%29.svg.png",
-  "lazio": "https://upload.wikimedia.org/wikipedia/en/thumb/7/71/SS_Lazio_Badge_2017.svg/200px-SS_Lazio_Badge_2017.svg.png",
-  "fiorentina": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/ACF_Fiorentina_2022.svg/200px-ACF_Fiorentina_2022.svg.png",
-  "atalanta": "https://upload.wikimedia.org/wikipedia/en/thumb/6/66/Atalanta_BC_logo.svg/200px-Atalanta_BC_logo.svg.png",
-  "torino": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Torino_FC_Logo.svg/200px-Torino_FC_Logo.svg.png",
-  "bologna": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Bologna_FC_1909_logo_%282023%29.svg/200px-Bologna_FC_1909_logo_%282023%29.svg.png",
-  "hellas verona": "https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Hellas_Verona_FC_logo.svg/200px-Hellas_Verona_FC_logo.svg.png",
-  "hellas": "https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Hellas_Verona_FC_logo.svg/200px-Hellas_Verona_FC_logo.svg.png",
-  "udinese": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Udinese_Calcio_logo_%282020%29.svg/200px-Udinese_Calcio_logo_%282020%29.svg.png",
-  // Ligue 1
-  "paris saint-germain": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/200px-Paris_Saint-Germain_F.C..svg.png",
-  "psg": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/200px-Paris_Saint-Germain_F.C..svg.png",
-  "paris sg": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/200px-Paris_Saint-Germain_F.C..svg.png",
-  "monaco": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/AS_Monaco_FC.svg/200px-AS_Monaco_FC.svg.png",
-  "as monaco": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/AS_Monaco_FC.svg/200px-AS_Monaco_FC.svg.png",
-  "lyon": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e2/Olympique_Lyonnais_%28logo%29.svg/200px-Olympique_Lyonnais_%28logo%29.svg.png",
-  "olympique lyonnais": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e2/Olympique_Lyonnais_%28logo%29.svg/200px-Olympique_Lyonnais_%28logo%29.svg.png",
-  "marseille": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Olympique_Marseille_logo.svg/200px-Olympique_Marseille_logo.svg.png",
-  "olympique marseille": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Olympique_Marseille_logo.svg/200px-Olympique_Marseille_logo.svg.png",
-  "lille": "https://upload.wikimedia.org/wikipedia/en/thumb/b/bc/LOSC_Lille_2011_logo.svg/200px-LOSC_Lille_2011_logo.svg.png",
-  "losc lille": "https://upload.wikimedia.org/wikipedia/en/thumb/b/bc/LOSC_Lille_2011_logo.svg/200px-LOSC_Lille_2011_logo.svg.png",
-  "nice": "https://upload.wikimedia.org/wikipedia/en/thumb/2/22/OGC_Nice_logo.svg/200px-OGC_Nice_logo.svg.png",
-  "ogc nice": "https://upload.wikimedia.org/wikipedia/en/thumb/2/22/OGC_Nice_logo.svg/200px-OGC_Nice_logo.svg.png",
-  "lens": "https://upload.wikimedia.org/wikipedia/en/thumb/9/90/Racing_Club_de_Lens_logo.svg/200px-Racing_Club_de_Lens_logo.svg.png",
-  "rc lens": "https://upload.wikimedia.org/wikipedia/en/thumb/9/90/Racing_Club_de_Lens_logo.svg/200px-Racing_Club_de_Lens_logo.svg.png",
-  "rennes": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b7/Stade_Rennais_FC.svg/200px-Stade_Rennais_FC.svg.png",
-  "nantes": "https://upload.wikimedia.org/wikipedia/en/thumb/1/12/FC_Nantes_logo.svg/200px-FC_Nantes_logo.svg.png",
-  "fc nantes": "https://upload.wikimedia.org/wikipedia/en/thumb/1/12/FC_Nantes_logo.svg/200px-FC_Nantes_logo.svg.png",
-  "strasbourg": "https://upload.wikimedia.org/wikipedia/en/thumb/9/99/RC_Strasbourg_logo.svg/200px-RC_Strasbourg_logo.svg.png",
-  "brest": "https://upload.wikimedia.org/wikipedia/en/thumb/5/52/Stade_Brestois_29_logo.svg/200px-Stade_Brestois_29_logo.svg.png",
-  "reims": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Stade_de_Reims_logo.svg/200px-Stade_de_Reims_logo.svg.png",
-  "angers": "https://upload.wikimedia.org/wikipedia/en/thumb/5/51/SCO_Angers_logo.svg/200px-SCO_Angers_logo.svg.png",
-  "auxerre": "https://upload.wikimedia.org/wikipedia/en/thumb/5/5a/AJ_Auxerre_logo.svg/200px-AJ_Auxerre_logo.svg.png",
-  "le havre": "https://upload.wikimedia.org/wikipedia/en/thumb/6/67/HAC_logo_2012.svg/200px-HAC_logo_2012.svg.png",
-  // Europa / CL extra
-  "porto": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f1/FC_Porto.svg/200px-FC_Porto.svg.png",
-  "fc porto": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f1/FC_Porto.svg/200px-FC_Porto.svg.png",
-  "benfica": "https://upload.wikimedia.org/wikipedia/en/thumb/6/68/SL_Benfica_crest.svg/200px-SL_Benfica_crest.svg.png",
-  "sl benfica": "https://upload.wikimedia.org/wikipedia/en/thumb/6/68/SL_Benfica_crest.svg/200px-SL_Benfica_crest.svg.png",
-  "ajax": "https://upload.wikimedia.org/wikipedia/en/thumb/7/79/Ajax_Amsterdam.svg/200px-Ajax_Amsterdam.svg.png",
-  "psv": "https://upload.wikimedia.org/wikipedia/en/thumb/0/05/PSV_Eindhoven.svg/200px-PSV_Eindhoven.svg.png",
-  "psv eindhoven": "https://upload.wikimedia.org/wikipedia/en/thumb/0/05/PSV_Eindhoven.svg/200px-PSV_Eindhoven.svg.png",
-  "celtic": "https://upload.wikimedia.org/wikipedia/en/thumb/3/38/Celtic_FC_crest.svg/200px-Celtic_FC_crest.svg.png",
-  "rangers": "https://upload.wikimedia.org/wikipedia/en/thumb/b/bf/Rangers_FC.svg/200px-Rangers_FC.svg.png",
-  "galatasaray": "https://upload.wikimedia.org/wikipedia/en/thumb/5/52/Galatasaray_S.K.svg/200px-Galatasaray_S.K.svg.png",
-  "fenerbahce": "https://upload.wikimedia.org/wikipedia/en/thumb/f/fb/Fenerbah%C3%A7e_SK.svg/200px-Fenerbah%C3%A7e_SK.svg.png",
-  "club brugge": "https://upload.wikimedia.org/wikipedia/en/thumb/1/13/Club_Brugge_KV_logo.svg/200px-Club_Brugge_KV_logo.svg.png",
-  "brugge": "https://upload.wikimedia.org/wikipedia/en/thumb/1/13/Club_Brugge_KV_logo.svg/200px-Club_Brugge_KV_logo.svg.png",
-  "anderlecht": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/RSC_Anderlecht_Logo.svg/200px-RSC_Anderlecht_Logo.svg.png",
-  "dinamo zagreb": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/GNK_Dinamo_Zagreb_Logo.svg/200px-GNK_Dinamo_Zagreb_Logo.svg.png",
-  "red bull salzburg": "https://upload.wikimedia.org/wikipedia/en/thumb/9/92/FC_Red_Bull_Salzburg_logo.svg/200px-FC_Red_Bull_Salzburg_logo.svg.png",
-  "shakhtar": "https://upload.wikimedia.org/wikipedia/en/thumb/a/af/FC_Shakhtar_Donetsk.svg/200px-FC_Shakhtar_Donetsk.svg.png",
-  // NBA
-  "los angeles lakers": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Los_Angeles_Lakers_logo.svg/200px-Los_Angeles_Lakers_logo.svg.png",
-  "lakers": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Los_Angeles_Lakers_logo.svg/200px-Los_Angeles_Lakers_logo.svg.png",
-  "boston celtics": "https://upload.wikimedia.org/wikipedia/en/thumb/8/8f/Boston_Celtics.svg/200px-Boston_Celtics.svg.png",
-  "celtics": "https://upload.wikimedia.org/wikipedia/en/thumb/8/8f/Boston_Celtics.svg/200px-Boston_Celtics.svg.png",
-  "golden state warriors": "https://upload.wikimedia.org/wikipedia/en/thumb/0/01/Golden_State_Warriors_logo.svg/200px-Golden_State_Warriors_logo.svg.png",
-  "warriors": "https://upload.wikimedia.org/wikipedia/en/thumb/0/01/Golden_State_Warriors_logo.svg/200px-Golden_State_Warriors_logo.svg.png",
-  "miami heat": "https://upload.wikimedia.org/wikipedia/en/thumb/f/fb/Miami_Heat_logo.svg/200px-Miami_Heat_logo.svg.png",
-  "heat": "https://upload.wikimedia.org/wikipedia/en/thumb/f/fb/Miami_Heat_logo.svg/200px-Miami_Heat_logo.svg.png",
-  "chicago bulls": "https://upload.wikimedia.org/wikipedia/en/thumb/d/d1/Chicago_Bulls_logo.svg/200px-Chicago_Bulls_logo.svg.png",
-  "bulls": "https://upload.wikimedia.org/wikipedia/en/thumb/d/d1/Chicago_Bulls_logo.svg/200px-Chicago_Bulls_logo.svg.png",
-  "denver nuggets": "https://upload.wikimedia.org/wikipedia/en/thumb/7/76/Denver_Nuggets.svg/200px-Denver_Nuggets.svg.png",
-  "nuggets": "https://upload.wikimedia.org/wikipedia/en/thumb/7/76/Denver_Nuggets.svg/200px-Denver_Nuggets.svg.png",
-  "milwaukee bucks": "https://upload.wikimedia.org/wikipedia/en/thumb/4/4a/Milwaukee_Bucks_logo.svg/200px-Milwaukee_Bucks_logo.svg.png",
-  "bucks": "https://upload.wikimedia.org/wikipedia/en/thumb/4/4a/Milwaukee_Bucks_logo.svg/200px-Milwaukee_Bucks_logo.svg.png",
-  "phoenix suns": "https://upload.wikimedia.org/wikipedia/en/thumb/d/dc/Phoenix_Suns_logo.svg/200px-Phoenix_Suns_logo.svg.png",
-  "suns": "https://upload.wikimedia.org/wikipedia/en/thumb/d/dc/Phoenix_Suns_logo.svg/200px-Phoenix_Suns_logo.svg.png",
-  // NHL
-  "boston bruins": "https://upload.wikimedia.org/wikipedia/en/thumb/1/12/Boston_Bruins.svg/200px-Boston_Bruins.svg.png",
-  "bruins": "https://upload.wikimedia.org/wikipedia/en/thumb/1/12/Boston_Bruins.svg/200px-Boston_Bruins.svg.png",
-  "toronto maple leafs": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b6/Toronto_Maple_Leafs_2016_logo.svg/200px-Toronto_Maple_Leafs_2016_logo.svg.png",
-  "maple leafs": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b6/Toronto_Maple_Leafs_2016_logo.svg/200px-Toronto_Maple_Leafs_2016_logo.svg.png",
-  "montreal canadiens": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Montreal_Canadiens.svg/200px-Montreal_Canadiens.svg.png",
-  "canadiens": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Montreal_Canadiens.svg/200px-Montreal_Canadiens.svg.png",
-  "tampa bay lightning": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a8/Tampa_Bay_Lightning_Logo.svg/200px-Tampa_Bay_Lightning_Logo.svg.png",
-  "lightning": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a8/Tampa_Bay_Lightning_Logo.svg/200px-Tampa_Bay_Lightning_Logo.svg.png",
-  "vegas golden knights": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e5/Vegas_Golden_Knights_logo.svg/200px-Vegas_Golden_Knights_logo.svg.png",
-  "golden knights": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e5/Vegas_Golden_Knights_logo.svg/200px-Vegas_Golden_Knights_logo.svg.png",
-  "colorado avalanche": "https://upload.wikimedia.org/wikipedia/en/thumb/8/8e/Colorado_Avalanche_logo_2.svg/200px-Colorado_Avalanche_logo_2.svg.png",
-  "avalanche": "https://upload.wikimedia.org/wikipedia/en/thumb/8/8e/Colorado_Avalanche_logo_2.svg/200px-Colorado_Avalanche_logo_2.svg.png",
-  "edmonton oilers": "https://upload.wikimedia.org/wikipedia/en/thumb/4/4d/Logo_Edmonton_Oilers.svg/200px-Logo_Edmonton_Oilers.svg.png",
-  "oilers": "https://upload.wikimedia.org/wikipedia/en/thumb/4/4d/Logo_Edmonton_Oilers.svg/200px-Logo_Edmonton_Oilers.svg.png",
-  "buffalo sabres": "https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Buffalo_Sabres_Logo.svg/200px-Buffalo_Sabres_Logo.svg.png",
-  "sabres": "https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Buffalo_Sabres_Logo.svg/200px-Buffalo_Sabres_Logo.svg.png",
-  "minnesota wild": "https://upload.wikimedia.org/wikipedia/en/thumb/f/fb/Minnesota_Wild.svg/200px-Minnesota_Wild.svg.png",
-  "wild": "https://upload.wikimedia.org/wikipedia/en/thumb/f/fb/Minnesota_Wild.svg/200px-Minnesota_Wild.svg.png",
-  "dallas stars": "https://upload.wikimedia.org/wikipedia/en/thumb/d/d1/Dallas_Stars_logo_%282013%29.svg/200px-Dallas_Stars_logo_%282013%29.svg.png",
-  "stars": "https://upload.wikimedia.org/wikipedia/en/thumb/d/d1/Dallas_Stars_logo_%282013%29.svg/200px-Dallas_Stars_logo_%282013%29.svg.png",
-  "florida panthers": "https://upload.wikimedia.org/wikipedia/en/thumb/4/43/Logo_Florida_Panthers.svg/200px-Logo_Florida_Panthers.svg.png",
-  "panthers": "https://upload.wikimedia.org/wikipedia/en/thumb/4/43/Logo_Florida_Panthers.svg/200px-Logo_Florida_Panthers.svg.png",
-  "carolina hurricanes": "https://upload.wikimedia.org/wikipedia/en/thumb/3/32/Carolina_Hurricanes.svg/200px-Carolina_Hurricanes.svg.png",
-  "hurricanes": "https://upload.wikimedia.org/wikipedia/en/thumb/3/32/Carolina_Hurricanes.svg/200px-Carolina_Hurricanes.svg.png",
-  "pittsburgh penguins": "https://upload.wikimedia.org/wikipedia/en/thumb/5/5d/Pittsburgh_Penguins_logo.svg/200px-Pittsburgh_Penguins_logo.svg.png",
-  "penguins": "https://upload.wikimedia.org/wikipedia/en/thumb/5/5d/Pittsburgh_Penguins_logo.svg/200px-Pittsburgh_Penguins_logo.svg.png",
-  "washington capitals": "https://upload.wikimedia.org/wikipedia/en/thumb/d/d1/Washington_Capitals.svg/200px-Washington_Capitals.svg.png",
-  "capitals": "https://upload.wikimedia.org/wikipedia/en/thumb/d/d1/Washington_Capitals.svg/200px-Washington_Capitals.svg.png",
-  "new york rangers": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/New_York_Rangers.svg/200px-New_York_Rangers.svg.png",
-  "ny rangers": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/New_York_Rangers.svg/200px-New_York_Rangers.svg.png",
-  // NHL extra
-  "montreal canadiens": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Montreal_Canadiens.svg/200px-Montreal_Canadiens.svg.png",
-  "utah mammoth": "https://upload.wikimedia.org/wikipedia/en/thumb/8/8e/Utah_Hockey_Club_logo.svg/200px-Utah_Hockey_Club_logo.svg.png",
-  "utah hockey club": "https://upload.wikimedia.org/wikipedia/en/thumb/8/8e/Utah_Hockey_Club_logo.svg/200px-Utah_Hockey_Club_logo.svg.png",
-  "philadelphia flyers": "https://upload.wikimedia.org/wikipedia/en/thumb/3/37/Philadelphia_Flyers.svg/200px-Philadelphia_Flyers.svg.png",
-  "flyers": "https://upload.wikimedia.org/wikipedia/en/thumb/3/37/Philadelphia_Flyers.svg/200px-Philadelphia_Flyers.svg.png",
-  "new jersey devils": "https://upload.wikimedia.org/wikipedia/en/thumb/d/d6/New_Jersey_Devils_logo.svg/200px-New_Jersey_Devils_logo.svg.png",
-  "devils": "https://upload.wikimedia.org/wikipedia/en/thumb/d/d6/New_Jersey_Devils_logo.svg/200px-New_Jersey_Devils_logo.svg.png",
-  "ottawa senators": "https://upload.wikimedia.org/wikipedia/en/thumb/0/0b/Ottawa_Senators_logo.svg/200px-Ottawa_Senators_logo.svg.png",
-  "senators": "https://upload.wikimedia.org/wikipedia/en/thumb/0/0b/Ottawa_Senators_logo.svg/200px-Ottawa_Senators_logo.svg.png",
-  "nashville predators": "https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Nashville_Predators_Logo_%282011%29.svg/200px-Nashville_Predators_Logo_%282011%29.svg.png",
-  "predators": "https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Nashville_Predators_Logo_%282011%29.svg/200px-Nashville_Predators_Logo_%282011%29.svg.png",
-  "st. louis blues": "https://upload.wikimedia.org/wikipedia/en/thumb/b/ba/St._Louis_Blues_logo.svg/200px-St._Louis_Blues_logo.svg.png",
-  "blues": "https://upload.wikimedia.org/wikipedia/en/thumb/b/ba/St._Louis_Blues_logo.svg/200px-St._Louis_Blues_logo.svg.png",
-  "chicago blackhawks": "https://upload.wikimedia.org/wikipedia/en/thumb/1/1f/Chicago_Blackhawks_logo.svg/200px-Chicago_Blackhawks_logo.svg.png",
-  "blackhawks": "https://upload.wikimedia.org/wikipedia/en/thumb/1/1f/Chicago_Blackhawks_logo.svg/200px-Chicago_Blackhawks_logo.svg.png",
-  "detroit red wings": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Detroit_Red_Wings_logo.svg/200px-Detroit_Red_Wings_logo.svg.png",
-  "red wings": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Detroit_Red_Wings_logo.svg/200px-Detroit_Red_Wings_logo.svg.png",
-  "seattle kraken": "https://upload.wikimedia.org/wikipedia/en/thumb/3/37/Seattle_Kraken_official_logo.svg/200px-Seattle_Kraken_official_logo.svg.png",
-  "kraken": "https://upload.wikimedia.org/wikipedia/en/thumb/3/37/Seattle_Kraken_official_logo.svg/200px-Seattle_Kraken_official_logo.svg.png",
-  "vancouver canucks": "https://upload.wikimedia.org/wikipedia/en/thumb/3/35/Vancouver_Canucks_logo.svg/200px-Vancouver_Canucks_logo.svg.png",
-  "canucks": "https://upload.wikimedia.org/wikipedia/en/thumb/3/35/Vancouver_Canucks_logo.svg/200px-Vancouver_Canucks_logo.svg.png",
-  "calgary flames": "https://upload.wikimedia.org/wikipedia/en/thumb/6/61/Calgary_Flames_logo.svg/200px-Calgary_Flames_logo.svg.png",
-  "flames": "https://upload.wikimedia.org/wikipedia/en/thumb/6/61/Calgary_Flames_logo.svg/200px-Calgary_Flames_logo.svg.png",
-  "winnipeg jets": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e0/Winnipeg_Jets_Logo_2011.svg/200px-Winnipeg_Jets_Logo_2011.svg.png",
-  "jets": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e0/Winnipeg_Jets_Logo_2011.svg/200px-Winnipeg_Jets_Logo_2011.svg.png",
-  "anaheim ducks": "https://upload.wikimedia.org/wikipedia/en/thumb/7/72/Anaheim_Ducks_logo.svg/200px-Anaheim_Ducks_logo.svg.png",
-  "ducks": "https://upload.wikimedia.org/wikipedia/en/thumb/7/72/Anaheim_Ducks_logo.svg/200px-Anaheim_Ducks_logo.svg.png",
-  "san jose sharks": "https://upload.wikimedia.org/wikipedia/en/thumb/3/37/San_Jose_Sharks_logo.svg/200px-San_Jose_Sharks_logo.svg.png",
-  "sharks": "https://upload.wikimedia.org/wikipedia/en/thumb/3/37/San_Jose_Sharks_logo.svg/200px-San_Jose_Sharks_logo.svg.png",
-  "los angeles kings": "https://upload.wikimedia.org/wikipedia/en/thumb/6/6b/Los_Angeles_Kings_logo.svg/200px-Los_Angeles_Kings_logo.svg.png",
-  "la kings": "https://upload.wikimedia.org/wikipedia/en/thumb/6/6b/Los_Angeles_Kings_logo.svg/200px-Los_Angeles_Kings_logo.svg.png",
-  "new york islanders": "https://upload.wikimedia.org/wikipedia/en/thumb/2/22/New_York_Islanders_logo_%282010%29.svg/200px-New_York_Islanders_logo_%282010%29.svg.png",
-  "islanders": "https://upload.wikimedia.org/wikipedia/en/thumb/2/22/New_York_Islanders_logo_%282010%29.svg/200px-New_York_Islanders_logo_%282010%29.svg.png",
-  // SHL (Swedish Hockey League)
-  "rojgle bk": "https://upload.wikimedia.org/wikipedia/en/thumb/a/ab/Rogle_BK_logo.svg/200px-Rogle_BK_logo.svg.png",
-  "rogle": "https://upload.wikimedia.org/wikipedia/en/thumb/a/ab/Rogle_BK_logo.svg/200px-Rogle_BK_logo.svg.png",
-  "skelleftea aik": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a3/Skellefte%C3%A5_AIK_logo.svg/200px-Skellefte%C3%A5_AIK_logo.svg.png",
-  "skelleftea": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a3/Skellefte%C3%A5_AIK_logo.svg/200px-Skellefte%C3%A5_AIK_logo.svg.png",
-  "frolunda": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a0/Fr%C3%B6lunda_Indians_logo.svg/200px-Fr%C3%B6lunda_Indians_logo.svg.png",
-  "djurgarden": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b8/Djurg%C3%A5rdens_IF_logo.svg/200px-Djurg%C3%A5rdens_IF_logo.svg.png",
-  "djurgardens": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b8/Djurg%C3%A5rdens_IF_logo.svg/200px-Djurg%C3%A5rdens_IF_logo.svg.png",
-  // NBA extra
-  "dallas mavericks": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f1/Dallas_Mavericks_logo.svg/200px-Dallas_Mavericks_logo.svg.png",
-  "mavericks": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f1/Dallas_Mavericks_logo.svg/200px-Dallas_Mavericks_logo.svg.png",
-  "brooklyn nets": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Brooklyn_Nets_newlogo.svg/200px-Brooklyn_Nets_newlogo.svg.png",
-  "nets": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Brooklyn_Nets_newlogo.svg/200px-Brooklyn_Nets_newlogo.svg.png",
-  "philadelphia 76ers": "https://upload.wikimedia.org/wikipedia/en/thumb/0/0e/Philadelphia_76ers_logo.svg/200px-Philadelphia_76ers_logo.svg.png",
-  "76ers": "https://upload.wikimedia.org/wikipedia/en/thumb/0/0e/Philadelphia_76ers_logo.svg/200px-Philadelphia_76ers_logo.svg.png",
-  "new york knicks": "https://upload.wikimedia.org/wikipedia/en/thumb/2/25/New_york_knicks.svg/200px-New_york_knicks.svg.png",
-  "knicks": "https://upload.wikimedia.org/wikipedia/en/thumb/2/25/New_york_knicks.svg/200px-New_york_knicks.svg.png",
-  "cleveland cavaliers": "https://upload.wikimedia.org/wikipedia/en/thumb/4/4b/Cleveland_Cavaliers_logo.svg/200px-Cleveland_Cavaliers_logo.svg.png",
-  "cavaliers": "https://upload.wikimedia.org/wikipedia/en/thumb/4/4b/Cleveland_Cavaliers_logo.svg/200px-Cleveland_Cavaliers_logo.svg.png",
-  "indiana pacers": "https://upload.wikimedia.org/wikipedia/en/thumb/1/1b/Indiana_Pacers.svg/200px-Indiana_Pacers.svg.png",
-  "pacers": "https://upload.wikimedia.org/wikipedia/en/thumb/1/1b/Indiana_Pacers.svg/200px-Indiana_Pacers.svg.png",
-  "orlando magic": "https://upload.wikimedia.org/wikipedia/en/thumb/1/10/Orlando_Magic_logo.svg/200px-Orlando_Magic_logo.svg.png",
-  "magic": "https://upload.wikimedia.org/wikipedia/en/thumb/1/10/Orlando_Magic_logo.svg/200px-Orlando_Magic_logo.svg.png",
-  "toronto raptors": "https://upload.wikimedia.org/wikipedia/en/thumb/3/36/Toronto_Raptors_logo.svg/200px-Toronto_Raptors_logo.svg.png",
-  "raptors": "https://upload.wikimedia.org/wikipedia/en/thumb/3/36/Toronto_Raptors_logo.svg/200px-Toronto_Raptors_logo.svg.png",
-  "oklahoma city thunder": "https://upload.wikimedia.org/wikipedia/en/thumb/5/5d/Oklahoma_City_Thunder.svg/200px-Oklahoma_City_Thunder.svg.png",
-  "thunder": "https://upload.wikimedia.org/wikipedia/en/thumb/5/5d/Oklahoma_City_Thunder.svg/200px-Oklahoma_City_Thunder.svg.png",
-  "minnesota timberwolves": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c2/Minnesota_Timberwolves_logo.svg/200px-Minnesota_Timberwolves_logo.svg.png",
-  "timberwolves": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c2/Minnesota_Timberwolves_logo.svg/200px-Minnesota_Timberwolves_logo.svg.png",
-  "memphis grizzlies": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f1/Memphis_Grizzlies.svg/200px-Memphis_Grizzlies.svg.png",
-  "grizzlies": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f1/Memphis_Grizzlies.svg/200px-Memphis_Grizzlies.svg.png",
-  "new orleans pelicans": "https://upload.wikimedia.org/wikipedia/en/thumb/0/0d/New_Orleans_Pelicans_logo.svg/200px-New_Orleans_Pelicans_logo.svg.png",
-  "pelicans": "https://upload.wikimedia.org/wikipedia/en/thumb/0/0d/New_Orleans_Pelicans_logo.svg/200px-New_Orleans_Pelicans_logo.svg.png",
-  "sacramento kings": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c7/SacramentoKings.svg/200px-SacramentoKings.svg.png",
-  "kings": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c7/SacramentoKings.svg/200px-SacramentoKings.svg.png",
-  "san antonio spurs": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/San_Antonio_Spurs.svg/200px-San_Antonio_Spurs.svg.png",
-  "spurs": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/San_Antonio_Spurs.svg/200px-San_Antonio_Spurs.svg.png",
-  "houston rockets": "https://upload.wikimedia.org/wikipedia/en/thumb/2/28/Houston_Rockets.svg/200px-Houston_Rockets.svg.png",
-  "rockets": "https://upload.wikimedia.org/wikipedia/en/thumb/2/28/Houston_Rockets.svg/200px-Houston_Rockets.svg.png",
-  "los angeles clippers": "https://upload.wikimedia.org/wikipedia/en/thumb/e/ed/Los_Angeles_Clippers_%282024%29.svg/200px-Los_Angeles_Clippers_%282024%29.svg.png",
-  "clippers": "https://upload.wikimedia.org/wikipedia/en/thumb/e/ed/Los_Angeles_Clippers_%282024%29.svg/200px-Los_Angeles_Clippers_%282024%29.svg.png",
-  "utah jazz": "https://upload.wikimedia.org/wikipedia/en/thumb/0/04/Utah_Jazz_logo_2016.svg/200px-Utah_Jazz_logo_2016.svg.png",
-  "jazz": "https://upload.wikimedia.org/wikipedia/en/thumb/0/04/Utah_Jazz_logo_2016.svg/200px-Utah_Jazz_logo_2016.svg.png",
-  "portland trail blazers": "https://upload.wikimedia.org/wikipedia/en/thumb/2/21/Portland_Trail_Blazers_logo.svg/200px-Portland_Trail_Blazers_logo.svg.png",
-  "trail blazers": "https://upload.wikimedia.org/wikipedia/en/thumb/2/21/Portland_Trail_Blazers_logo.svg/200px-Portland_Trail_Blazers_logo.svg.png",
-  "atlanta hawks": "https://upload.wikimedia.org/wikipedia/en/thumb/2/24/Atlanta_Hawks_logo.svg/200px-Atlanta_Hawks_logo.svg.png",
-  "hawks": "https://upload.wikimedia.org/wikipedia/en/thumb/2/24/Atlanta_Hawks_logo.svg/200px-Atlanta_Hawks_logo.svg.png",
-  "charlotte hornets": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c4/Charlotte_Hornets_%282014%29.svg/200px-Charlotte_Hornets_%282014%29.svg.png",
-  "hornets": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c4/Charlotte_Hornets_%282014%29.svg/200px-Charlotte_Hornets_%282014%29.svg.png",
-  "washington wizards": "https://upload.wikimedia.org/wikipedia/en/thumb/0/02/Washington_Wizards_logo.svg/200px-Washington_Wizards_logo.svg.png",
-  "wizards": "https://upload.wikimedia.org/wikipedia/en/thumb/0/02/Washington_Wizards_logo.svg/200px-Washington_Wizards_logo.svg.png",
-  "detroit pistons": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Pistons_logo17.svg/200px-Pistons_logo17.svg.png",
-  "pistons": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Pistons_logo17.svg/200px-Pistons_logo17.svg.png",
+// ===== ESPN LOGO SYSTEM =====
+// Soccer: /i/teamlogos/soccer/500/{id}.png
+// NBA:    /i/teamlogos/nba/500/{id}.png
+// NHL:    /i/teamlogos/nhl/500/{id}.png
+// Tennis: /i/headshots/tennis/players/full/{id}.png (pyöreä kasvokuva)
+
+const ESPN_SOCCER = {
+  "manchester city": 382, "man city": 382,
+  "manchester united": 360, "man united": 360,
+  "liverpool": 364, "arsenal": 359, "chelsea": 363,
+  "tottenham": 367, "tottenham hotspur": 367,
+  "newcastle": 361, "newcastle united": 361,
+  "aston villa": 362, "west ham": 371, "west ham united": 371,
+  "brighton": 331, "everton": 368, "brentford": 337,
+  "fulham": 370, "crystal palace": 384, "nottingham forest": 374,
+  "burnley": 349, "wolves": 380, "wolverhampton": 380,
+  "leeds united": 357, "leeds": 357, "sheffield united": 375,
+  "real madrid": 86, "barcelona": 83, "fc barcelona": 83,
+  "atletico madrid": 1068, "atletico": 1068,
+  "sevilla": 92, "real sociedad": 89, "villarreal": 102,
+  "athletic bilbao": 93, "athletic club": 93,
+  "real betis": 88, "valencia": 94, "osasuna": 87,
+  "getafe": 9812, "celta vigo": 3842, "girona": 9856,
+  "mallorca": 9817, "espanyol": 84, "alaves": 3747,
+  "rayo vallecano": 9818,
+  "bayern munich": 132, "fc bayern": 132, "borussia dortmund": 124,
+  "bayer leverkusen": 131, "leverkusen": 131,
+  "rb leipzig": 11420, "eintracht frankfurt": 9823, "frankfurt": 9823,
+  "sc freiburg": 9826, "freiburg": 9826,
+  "vfl wolfsburg": 130, "wolfsburg": 130,
+  "werder bremen": 129, "vfb stuttgart": 128, "stuttgart": 128,
+  "hamburger sv": 127, "fc st. pauli": 9832, "st. pauli": 9832,
+  "fc augsburg": 9820, "augsburg": 9820,
+  "union berlin": 10189, "1. fc union berlin": 10189,
+  "borussia monchengladbach": 126,
+  "juventus": 109, "inter milan": 110, "inter": 110,
+  "ac milan": 108, "milan": 108, "napoli": 114,
+  "roma": 113, "as roma": 113, "lazio": 115,
+  "fiorentina": 111, "atalanta": 107, "torino": 118,
+  "bologna": 119, "hellas verona": 9875, "hellas": 9875,
+  "udinese": 9874, "sassuolo": 9870, "parma": 116,
+  "paris saint-germain": 160, "paris saint germain": 160, "psg": 160, "paris sg": 160,
+  "monaco": 162, "as monaco": 162,
+  "marseille": 161, "olympique marseille": 161,
+  "lyon": 9829, "olympique lyonnais": 9829,
+  "lille": 163, "losc lille": 163,
+  "nice": 10261, "ogc nice": 10261,
+  "lens": 9839, "rc lens": 9839,
+  "rennes": 10257, "nantes": 9842, "fc nantes": 9842,
+  "strasbourg": 9847, "brest": 9836,
+  "reims": 9845, "angers": 9834, "auxerre": 9835,
+  "le havre": 9838,
+  "porto": 226, "fc porto": 226,
+  "benfica": 225, "sl benfica": 225,
+  "sporting cp": 227, "sporting": 227,
+  "ajax": 194, "psv": 197, "psv eindhoven": 197,
+  "feyenoord": 196,
+  "celtic": 249, "rangers": 254,
+  "galatasaray": 10261, "fenerbahce": 10261,
+  "club brugge": 10261, "brugge": 10261,
+  "anderlecht": 10261,
+  "dinamo zagreb": 10261,
+  "red bull salzburg": 10261, "rb salzburg": 10261,
+  "shakhtar donetsk": 10261, "shakhtar": 10261,
 };
 
-function normTeam(s) {
+const ESPN_NBA = {
+  "atlanta hawks": 1, "hawks": 1,
+  "boston celtics": 2, "celtics": 2,
+  "brooklyn nets": 17, "nets": 17,
+  "charlotte hornets": 30, "hornets": 30,
+  "chicago bulls": 4, "bulls": 4,
+  "cleveland cavaliers": 5, "cavaliers": 5,
+  "dallas mavericks": 6, "mavericks": 6,
+  "denver nuggets": 7, "nuggets": 7,
+  "detroit pistons": 8, "pistons": 8,
+  "golden state warriors": 9, "warriors": 9,
+  "houston rockets": 10, "rockets": 10,
+  "indiana pacers": 11, "pacers": 11,
+  "los angeles clippers": 12, "la clippers": 12, "clippers": 12,
+  "los angeles lakers": 13, "lakers": 13,
+  "memphis grizzlies": 29, "grizzlies": 29,
+  "miami heat": 14, "heat": 14,
+  "milwaukee bucks": 15, "bucks": 15,
+  "minnesota timberwolves": 16, "timberwolves": 16,
+  "new orleans pelicans": 3, "pelicans": 3,
+  "new york knicks": 18, "knicks": 18,
+  "oklahoma city thunder": 25, "thunder": 25,
+  "orlando magic": 19, "magic": 19,
+  "philadelphia 76ers": 20, "76ers": 20,
+  "phoenix suns": 21, "suns": 21,
+  "portland trail blazers": 22, "trail blazers": 22,
+  "sacramento kings": 23, "kings": 23,
+  "san antonio spurs": 24, "spurs": 24,
+  "toronto raptors": 28, "raptors": 28,
+  "utah jazz": 26, "jazz": 26,
+  "washington wizards": 27, "wizards": 27,
+};
+
+const ESPN_NHL = {
+  "anaheim ducks": 25, "ducks": 25,
+  "boston bruins": 1, "bruins": 1,
+  "buffalo sabres": 2, "sabres": 2,
+  "calgary flames": 20, "flames": 20,
+  "carolina hurricanes": 12, "hurricanes": 12,
+  "chicago blackhawks": 4, "blackhawks": 4,
+  "colorado avalanche": 21, "avalanche": 21,
+  "columbus blue jackets": 29, "blue jackets": 29,
+  "dallas stars": 25, "stars": 25,
+  "detroit red wings": 5, "red wings": 5,
+  "edmonton oilers": 22, "oilers": 22,
+  "florida panthers": 13, "panthers": 13,
+  "los angeles kings": 26, "la kings": 26,
+  "minnesota wild": 30, "wild": 30,
+  "montreal canadiens": 8, "canadiens": 8,
+  "nashville predators": 18, "predators": 18,
+  "new jersey devils": 9, "devils": 9,
+  "new york islanders": 10, "islanders": 10,
+  "new york rangers": 3, "rangers nhl": 3,
+  "ottawa senators": 19, "senators": 19,
+  "philadelphia flyers": 11, "flyers": 11,
+  "pittsburgh penguins": 16, "penguins": 16,
+  "san jose sharks": 28, "sharks": 28,
+  "seattle kraken": 55, "kraken": 55,
+  "st. louis blues": 27, "blues": 27,
+  "tampa bay lightning": 14, "lightning": 14,
+  "toronto maple leafs": 15, "maple leafs": 15,
+  "utah hockey club": 53, "utah mammoth": 53, "mammoth": 53,
+  "vancouver canucks": 23, "canucks": 23,
+  "vegas golden knights": 31, "golden knights": 31,
+  "washington capitals": 17, "capitals": 17,
+  "winnipeg jets": 52, "jets": 52,
+};
+
+const ESPN_TENNIS = {
+  "novak djokovic": 474, "djokovic": 474,
+  "carlos alcaraz": 8523, "alcaraz": 8523,
+  "jannik sinner": 8524, "sinner": 8524,
+  "daniil medvedev": 5341, "medvedev": 5341,
+  "alexander zverev": 5343, "zverev": 5343,
+  "andrey rublev": 6015, "rublev": 6015,
+  "casper ruud": 6318, "ruud": 6318,
+  "holger rune": 8759, "rune": 8759,
+  "stefanos tsitsipas": 5384, "tsitsipas": 5384,
+  "taylor fritz": 5373, "fritz": 5373,
+  "tommy paul": 5379, "paul": 5379,
+  "ben shelton": 9038, "shelton": 9038,
+  "frances tiafoe": 5382, "tiafoe": 5382,
+  "rafael nadal": 614, "nadal": 614,
+  "grigor dimitrov": 5370, "dimitrov": 5370,
+  "hubert hurkacz": 6317, "hurkacz": 6317,
+  "alex de minaur": 7213, "de minaur": 7213,
+  "lorenzo musetti": 8757, "musetti": 8757,
+  "jack draper": 9107, "draper": 9107,
+  "aryna sabalenka": 5345, "sabalenka": 5345,
+  "iga swiatek": 7437, "swiatek": 7437,
+  "coco gauff": 8234, "gauff": 8234,
+  "elena rybakina": 6317, "rybakina": 6317,
+  "jessica pegula": 5361, "pegula": 5361,
+  "maria sakkari": 5363, "sakkari": 5363,
+  "jasmine paolini": 6319, "paolini": 6319,
+  "marta kostyuk": 8522, "kostyuk": 8522,
+  "linda noskova": 9105, "noskova": 9105,
+  "mirra andreeva": 9200, "andreeva": 9200,
+  "flavio cobolli": 9201, "cobolli": 9201,
+};
+
+function normStr(s) {
   if (!s) return "";
   return s.toLowerCase()
-    .replace(/[àáâãäå]/g,"a").replace(/[èéêë]/g,"e").replace(/[ìíîï]/g,"i")
-    .replace(/[òóôõö]/g,"o").replace(/[ùúûü]/g,"u").replace(/[ñ]/g,"n")
-    .replace(/[ç]/g,"c").replace(/[ý]/g,"y").replace(/\s+/g," ").trim();
+    .replace(/[àáâ]/g,"a").replace(/[èéê]/g,"e").replace(/[ìíî]/g,"i")
+    .replace(/[òóô]/g,"o").replace(/[ùúû]/g,"u").replace(/ü/g,"u")
+    .replace(/ö/g,"o").replace(/ä/g,"a").replace(/å/g,"a")
+    .replace(/ñ/g,"n").replace(/ç/g,"c").replace(/ý/g,"y")
+    .replace(/\s+/g," ").trim();
 }
 
-function getLogoUrl(teamName) {
-  if (!teamName) return null;
-  const n = normTeam(teamName);
-  // Exact match
-  for (const [key, url] of Object.entries(TEAM_LOGOS)) {
-    if (normTeam(key) === n) return url;
+function findId(map, name) {
+  const n = normStr(name);
+  for (const [k,v] of Object.entries(map)) {
+    if (normStr(k) === n) return v;
   }
-  // Partial match
-  for (const [key, url] of Object.entries(TEAM_LOGOS)) {
-    const nk = normTeam(key);
-    if (n.includes(nk) || nk.includes(n)) return url;
+  for (const [k,v] of Object.entries(map)) {
+    const nk = normStr(k);
+    if (n.includes(nk) || nk.includes(n)) return v;
   }
   return null;
 }
 
-function logoImgSm(teamName) {
-  const url = getLogoUrl(teamName);
-  const init = getTeamInitials(teamName);
-  const color = getTeamColor(teamName);
-  if (url) return `<img class="team-logo-sm" src="${url}" alt="${teamName}" onerror="this.style.display='none';this.nextSibling.style.display='flex'" /><span class="team-logo-sm fallback" style="display:none;background:${color}30;color:${color}">${init}</span>`;
-  return `<span class="team-logo-sm fallback" style="background:${color}30;color:${color}">${init}</span>`;
+function getLogoInfo(name, sport) {
+  if (!name) return null;
+  if (sport === "tennis") {
+    const id = findId(ESPN_TENNIS, name);
+    if (id) return { url: `https://a.espncdn.com/i/headshots/tennis/players/full/${id}.png`, round: true };
+  }
+  if (sport === "koripallo") {
+    const id = findId(ESPN_NBA, name);
+    if (id) return { url: `https://a.espncdn.com/i/teamlogos/nba/500/${id}.png`, round: false };
+  }
+  if (sport === "jääkiekko") {
+    const id = findId(ESPN_NHL, name);
+    if (id) return { url: `https://a.espncdn.com/i/teamlogos/nhl/500/${id}.png`, round: false };
+  }
+  // jalkapallo tai muu
+  const id = findId(ESPN_SOCCER, name);
+  if (id) return { url: `https://a.espncdn.com/i/teamlogos/soccer/500/${id}.png`, round: false };
+  return null;
 }
 
-function logoImgLg(teamName) {
-  const url = getLogoUrl(teamName);
-  const init = getTeamInitials(teamName);
-  const color = getTeamColor(teamName);
-  if (url) return `<img class="team-logo-lg" src="${url}" alt="${teamName}" onerror="this.style.display='none';this.nextSibling.style.display='flex'" /><span class="team-logo-lg fallback" style="display:none;background:${color}30;color:${color};border-color:${color}50">${init}</span>`;
-  return `<span class="team-logo-lg fallback" style="background:${color}30;color:${color};border-color:${color}50">${init}</span>`;
+function getTeamInitials(name) {
+  if (!name) return "?";
+  const skip = ["fc","ac","sc","bk","if","sk","fk","afc","cf","rc","us","as","ss","sv","vfb","vfl","rb","tsg","bsc","hsv","1.","sl","og","ogc"];
+  const words = name.trim().split(/\s+/).filter(w => !skip.includes(w.toLowerCase()));
+  if (words.length === 0) return name.substring(0,2).toUpperCase();
+  if (words.length === 1) return words[0].substring(0,3).toUpperCase();
+  return (words[0][0] + words[words.length-1][0]).toUpperCase();
 }
 
+function getTeamColor(name) {
+  const n = (name||"").toLowerCase();
+  if (n.includes("liverpool")||n.includes("manchester united")||n.includes("arsenal")||n.includes("lightning")||(n.includes("milan")&&!n.includes("inter"))) return "#c41e3a";
+  if (n.includes("chelsea")||n.includes("manchester city")||n.includes("lazio")||n.includes("oilers")||n.includes("canadiens")||n.includes("porto")) return "#0057a8";
+  if (n.includes("juventus")||n.includes("newcastle")||n.includes("penguins")) return "#2a2a2a";
+  if (n.includes("barcelona")||n.includes("paris")||n.includes("psg")) return "#a50044";
+  if (n.includes("bayern")||n.includes("leverkusen")||n.includes("benfica")) return "#dc052d";
+  if (n.includes("dortmund")) return "#c8a400";
+  if (n.includes("real madrid")||n.includes("tottenham")) return "#6b4c9a";
+  if (n.includes("roma")) return "#8b0000";
+  if (n.includes("inter")) return "#003399";
+  if (n.includes("atletico")) return "#cb3524";
+  if (n.includes("warriors")) return "#1d428a";
+  if (n.includes("lakers")) return "#552583";
+  if (n.includes("celtics")) return "#007a33";
+  if (n.includes("heat")) return "#98002e";
+  if (n.includes("bruins")) return "#fcb514";
+  return "#2d3748";
+}
 
+function logoSmHtml(name, sport) {
+  const info = getLogoInfo(name, sport);
+  const init = getTeamInitials(name);
+  const color = getTeamColor(name);
+  if (info) {
+    const cls = info.round ? "logo-sm-round" : "logo-sm";
+    const bg = info.round ? "" : `style="background:#fff;padding:2px;border-radius:4px"`;
+    return `<img class="${cls}" src="${info.url}" alt="${name}" ${bg} onerror="this.outerHTML='<span class=logo-sm-fallback style=background:${color}30;color:${color}>${init}</span>'" />`;
+  }
+  return `<span class="logo-sm-fallback" style="background:${color}30;color:${color}">${init}</span>`;
+}
+
+function logoLgHtml(name, sport) {
+  const info = getLogoInfo(name, sport);
+  const init = getTeamInitials(name);
+  const color = getTeamColor(name);
+  if (info) {
+    const cls = info.round ? "logo-lg-round" : "logo-lg";
+    const bg = info.round ? "" : `style="background:#fff;padding:6px;border-radius:10px"`;
+    return `<img class="${cls}" src="${info.url}" alt="${name}" ${bg} onerror="this.outerHTML='<span class=logo-lg-fallback style=background:${color}30;color:${color};border-color:${color}50>${init}</span>'" />`;
+  }
+  return `<span class="logo-lg-fallback" style="background:${color}30;color:${color};border-color:${color}50">${init}</span>`;
+}
+
+// ===== UTILS =====
 function showPage(p, btn) {
   document.querySelectorAll(".page").forEach(el => el.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
@@ -659,9 +598,7 @@ function showPage(p, btn) {
   if (p === "analytics") renderAnalytics();
   if (p === "bets") renderMyBets();
 }
-
 function toNum(s) { return parseFloat((s || "").replace(",", ".")) || 0; }
-
 function formatTarget(target, home, away) {
   if (!target) return target;
   const t = target.trim();
@@ -672,42 +609,12 @@ function formatTarget(target, home, away) {
   if (away.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(away.toLowerCase().split(" ")[0])) return `2 — ${away} voittaa`;
   return t;
 }
-
-function getTeamInitials(name) {
-  if (!name) return "?";
-  const skip = ["fc","ac","sc","bk","if","sk","fk","afc","cf","rc","us","as","ss","sv","vfb","vfl","rb","tsg","bsc","hsv","1."];
-  const words = name.trim().split(/\s+/).filter(w => !skip.includes(w.toLowerCase()));
-  if (words.length === 0) return name.substring(0,2).toUpperCase();
-  if (words.length === 1) return words[0].substring(0,3).toUpperCase();
-  return (words[0][0] + words[words.length-1][0]).toUpperCase();
-}
-
-function getTeamColor(name) {
-  const n = name.toLowerCase();
-  if (n.includes("liverpool")||n.includes("manchester united")||n.includes("arsenal")||n.includes("lightning")||n.includes("milan")&&!n.includes("inter")) return "#c41e3a";
-  if (n.includes("chelsea")||n.includes("manchester city")||n.includes("lazio")||n.includes("oilers")||n.includes("canadiens")||n.includes("porto")) return "#0057a8";
-  if (n.includes("juventus")||n.includes("newcastle")||n.includes("penguins")) return "#2a2a2a";
-  if (n.includes("barcelona")||n.includes("paris")||n.includes("psg")||n.includes("rangers")) return "#a50044";
-  if (n.includes("bayern")||n.includes("leverkusen")||n.includes("benfica")) return "#dc052d";
-  if (n.includes("dortmund")) return "#c8a400";
-  if (n.includes("real madrid")||n.includes("tottenham")) return "#6b4c9a";
-  if (n.includes("roma")) return "#8b0000";
-  if (n.includes("inter")) return "#003399";
-  if (n.includes("atletico")) return "#cb3524";
-  if (n.includes("golden state")||n.includes("warriors")) return "#1d428a";
-  if (n.includes("lakers")) return "#552583";
-  if (n.includes("celtics")) return "#007a33";
-  if (n.includes("heat")) return "#98002e";
-  if (n.includes("bruins")||n.includes("boston")) return "#fcb514";
-  return "#2d3748";
-}
-
 function getSport(match) {
   const m = match.toLowerCase();
-  const football = ["fc","united","city","madrid","paris","bayern","juventus","milan","arsenal","chelsea","liverpool","barcelona","ajax","lens","nantes","lyon","metz","brest","angers","auxerre","strasbourg","torino","roma","fiorentina","burnley","everton","brentford","leeds","hellas","leverkusen","werder","augsburg","osasuna","espanyol","real","sevilla","valencia","villarreal","getafe","mallorca","girona","celta","betis","hamburg","frankfurt","benfica","porto","napoli","lazio","atletico","monaco","rennes","lille","marseille","nice","reims","metz","brugge","anderlecht","celtic","rangers","galatasaray","fenerbahce","salzburg","zagreb","shakhtar","psv","brighton","wolves","fulham","brentford","nottingham","newcastle","aston","crystal"];
-  const tennis = ["sinner","djokovic","nadal","federer","medvedev","alcaraz","kostyuk","swiatek","sabalenka","rybakina","noskova","jodar","cobolli","tsitsipas","zverev","ruud","dimitrov","fritz","tiafoe","shelton","musetti","de minaur","hurkacz","rune","struff","kotov","mpetshi","perricard","bublik","korda","khachanov","berrettini","norrie","garin"];
-  const basketball = ["lakers","celtics","warriors","heat","bulls","spurs","magic","pistons","trail blazers","golden state","brooklyn","miami","dallas","houston","nuggets","bucks","suns","knicks","76ers","nets","clippers","pelicans","grizzlies","rockets","jazz","thunder","timberwolves","kings","hawks","hornets","wizards","pacers","cavaliers","raptors","blazers"];
-  const icehockey = ["lightning","canadiens","flyers","penguins","stars","wild","golden knights","mammoth","sabres","bruins","oilers","ducks","rögle","skellefteå","frölunda","djurgården","maple leafs","avalanche","rangers","islanders","devils","blue jackets","senators","coyotes","sharks","kings","ducks","flames","jets","canucks","kraken","predators","blues","blackhawks","red wings","capitals","hurricanes","panthers"];
+  const tennis = ["sinner","djokovic","nadal","federer","medvedev","alcaraz","kostyuk","swiatek","sabalenka","rybakina","noskova","jodar","cobolli","tsitsipas","zverev","ruud","dimitrov","fritz","tiafoe","shelton","musetti","de minaur","hurkacz","rune","paolini","gauff","pegula","sakkari","andreeva","draper","paul"];
+  const basketball = ["lakers","celtics","warriors","heat","bulls","spurs","magic","pistons","trail blazers","golden state","brooklyn","miami","dallas mavericks","houston","nuggets","bucks","suns","knicks","76ers","nets","clippers","pelicans","grizzlies","rockets","jazz","thunder","timberwolves","kings","hawks","hornets","wizards","pacers","cavaliers","raptors"];
+  const icehockey = ["lightning","canadiens","flyers","penguins","stars","wild","golden knights","mammoth","sabres","bruins","oilers","ducks","rögle","skellefteå","frölunda","djurgården","maple leafs","avalanche","islanders","devils","senators","sharks","kraken","predators","blues","blackhawks","red wings","capitals","hurricanes","panthers","flames","jets","canucks"];
+  const football = ["fc","united","city","madrid","paris","bayern","juventus","milan","arsenal","chelsea","liverpool","barcelona","ajax","lens","nantes","lyon","metz","brest","angers","auxerre","strasbourg","torino","roma","fiorentina","burnley","everton","brentford","leeds","hellas","leverkusen","werder","augsburg","osasuna","espanyol","real","sevilla","valencia","villarreal","getafe","mallorca","girona","celta","betis","hamburg","frankfurt","benfica","porto","napoli","lazio","atletico","monaco","rennes","lille","marseille","nice","reims","brugge","anderlecht","celtic","salzburg","zagreb","shakhtar","psv","brighton","wolves","fulham","nottingham","newcastle","aston","crystal","galatasaray","fenerbahce","sporting","feyenoord"];
   if (tennis.some(t => m.includes(t))) return "tennis";
   if (basketball.some(t => m.includes(t))) return "koripallo";
   if (icehockey.some(t => m.includes(t))) return "jääkiekko";
@@ -720,8 +627,7 @@ function parseCSV(text) {
   if (lines.length < 2) return [];
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
-    const cols = [];
-    let cur = "", inQ = false;
+    const cols = []; let cur = "", inQ = false;
     for (const ch of lines[i]) {
       if (ch === '"') { inQ = !inQ; }
       else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
@@ -741,8 +647,7 @@ function parsePicksCSV(text) {
   if (lines.length < 2) return [];
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
-    const cols = [];
-    let cur = "", inQ = false;
+    const cols = []; let cur = "", inQ = false;
     for (const ch of lines[i]) {
       if (ch === '"') { inQ = !inQ; }
       else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
@@ -764,7 +669,6 @@ function updateBookFilter() {
   sel.innerHTML = '<option value="">Kaikki kirjat</option>';
   books.forEach(b => { const o = document.createElement("option"); o.value=b; o.textContent=b; if(b===cur)o.selected=true; sel.appendChild(o); });
 }
-
 function getFiltered() {
   const oddsMin = toNum(document.getElementById("f-odds-min").value)||1.0;
   const oddsMax = toNum(document.getElementById("f-odds-max").value)||99;
@@ -773,7 +677,6 @@ function getFiltered() {
   const sport = document.getElementById("f-sport").value;
   return evBets.filter(b => b.odds>=oddsMin && b.odds<=oddsMax && b.ev>=evMin && (!book||b.book===book) && (!sport||b.sport===sport));
 }
-
 function resetFilters() {
   document.getElementById("f-odds-min").value="1.3";
   document.getElementById("f-odds-max").value="5.0";
@@ -782,7 +685,6 @@ function resetFilters() {
   document.getElementById("f-sport").value="";
   renderEV();
 }
-
 function kelly(prob, odds, frac, br) { const b=odds-1,q=1-prob; return Math.max(0,(b*prob-q)/b)*frac*br; }
 function evClass(ev) { return ev>=10?"ev-top":ev>=5?"ev-high":""; }
 function toggleDetail(id) { const el=document.getElementById(id); if(el) el.classList.toggle("open"); }
@@ -796,41 +698,36 @@ function renderEV() {
   const empty = document.getElementById("ev-empty");
   const summary = document.getElementById("ev-summary");
   const filtered = getFiltered();
-
   document.getElementById("filter-count").innerHTML = `<strong>${filtered.length}</strong> / ${evBets.length} kohdetta`;
   if (filtered.length===0) { empty.style.display="block"; list.innerHTML=""; summary.style.display=evBets.length>0?"grid":"none"; return; }
   empty.style.display="none"; summary.style.display="grid";
-
   const avg=(filtered.reduce((a,b)=>a+b.ev,0)/filtered.length).toFixed(1);
   document.getElementById("ev-count").textContent=filtered.length;
   document.getElementById("ev-best").textContent="+"+filtered[0].ev.toFixed(1)+"%";
   document.getElementById("ev-avg").textContent="+"+avg+"%";
   document.getElementById("ev-bankroll").textContent=br.toLocaleString("fi-FI")+"€";
-
   const sportBadge={jalkapallo:"FOOT",tennis:"TEN",koripallo:"NBA",jääkiekko:"ICE",muu:"SPT"};
-
   list.innerHTML = filtered.map((b,i) => {
     const ks=kelly(b.pinnPct,b.odds,kf,br);
     const rec=ks>0?Math.min(ks,flat*2):flat;
     const kpct=((ks/br)*100).toFixed(2);
     const pot=(rec*b.odds).toFixed(0);
     const badge=sportBadge[b.sport]||"SPT";
-    const detailId=`ev-detail-${i}`;
-    const formattedTarget=formatTarget(b.target,b.home,b.away);
-    const pinnHome=(b.pinnPct*100).toFixed(0);
-    const pinnDraw=Math.max(0,100-pinnHome-(100-pinnHome)/2).toFixed(0);
-    const pinnAway=Math.max(0,(100-pinnHome)/2).toFixed(0);
-
+    const did=`ev-d-${i}`;
+    const ft=formatTarget(b.target,b.home,b.away);
+    const pH=(b.pinnPct*100).toFixed(0);
+    const pD=Math.max(0,100-pH-(100-pH)/2).toFixed(0);
+    const pA=Math.max(0,(100-pH)/2).toFixed(0);
     return `<div class="bet-card ${evClass(b.ev)}">
-      <div class="bet-card-main" onclick="toggleDetail('${detailId}')">
+      <div class="bet-card-main" onclick="toggleDetail('${did}')">
         <div>
           <div class="match-header">
-            ${logoImgSm(b.home)}
+            ${logoSmHtml(b.home,b.sport)}
             <span class="vs-sm">VS</span>
-            ${logoImgSm(b.away)}
-            <span class="bet-match"><span style="font-size:0.55rem;background:var(--surface3);color:var(--text3);padding:1px 5px;border-radius:3px;margin-right:5px">${badge}</span>${b.match}</span>
+            ${logoSmHtml(b.away,b.sport)}
+            <span class="bet-match"><span style="font-size:0.5rem;background:var(--surface3);color:var(--text3);padding:1px 5px;border-radius:3px;margin-right:4px">${badge}</span>${b.match}</span>
           </div>
-          <div class="bet-target">${formattedTarget}</div>
+          <div class="bet-target">${ft}</div>
           <div class="tags">
             <span class="tag">${b.starts}</span>
             <span class="tag">${b.book}</span>
@@ -843,20 +740,20 @@ function renderEV() {
         <div class="cell"><div class="cell-lbl">EV</div><div class="cell-val ev-green">+${b.ev.toFixed(1)}%</div><div class="cell-sub">Expected value</div></div>
         <div class="kelly-box"><div class="kelly-euro">${rec.toFixed(0)}€</div><div class="kelly-pct">Kelly ${kpct}%</div><div class="kelly-lbl">Suositeltu panos</div></div>
       </div>
-      <div class="bet-detail" id="${detailId}">
+      <div class="bet-detail" id="${did}">
         <div class="detail-teams">
-          <div class="detail-team">${logoImgLg(b.home)}<div class="team-name">${b.home}</div></div>
+          <div class="detail-team">${logoLgHtml(b.home,b.sport)}<div class="team-name">${b.home}</div></div>
           <div class="vs-badge">VS</div>
-          <div class="detail-team">${logoImgLg(b.away)}<div class="team-name">${b.away}</div></div>
+          <div class="detail-team">${logoLgHtml(b.away,b.sport)}<div class="team-name">${b.away}</div></div>
         </div>
         <div class="detail-probs">
-          <div class="prob-bar-wrap"><div class="prob-label">${b.home.split(" ")[0]} voitto</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:${pinnHome}%;background:var(--green)"></div></div><div class="prob-val" style="color:var(--green)">${pinnHome}%</div></div>
-          <div class="prob-bar-wrap"><div class="prob-label">Tasapeli</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:${pinnDraw}%;background:var(--amber)"></div></div><div class="prob-val" style="color:var(--amber)">${pinnDraw}%</div></div>
-          <div class="prob-bar-wrap"><div class="prob-label">${b.away.split(" ")[0]} voitto</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:${pinnAway}%;background:var(--blue)"></div></div><div class="prob-val" style="color:var(--blue)">${pinnAway}%</div></div>
+          <div class="prob-bar-wrap"><div class="prob-label">${b.home.split(" ")[0]} voitto</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:${pH}%;background:var(--green)"></div></div><div class="prob-val" style="color:var(--green)">${pH}%</div></div>
+          <div class="prob-bar-wrap"><div class="prob-label">Tasapeli</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:${pD}%;background:var(--amber)"></div></div><div class="prob-val" style="color:var(--amber)">${pD}%</div></div>
+          <div class="prob-bar-wrap"><div class="prob-label">${b.away.split(" ")[0]} voitto</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:${pA}%;background:var(--blue)"></div></div><div class="prob-val" style="color:var(--blue)">${pA}%</div></div>
         </div>
         <div class="detail-info">
           <span class="detail-tag green">EV: +${b.ev.toFixed(1)}%</span>
-          <span class="detail-tag blue">Kerroin: ${b.odds.toFixed(2)} @ ${b.book}</span>
+          <span class="detail-tag blue">${b.odds.toFixed(2)} @ ${b.book}</span>
           <span class="detail-tag amber">Panos: ${rec.toFixed(0)}€</span>
           ${b.ml?`<span class="detail-tag purple">ML: ${b.ml}</span>`:""}
         </div>
@@ -870,52 +767,49 @@ function renderPicks() {
   const empty = document.getElementById("picks-empty");
   const summary = document.getElementById("picks-summary");
   document.getElementById("picks-loading").style.display="none";
-
   if (picks.length===0) { empty.style.display="block"; list.innerHTML=""; summary.style.display="none"; return; }
   empty.style.display="none"; summary.style.display="grid";
-
   const strong=picks.filter(p=>p.stars==="***").length;
   const avgConf=(picks.reduce((a,b)=>a+b.bzConf,0)/picks.length).toFixed(0);
   document.getElementById("p-count").textContent=picks.length;
   document.getElementById("p-strong").textContent=strong;
   document.getElementById("p-best").textContent=picks[0].pickScore.toFixed(1);
   document.getElementById("p-conf").textContent=avgConf+"%";
-
   list.innerHTML = picks.map((p,i) => {
-    const starsClass=p.stars==="***"?"three-stars":p.stars==="**"?"two-stars":"";
-    const starsDisplay=p.stars==="***"?"⭐⭐⭐":p.stars==="**"?"⭐⭐":"⭐";
-    const evColor=p.ev>0?"var(--green)":p.ev<0?"var(--red)":"var(--text2)";
-    const detailId=`pick-detail-${i}`;
-    const formattedPick=formatTarget(p.pick,p.home,p.away);
-
-    return `<div class="pick-card ${starsClass}">
-      <div class="pick-card-main" onclick="toggleDetail('${detailId}')">
+    const sc=p.stars==="***"?"three-stars":p.stars==="**"?"two-stars":"";
+    const sd=p.stars==="***"?"⭐⭐⭐":p.stars==="**"?"⭐⭐":"⭐";
+    const ec=p.ev>0?"var(--green)":p.ev<0?"var(--red)":"var(--text2)";
+    const did=`pick-d-${i}`;
+    const sp=getSport(p.match);
+    const fp=formatTarget(p.pick,p.home,p.away);
+    return `<div class="pick-card ${sc}">
+      <div class="pick-card-main" onclick="toggleDetail('${did}')">
         <div class="pick-header">
           <div class="pick-left">
-            <div class="pick-match-logos">
-              ${logoImgSm(p.home)}
+            <div class="pick-match-row">
+              ${logoSmHtml(p.home,sp)}
               <span class="vs-sm">VS</span>
-              ${logoImgSm(p.away)}
+              ${logoSmHtml(p.away,sp)}
               <span class="pick-match">${p.match} · ${p.starts}</span>
             </div>
-            <div class="pick-target">${formattedPick}</div>
+            <div class="pick-target">${fp}</div>
             <span class="pick-score-badge">Picki-score: ${p.pickScore.toFixed(1)}</span>
           </div>
-          <div class="pick-stars">${starsDisplay}</div>
+          <div class="pick-stars">${sd}</div>
         </div>
         <div class="pick-grid">
           <div class="pick-cell"><div class="pick-cell-lbl">Kerroin</div><div class="pick-cell-val" style="color:#fff">${p.odds.toFixed(2)}</div></div>
           <div class="pick-cell"><div class="pick-cell-lbl">Kirja</div><div class="pick-cell-val" style="font-size:0.72rem;color:var(--text2)">${p.book}</div></div>
           <div class="pick-cell"><div class="pick-cell-lbl">Pinnacle %</div><div class="pick-cell-val" style="color:var(--blue)">${(p.pinnPct*100).toFixed(1)}%</div></div>
           <div class="pick-cell"><div class="pick-cell-lbl">Bzzoiro conf.</div><div class="pick-cell-val" style="color:var(--purple)">${p.bzConf}%</div></div>
-          <div class="pick-cell"><div class="pick-cell-lbl">EV %</div><div class="pick-cell-val" style="color:${evColor}">${p.ev>0?"+":""}${p.ev.toFixed(1)}%</div></div>
+          <div class="pick-cell"><div class="pick-cell-lbl">EV %</div><div class="pick-cell-val" style="color:${ec}">${p.ev>0?"+":""}${p.ev.toFixed(1)}%</div></div>
         </div>
       </div>
-      <div class="pick-detail" id="${detailId}">
+      <div class="pick-detail" id="${did}">
         <div class="detail-teams">
-          <div class="detail-team">${logoImgLg(p.home)}<div class="team-name">${p.home}</div></div>
+          <div class="detail-team">${logoLgHtml(p.home,sp)}<div class="team-name">${p.home}</div></div>
           <div class="vs-badge">VS</div>
-          <div class="detail-team">${logoImgLg(p.away)}<div class="team-name">${p.away}</div></div>
+          <div class="detail-team">${logoLgHtml(p.away,sp)}<div class="team-name">${p.away}</div></div>
         </div>
         <div class="conf-meter">
           <div class="conf-meter-label"><span>Bzzoiro luottamus</span><span style="color:var(--purple);font-weight:600">${p.bzConf}%</span></div>
@@ -927,7 +821,7 @@ function renderPicks() {
           <div class="prob-bar-wrap"><div class="prob-label">${p.away.split(" ")[0]} voitto</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:${Math.max(0,100-p.pinnPct*100-25).toFixed(0)}%;background:var(--blue)"></div></div><div class="prob-val" style="color:var(--blue)">${Math.max(0,100-p.pinnPct*100-25).toFixed(1)}%</div></div>
         </div>
         <div class="detail-info">
-          <span class="detail-tag purple">Bzzoiro: ${p.bzConf}% varmuus</span>
+          <span class="detail-tag purple">Bzzoiro: ${p.bzConf}%</span>
           <span class="detail-tag green">EV: ${p.ev>0?"+":""}${p.ev.toFixed(1)}%</span>
           <span class="detail-tag blue">@ ${p.odds.toFixed(2)} — ${p.book}</span>
           ${p.predScore?`<span class="detail-tag amber">Enn. tulos: ${p.predScore}</span>`:""}
@@ -968,7 +862,6 @@ function startTimer() {
 
 function saveBets() { localStorage.setItem("bettipena_bets",JSON.stringify(myBets)); }
 function toggleAddForm() { const f=document.getElementById("add-form"); f.style.display=f.style.display==="block"?"none":"block"; }
-
 function saveBet() {
   const match=document.getElementById("f-match").value.trim();
   const target=document.getElementById("f-target").value.trim();
@@ -977,10 +870,8 @@ function saveBet() {
   saveBets(); renderMyBets(); toggleAddForm();
   ["f-match","f-target","f-book-input","f-odds","f-stake","f-ev","f-pinn"].forEach(id=>document.getElementById(id).value="");
 }
-
 function updateResult(id,val){const b=myBets.find(x=>x.id===id);if(b){b.result=val;saveBets();renderMyBets();}}
 function deleteBet(id){myBets=myBets.filter(x=>x.id!==id);saveBets();renderMyBets();}
-
 function renderMyBets() {
   const list=document.getElementById("bets-list");
   const won=myBets.filter(b=>b.result==="won").length;
@@ -994,7 +885,7 @@ function renderMyBets() {
   const roiEl=document.getElementById("b-roi");
   roiEl.textContent=roi!=="—"?roi+"%":"—";
   roiEl.className="stat-value "+(parseFloat(roi)>0?"green":parseFloat(roi)<0?"red":"");
-  if(myBets.length===0){list.innerHTML='<div class="empty-box">Ei betsejä vielä. Lisää ensimmäinen betsi!</div>';return;}
+  if(myBets.length===0){list.innerHTML='<div class="empty-box">Ei betsejä vielä.</div>';return;}
   list.innerHTML=myBets.map(b=>{
     const pl=b.result==="won"?b.stake*(b.odds-1):b.result==="lost"?-b.stake:null;
     const plStr=pl!==null?(pl>0?`+${pl.toFixed(2)}€`:`${pl.toFixed(2)}€`):"—";
@@ -1013,7 +904,6 @@ function renderMyBets() {
     </div>`;
   }).join("");
 }
-
 let bankrollChart,plChart;
 function renderAnalytics() {
   const settled=myBets.filter(b=>b.result!=="pending");
@@ -1035,18 +925,18 @@ function renderAnalytics() {
   const brLabels=["Alku"],brData=[br];
   [...myBets].reverse().forEach((b,i)=>{if(b.result==="won")running+=b.stake*(b.odds-1);else if(b.result==="lost")running-=b.stake;brLabels.push(`B${i+1}`);brData.push(parseFloat(running.toFixed(2)));});
   if(bankrollChart)bankrollChart.destroy();
-  bankrollChart=new Chart(document.getElementById("bankroll-chart"),{type:"line",data:{labels:brLabels,datasets:[{label:"Kassa (€)",data:brData,borderColor:"#00e676",backgroundColor:"rgba(0,230,118,0.05)",borderWidth:2,pointRadius:3,tension:0.3,fill:true}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#4a5568"},grid:{color:"rgba(255,255,255,0.04)"}},y:{ticks:{color:"#4a5568"},grid:{color:"rgba(255,255,255,0.04)"}}}}});
+  bankrollChart=new Chart(document.getElementById("bankroll-chart"),{type:"line",data:{labels:brLabels,datasets:[{label:"Kassa",data:brData,borderColor:"#00e676",backgroundColor:"rgba(0,230,118,0.05)",borderWidth:2,pointRadius:3,tension:0.3,fill:true}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#4a5568"},grid:{color:"rgba(255,255,255,0.04)"}},y:{ticks:{color:"#4a5568"},grid:{color:"rgba(255,255,255,0.04)"}}}}});
   const plData=[...myBets].reverse().map(b=>{if(b.result==="won")return parseFloat((b.stake*(b.odds-1)).toFixed(2));if(b.result==="lost")return -b.stake;return 0;});
   const plLabels=[...myBets].reverse().map((b,i)=>`B${i+1}`);
   if(plChart)plChart.destroy();
-  plChart=new Chart(document.getElementById("pl-chart"),{type:"bar",data:{labels:plLabels,datasets:[{label:"P&L (€)",data:plData,backgroundColor:plData.map(v=>v>=0?"rgba(0,230,118,0.6)":"rgba(255,68,68,0.6)"),borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#4a5568"},grid:{color:"rgba(255,255,255,0.04)"}},y:{ticks:{color:"#4a5568"},grid:{color:"rgba(255,255,255,0.04)"}}}}});
+  plChart=new Chart(document.getElementById("pl-chart"),{type:"bar",data:{labels:plLabels,datasets:[{label:"P&L",data:plData,backgroundColor:plData.map(v=>v>=0?"rgba(0,230,118,0.6)":"rgba(255,68,68,0.6)"),borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#4a5568"},grid:{color:"rgba(255,255,255,0.04)"}},y:{ticks:{color:"#4a5568"},grid:{color:"rgba(255,255,255,0.04)"}}}}});
   const avgStake=myBets.length>0?myBets.reduce((a,b)=>a+b.stake,0)/myBets.length:10;
   const avgEvPct=parseFloat(avgEV)||3;
   const weeklyEV=avgStake*(avgEvPct/100)*5;
   document.getElementById("forecast-rows").innerHTML=[
     {label:"Avg panos",value:avgStake.toFixed(0)+"€",cls:""},
     {label:"Avg EV %",value:"+"+avgEvPct.toFixed(1)+"%",cls:"green"},
-    {label:"Betsejä / viikko (oletus)",value:5,cls:""},
+    {label:"Betsejä / viikko",value:5,cls:""},
     {label:"Odotettu tuotto / viikko",value:"+"+weeklyEV.toFixed(2)+"€",cls:"green"},
     {label:"Odotettu tuotto / kk",value:"+"+(weeklyEV*4).toFixed(2)+"€",cls:"green"},
     {label:"Nykyinen kassa",value:br.toLocaleString("fi-FI")+"€",cls:"amber"},
@@ -1054,9 +944,8 @@ function renderAnalytics() {
     {label:"Ennuste kassa 3kk",value:(br+weeklyEV*12).toFixed(2)+"€",cls:"green"},
   ].map(r=>`<div class="forecast-row"><span class="label">${r.label}</span><span class="value ${r.cls}">${r.value}</span></div>`).join("");
 }
-
 function toggleChat(){document.getElementById("chat-window").classList.toggle("open");}
-const chatResponses={"kelly":"Kelly-kaava: f* = (bp - q) / b. b=kerroin-1, p=voittotodennäköisyys, q=häviötodennäköisyys. Käytä 25% fraktiota! 📊","ev":"EV kertoo odotetun tuoton per panos. +5% EV = 5€ per 100€ pitkällä aikavälillä. 💚","roi":"ROI = (Voitot - Panokset) / Panokset × 100%. Tavoittele +3-8%. 📈","pinnacle":"Pinnacle on sharpbook — pienin marginaali. Heidän kertoimensa = paras arvio todellisesta todennäköisyydestä. 🎯","flat":"Flat bet = sama summa joka betsiin. 0.5-2% bankrollista. 💰","bankroll":"Älä riskeeraa yli 2-3% bankrollista per betsi! 🛡️","picki":"Pickit = Bzzoiro ML + Pinnacle kertoimet. Picki-score = confidence × (1 + EV%). ⭐","bzzoiro":"Bzzoiro on ML-algoritmi otteluiden ennustamiseen. Yhdistämme sen Pinnacleen parhaille kohteille. 🤖","default":"Voin auttaa EV-bettauksessa, Kellyssä, ROI:ssa ja pickien tulkinnassa. Kysy lisää!"};
+const chatResponses={"kelly":"Kelly-kaava: f* = (bp - q) / b. Käytä 25% fraktiota!","ev":"EV = odotettu tuotto per panos. +5% EV = 5€ per 100€ pitkällä aikavälillä.","roi":"ROI = (Voitot - Panokset) / Panokset × 100%. Tavoittele +3-8%.","pinnacle":"Pinnacle on sharpbook — pienin marginaali. Heidän kertoimensa on paras arvio todellisesta todennäköisyydestä.","flat":"Flat bet = sama summa joka betsiin. 0.5-2% bankrollista.","bankroll":"Älä riskeeraa yli 2-3% bankrollista per betsi!","picki":"Pickit = Bzzoiro ML + Pinnacle. Picki-score = confidence × (1 + EV%).","bzzoiro":"Bzzoiro on ML-algoritmi. Yhdistämme sen Pinnacleen parhaille kohteille.","default":"Voin auttaa EV-bettauksessa, Kellyssä, ROI:ssa ja pickien tulkinnassa."};
 function sendChat(){const input=document.getElementById("chat-input");const msgs=document.getElementById("chat-msgs");const text=input.value.trim();if(!text)return;msgs.innerHTML+=`<div class="msg user">${text}</div>`;input.value="";const key=Object.keys(chatResponses).find(k=>text.toLowerCase().includes(k))||"default";setTimeout(()=>{msgs.innerHTML+=`<div class="msg bot">${chatResponses[key]}</div>`;msgs.scrollTop=msgs.scrollHeight;},600);msgs.scrollTop=msgs.scrollHeight;}
 
 fetchAll();
