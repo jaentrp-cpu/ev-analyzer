@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BettiPena — EV Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #07090f;
+  --surface: #0d1117;
+  --surface2: #161b27;
+  --surface3: #1c2333;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.1);
+  --green: #00e676;
+  --green-dim: rgba(0,230,118,0.1);
+  --amber: #ffab00;
+  --amber-dim: rgba(255,171,0,0.1);
+  --red: #ff4444;
+  --red-dim: rgba(255,68,68,0.1);
+  --blue: #4da6ff;
+  --blue-dim: rgba(77,166,255,0.1);
+  --purple: #b388ff;
+  --text: #e2e8f0;
+  --text2: #64748b;
+  --text3: #334155;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-bar {
+  height: 2px;
+  background: linear-gradient(90deg, var(--green), var(--blue), var(--purple));
+}
+
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.brand-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.brand-name { font-size: 1.1rem; font-weight: 700; color: #fff; }
+.brand-name span { color: var(--green); }
+.brand-tag { font-size: 0.65rem; color: var(--text2); background: var(--surface2); padding: 2px 8px; border-radius: 20px; border: 1px solid var(--border2); }
+
+nav { display: flex; gap: 4px; }
+
+.nav-btn {
+  background: none;
+  border: none;
+  color: var(--text2);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover { color: var(--text); background: var(--surface2); }
+.nav-btn.active { color: var(--green); background: var(--green-dim); }
+
+.header-right { display: flex; align-items: center; gap: 12px; }
+
+#countdown-badge {
+  font-size: 0.7rem;
+  color: var(--green);
+  background: var(--green-dim);
+  border: 1px solid rgba(0,230,118,0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+#last-update-txt { font-size: 0.68rem; color: var(--text3); }
+
+main { flex: 1; padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+}
+
+.stat-label { font-size: 0.65rem; font-weight: 500; color: var(--text2); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.stat-value { font-size: 1.5rem; font-weight: 700; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+.stat-value.green { color: var(--green); }
+.stat-value.amber { color: var(--amber); }
+.stat-value.blue { color: var(--blue); }
+.stat-value.red { color: var(--red); }
+
+.settings-bar {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  flex-wrap: wrap;
+}
+
+.setting-group { display: flex; flex-direction: column; gap: 5px; }
+
+.setting-group label {
+  font-size: 0.63rem;
+  font-weight: 500;
+  color: var(--text2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.setting-group input, .setting-group select {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  width: 170px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.setting-group input:focus, .setting-group select:focus { border-color: var(--green); }
+
+.bet-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 10px;
+  display: grid;
+  grid-template-columns: 1fr 110px 120px 150px;
+  gap: 1.5rem;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s;
+}
+
+.bet-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--green);
+}
+
+.bet-card:hover { background: var(--surface2); }
+.bet-card.ev-high::before { background: var(--amber); }
+.bet-card.ev-top::before { background: var(--red); }
+
+.bet-match { font-size: 0.63rem; font-weight: 500; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 3px; }
+.bet-target { font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 6px; }
+
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font-size: 0.63rem; color: var(--text2); background: var(--surface2); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); }
+
+.cell { text-align: center; }
+.cell-lbl { font-size: 0.58rem; font-weight: 500; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+.cell-val { font-size: 1.05rem; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+.cell-sub { font-size: 0.6rem; color: var(--text3); margin-top: 2px; }
+
+.ev-green { color: var(--green); }
+.bet-card.ev-high .ev-green { color: var(--amber); }
+.bet-card.ev-top .ev-green { color: var(--red); }
+
+.kelly-box {
+  background: linear-gradient(135deg, rgba(0,230,118,0.08), rgba(77,166,255,0.08));
+  border: 1px solid rgba(0,230,118,0.15);
+  border-radius: 10px;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.kelly-euro { font-size: 1.2rem; font-weight: 700; color: var(--green); font-family: 'Space Grotesk', sans-serif; }
+.kelly-pct { font-size: 0.63rem; color: var(--text2); margin-top: 2px; }
+.kelly-lbl { font-size: 0.58rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; }
+
+.add-bet-btn {
+  background: var(--green-dim);
+  border: 1px solid rgba(0,230,118,0.3);
+  color: var(--green);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: all 0.2s;
+}
+
+.add-bet-btn:hover { background: rgba(0,230,118,0.2); }
+
+.add-bet-form {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1rem; }
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 0.63rem; font-weight: 500; color: var(--text2); letter-spacing: 0.08em; text-transform: uppercase; }
+.form-group input, .form-group select {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.form-group input:focus, .form-group select:focus { border-color: var(--green); }
+
+.form-actions { display: flex; gap: 10px; }
+
+.btn-primary {
+  background: var(--green);
+  border: none;
+  color: #000;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:hover { opacity: 0.85; }
+
+.btn-secondary {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.my-bet-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.5rem;
+  margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: 1fr 80px 80px 100px 120px 110px;
+  gap: 1rem;
+  align-items: center;
+}
+
+.my-bet-card.won { border-left: 3px solid var(--green); }
+.my-bet-card.lost { border-left: 3px solid var(--red); }
+.my-bet-card.pending { border-left: 3px solid var(--amber); }
+
+.result-select {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  cursor: pointer;
+}
+
+.analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.chart-title { font-size: 0.75rem; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+
+canvas { width: 100% !important; }
+
+.forecast-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.forecast-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.82rem;
+}
+
+.forecast-row:last-child { border-bottom: none; }
+.forecast-row .label { color: var(--text2); }
+.forecast-row .value { font-weight: 600; font-family: 'Space Grotesk', sans-serif; }
+.forecast-row .value.green { color: var(--green); }
+.forecast-row .value.amber { color: var(--amber); }
+
+.chat-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 200;
+}
+
+.chat-bubble {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green), var(--blue));
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  box-shadow: 0 4px 20px rgba(0,230,118,0.3);
+  transition: transform 0.2s;
+  margin-left: auto;
+}
+
+.chat-bubble:hover { transform: scale(1.1); }
+
+.chat-window {
+  display: none;
+  width: 340px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.chat-window.open { display: flex; flex-direction: column; }
+
+.chat-header {
+  background: linear-gradient(135deg, rgba(0,230,118,0.15), rgba(77,166,255,0.15));
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green), var(--blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.chat-name { font-size: 0.85rem; font-weight: 600; color: #fff; }
+.chat-status { font-size: 0.65rem; color: var(--green); }
+
+.chat-messages {
+  flex: 1;
+  height: 280px;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.msg {
+  max-width: 85%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.msg.bot {
+  background: var(--surface2);
+  color: var(--text);
+  align-self: flex-start;
+  border-bottom-left-radius: 3px;
+}
+
+.msg.user {
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(0,230,118,0.2);
+  align-self: flex-end;
+  border-bottom-right-radius: 3px;
+}
+
+.chat-input-row {
+  padding: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.chat-input:focus { border-color: var(--green); }
+
+.chat-send {
+  background: var(--green);
+  border: none;
+  color: #000;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.loading-box { text-align: center; padding: 4rem; color: var(--text2); font-size: 0.85rem; }
+.spinner { width: 30px; height: 30px; border: 2px solid var(--border2); border-top-color: var(--green); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-box { text-align: center; padding: 3rem; color: var(--text2); font-size: 0.85rem; }
+
+@media (max-width: 900px) {
+  .summary-grid { grid-template-columns: repeat(2,1fr); }
+  .bet-card { grid-template-columns: 1fr 1fr; }
+  .kelly-box { grid-column: span 2; }
+  .my-bet-card { grid-template-columns: 1fr 1fr 1fr; }
+  .analytics-grid { grid-template-columns: 1fr; }
+  main { padding: 1rem; }
+  header { padding: 0 1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+
+<header>
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <span class="brand-name">Betti<span>Pena</span></span>
+    <span class="brand-tag">EV ANALYZER</span>
+  </div>
+  <nav>
+    <button class="nav-btn active" onclick="showPage('ev')">EV Kohteet</button>
+    <button class="nav-btn" onclick="showPage('bets')">Omat Betsit</button>
+    <button class="nav-btn" onclick="showPage('analytics')">Analytiikka</button>
+  </nav>
+  <div class="header-right">
+    <span id="last-update-txt">—</span>
+    <span id="countdown-badge">Ladataan...</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- EV PAGE -->
+  <div class="page active" id="page-ev">
+    <div class="settings-bar">
+      <div class="setting-group">
+        <label>Bankroll (€)</label>
+        <input type="number" id="bankroll" value="1000" min="10" step="100" oninput="renderEV()" />
+      </div>
+      <div class="setting-group">
+        <label>Kelly-fraktio</label>
+        <select id="kelly-frac" onchange="renderEV()">
+          <option value="0.1">10% — erittäin varovainen</option>
+          <option value="0.25" selected>25% — varovainen</option>
+          <option value="0.5">50% — normaali</option>
+          <option value="1.0">100% — täysi Kelly</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label>Flat bet %</label>
+        <input type="number" id="flat-pct" value="0.75" min="0.25" max="5" step="0.25" oninput="renderEV()" />
+      </div>
+    </div>
+
+    <div class="summary-grid" id="ev-summary" style="display:none">
+      <div class="stat-card"><div class="stat-label">Kohteet</div><div class="stat-value blue" id="ev-count">—</div></div>
+      <div class="stat-card"><div class="stat-label">Paras EV</div><div class="stat-value green" id="ev-best">—</div></div>
+      <div class="stat-card"><div class="stat-label">Keskiarvo EV</div><div class="stat-value green" id="ev-avg">—</div></div>
+      <div class="stat-card"><div class="stat-label">Bankroll</div><div class="stat-value amber" id="ev-bankroll">—</div></div>
+    </div>
+
+    <div class="loading-box" id="ev-loading"><div class="spinner"></div>Haetaan EV-kohteita...</div>
+    <div class="empty-box" id="ev-empty" style="display:none">Ei plus-EV kohteita juuri nyt.</div>
+    <div id="ev-list"></div>
+  </div>
+
+  <!-- BETS PAGE -->
+  <div class="page" id="page-bets">
+    <div class="summary-grid" id="bets-summary">
+      <div class="stat-card"><div class="stat-label">Betsit yhteensä</div><div class="stat-value blue" id="b-total">0</div></div>
+      <div class="stat-card"><div class="stat-label">Voitettu</div><div class="stat-value green" id="b-won">0</div></div>
+      <div class="stat-card"><div class="stat-label">Hävitty</div><div class="stat-value red" id="b-lost">0</div></div>
+      <div class="stat-card"><div class="stat-label">ROI</div><div class="stat-value" id="b-roi">—</div></div>
+    </div>
+
+    <button class="add-bet-btn" onclick="toggleAddForm()">+ Lisää betsi</button>
+
+    <div class="add-bet-form" id="add-form">
+      <div class="form-grid">
+        <div class="form-group"><label>Ottelu</label><input type="text" id="f-match" placeholder="esim. PSG vs Bayern" /></div>
+        <div class="form-group"><label>Kohde</label><input type="text" id="f-target" placeholder="esim. Bayern voittaa" /></div>
+        <div class="form-group"><label>Kirja</label><input type="text" id="f-book" placeholder="esim. Unibet" /></div>
+        <div class="form-group"><label>Kerroin</label><input type="number" id="f-odds" step="0.01" placeholder="esim. 1.85" /></div>
+        <div class="form-group"><label>Panos (€)</label><input type="number" id="f-stake" placeholder="esim. 10" /></div>
+        <div class="form-group"><label>EV %</label><input type="number" id="f-ev" step="0.1" placeholder="esim. 3.2" /></div>
+        <div class="form-group"><label>Pinnacle %</label><input type="number" id="f-pinn" step="0.1" placeholder="esim. 55.4" /></div>
+        <div class="form-group"><label>Tulos</label>
+          <select id="f-result">
+            <option value="pending">Odottaa</option>
+            <option value="won">Voitto</option>
+            <option value="lost">Tappio</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="saveBet()">Tallenna betsi</button>
+        <button class="btn-secondary" onclick="toggleAddForm()">Peruuta</button>
+      </div>
+    </div>
+
+    <div id="bets-list"><div class="empty-box">Ei betsejä vielä. Lisää ensimmäinen betsi!</div></div>
+  </div>
+
+  <!-- ANALYTICS PAGE -->
+  <div class="page" id="page-analytics">
+    <div class="summary-grid" id="analytics-summary">
+      <div class="stat-card"><div class="stat-label">Kokonaistuotto</div><div class="stat-value" id="a-profit">—</div></div>
+      <div class="stat-card"><div class="stat-label">ROI</div><div class="stat-value" id="a-roi">—</div></div>
+      <div class="stat-card"><div class="stat-label">Osumisprosentti</div><div class="stat-value blue" id="a-hit">—</div></div>
+      <div class="stat-card"><div class="stat-label">Avg EV</div><div class="stat-value green" id="a-avgev">—</div></div>
+    </div>
+
+    <div class="analytics-grid">
+      <div class="chart-card">
+        <div class="chart-title">Kassan kehitys</div>
+        <canvas id="bankroll-chart" height="200"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Voitto / Tappio per betti</div>
+        <canvas id="pl-chart" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="forecast-card">
+      <div class="chart-title">Ennuste</div>
+      <div id="forecast-rows"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- BETTI PENA CHAT -->
+<div class="chat-container">
+  <div class="chat-window" id="chat-window">
+    <div class="chat-header">
+      <div class="chat-avatar">🤖</div>
+      <div>
+        <div class="chat-name">Betti Pena</div>
+        <div class="chat-status">● Online</div>
+      </div>
+    </div>
+    <div class="chat-messages" id="chat-msgs">
+      <div class="msg bot">Hei! Olen Betti Pena 🎯 Autan sinua EV-bettauksessa. Kysy minulta vaikka Kelly-kaavasta, ROI:sta tai miten tulkitset EV-prosenttia!</div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chat-input" placeholder="Kysy jotain..." onkeydown="if(event.key==='Enter')sendChat()" />
+      <button class="chat-send" onclick="sendChat()">→</button>
+    </div>
+  </div>
+  <button class="chat-bubble" onclick="toggleChat()">🤖</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+const SHEET_ID = "1t8vBG7HNKcR-YZLnQ_BBpI0R8_OtIptY_yomZhwipEo";
+const CSV_EV = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+const REFRESH = 300;
+
+let evBets = [];
+let myBets = JSON.parse(localStorage.getItem("bettipena_bets") || "[]");
+let countdown = REFRESH;
+let timer;
+
+// --- NAV ---
+function showPage(p) {
+  document.querySelectorAll(".page").forEach(el => el.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
+  document.getElementById("page-" + p).classList.add("active");
+  event.target.classList.add("active");
+  if (p === "analytics") renderAnalytics();
+  if (p === "bets") renderMyBets();
+}
+
+// --- CSV PARSE (KORJATTU: pilkku → piste desimaaliluvuissa) ---
+function toNum(s) {
+  return parseFloat((s || "").replace(",", ".")) || 0;
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split("\n");
+  if (lines.length < 2) return [];
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = [];
+    let cur = "", inQ = false;
+    for (const ch of lines[i]) {
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
+      else { cur += ch; }
+    }
+    cols.push(cur.trim());
+    if (cols.length >= 7 && cols[0] && cols[0] !== "Ei plus-EV kohteita juuri nyt") {
+      rows.push({
+        match: cols[0],
+        starts: cols[1],
+        target: cols[2],
+        odds: toNum(cols[3]),
+        book: cols[4],
+        pinnPct: toNum(cols[5]) / 100,
+        ev: toNum(cols[6]),
+        updated: cols[7] || ""
+      });
+    }
+  }
+  return rows.sort((a,b) => b.ev - a.ev);
+}
+
+// --- KELLY ---
+function kelly(prob, odds, frac, br) {
+  const b = odds - 1, q = 1 - prob;
+  return Math.max(0, (b*prob - q)/b) * frac * br;
+}
+
+function evClass(ev) {
+  return ev >= 10 ? "ev-top" : ev >= 5 ? "ev-high" : "";
+}
+
+// --- RENDER EV ---
+function renderEV() {
+  const br = parseFloat(document.getElementById("bankroll").value)||1000;
+  const kf = parseFloat(document.getElementById("kelly-frac").value)||0.25;
+  const fp = parseFloat(document.getElementById("flat-pct").value)||0.75;
+  const flat = br * fp / 100;
+
+  const list = document.getElementById("ev-list");
+  const empty = document.getElementById("ev-empty");
+  const summary = document.getElementById("ev-summary");
+
+  if (evBets.length === 0) {
+    empty.style.display = "block";
+    list.innerHTML = "";
+    summary.style.display = "none";
+    return;
+  }
+
+  empty.style.display = "none";
+  summary.style.display = "grid";
+  const avg = (evBets.reduce((a,b)=>a+b.ev,0)/evBets.length).toFixed(1);
+  document.getElementById("ev-count").textContent = evBets.length;
+  document.getElementById("ev-best").textContent = "+" + evBets[0].ev.toFixed(1) + "%";
+  document.getElementById("ev-avg").textContent = "+" + avg + "%";
+  document.getElementById("ev-bankroll").textContent = br.toLocaleString("fi-FI") + "€";
+
+  list.innerHTML = evBets.map(b => {
+    const ks = kelly(b.pinnPct, b.odds, kf, br);
+    const rec = ks > 0 ? Math.min(ks, flat*2) : flat;
+    const kpct = ((ks/br)*100).toFixed(2);
+    const pot = (rec * b.odds).toFixed(0);
+    return `<div class="bet-card ${evClass(b.ev)}">
+      <div>
+        <div class="bet-match">${b.match}</div>
+        <div class="bet-target">${b.target}</div>
+        <div class="tags">
+          <span class="tag">${b.starts}</span>
+          <span class="tag">${b.book}</span>
+          <span class="tag">Pinnacle ${(b.pinnPct*100).toFixed(1)}%</span>
+          <span class="tag">Voitto: ${pot}€</span>
+        </div>
+      </div>
+      <div class="cell">
+        <div class="cell-lbl">Kerroin</div>
+        <div class="cell-val" style="color:#fff">${b.odds.toFixed(2)}</div>
+        <div class="cell-sub">${b.book}</div>
+      </div>
+      <div class="cell">
+        <div class="cell-lbl">EV</div>
+        <div class="cell-val ev-green">+${b.ev.toFixed(1)}%</div>
+        <div class="cell-sub">Expected value</div>
+      </div>
+      <div class="kelly-box">
+        <div class="kelly-euro">${rec.toFixed(0)}€</div>
+        <div class="kelly-pct">Kelly ${kpct}%</div>
+        <div class="kelly-lbl">Suositeltu panos</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// --- FETCH EV ---
+async function fetchEV() {
+  try {
+    const res = await fetch(CSV_EV + "&t=" + Date.now());
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+    evBets = parseCSV(text);
+    document.getElementById("ev-loading").style.display = "none";
+    renderEV();
+    const upd = evBets[0]?.updated || new Date().toLocaleString("fi-FI");
+    document.getElementById("last-update-txt").textContent = "Päivitetty: " + upd;
+    countdown = REFRESH;
+  } catch(e) {
+    document.getElementById("ev-loading").style.display = "none";
+    document.getElementById("ev-empty").style.display = "block";
+    document.getElementById("ev-empty").textContent = "Virhe: " + e.message;
+  }
+}
+
+function startTimer() {
+  clearInterval(timer);
+  timer = setInterval(() => {
+    countdown--;
+    const m = Math.floor(countdown/60), s = countdown%60;
+    document.getElementById("countdown-badge").textContent = `Päivitys: ${m}:${s.toString().padStart(2,"0")}`;
+    if (countdown <= 0) fetchEV();
+  }, 1000);
+}
+
+// --- MY BETS ---
+function saveBets() { localStorage.setItem("bettipena_bets", JSON.stringify(myBets)); }
+
+function toggleAddForm() {
+  const f = document.getElementById("add-form");
+  f.style.display = f.style.display === "block" ? "none" : "block";
+}
+
+function saveBet() {
+  const match = document.getElementById("f-match").value.trim();
+  const target = document.getElementById("f-target").value.trim();
+  if (!match || !target) { alert("Täytä ainakin ottelu ja kohde."); return; }
+  const bet = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString("fi-FI"),
+    match, target,
+    book: document.getElementById("f-book").value,
+    odds: parseFloat(document.getElementById("f-odds").value)||0,
+    stake: parseFloat(document.getElementById("f-stake").value)||0,
+    ev: parseFloat(document.getElementById("f-ev").value)||0,
+    pinn: parseFloat(document.getElementById("f-pinn").value)||0,
+    result: document.getElementById("f-result").value,
+  };
+  myBets.unshift(bet);
+  saveBets();
+  renderMyBets();
+  toggleAddForm();
+  ["f-match","f-target","f-book","f-odds","f-stake","f-ev","f-pinn"].forEach(id => document.getElementById(id).value = "");
+}
+
+function updateResult(id, val) {
+  const b = myBets.find(x => x.id === id);
+  if (b) { b.result = val; saveBets(); renderMyBets(); }
+}
+
+function deleteBet(id) {
+  myBets = myBets.filter(x => x.id !== id);
+  saveBets();
+  renderMyBets();
+}
+
+function renderMyBets() {
+  const list = document.getElementById("bets-list");
+  const won = myBets.filter(b => b.result === "won").length;
+  const lost = myBets.filter(b => b.result === "lost").length;
+  const totalStake = myBets.reduce((a,b) => a + (b.result !== "pending" ? b.stake : 0), 0);
+  const totalProfit = myBets.reduce((a,b) => {
+    if (b.result === "won") return a + b.stake * (b.odds - 1);
+    if (b.result === "lost") return a - b.stake;
+    return a;
+  }, 0);
+  const roi = totalStake > 0 ? (totalProfit/totalStake*100).toFixed(1) : "—";
+
+  document.getElementById("b-total").textContent = myBets.length;
+  document.getElementById("b-won").textContent = won;
+  document.getElementById("b-lost").textContent = lost;
+  const roiEl = document.getElementById("b-roi");
+  roiEl.textContent = roi !== "—" ? roi + "%" : "—";
+  roiEl.className = "stat-value " + (parseFloat(roi) > 0 ? "green" : parseFloat(roi) < 0 ? "red" : "");
+
+  if (myBets.length === 0) { list.innerHTML = '<div class="empty-box">Ei betsejä vielä. Lisää ensimmäinen betsi!</div>'; return; }
+
+  list.innerHTML = myBets.map(b => {
+    const pl = b.result === "won" ? b.stake*(b.odds-1) : b.result === "lost" ? -b.stake : null;
+    const plStr = pl !== null ? (pl > 0 ? `+${pl.toFixed(2)}€` : `${pl.toFixed(2)}€`) : "—";
+    const plColor = pl > 0 ? "var(--green)" : pl < 0 ? "var(--red)" : "var(--text2)";
+    return `<div class="my-bet-card ${b.result}">
+      <div>
+        <div class="bet-match">${b.match}</div>
+        <div class="bet-target" style="font-size:0.85rem;font-weight:600;color:#fff;margin:2px 0">${b.target}</div>
+        <div style="font-size:0.65rem;color:var(--text3)">${b.date} · ${b.book} · @${b.odds.toFixed(2)}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:0.6rem;color:var(--text3);margin-bottom:3px">PANOS</div>
+        <div style="font-weight:600;font-size:0.9rem">${b.stake}€</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:0.6rem;color:var(--text3);margin-bottom:3px">EV</div>
+        <div style="font-weight:600;color:var(--green);font-size:0.9rem">+${b.ev}%</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:0.6rem;color:var(--text3);margin-bottom:3px">TULOS €</div>
+        <div style="font-weight:700;color:${plColor};font-size:0.9rem">${plStr}</div>
+      </div>
+      <select class="result-select" onchange="updateResult(${b.id}, this.value)">
+        <option value="pending" ${b.result==="pending"?"selected":""}>Odottaa</option>
+        <option value="won" ${b.result==="won"?"selected":""}>Voitto ✓</option>
+        <option value="lost" ${b.result==="lost"?"selected":""}>Tappio ✗</option>
+      </select>
+      <button onclick="deleteBet(${b.id})" style="background:var(--red-dim);border:1px solid rgba(255,68,68,0.2);color:var(--red);font-size:0.72rem;padding:5px 10px;border-radius:6px;cursor:pointer">Poista</button>
+    </div>`;
+  }).join("");
+}
+
+// --- ANALYTICS ---
+let bankrollChart, plChart;
+
+function renderAnalytics() {
+  const settled = myBets.filter(b => b.result !== "pending");
+  const won = settled.filter(b => b.result === "won").length;
+  const totalStake = settled.reduce((a,b) => a+b.stake, 0);
+  const totalProfit = settled.reduce((a,b) => {
+    if (b.result === "won") return a + b.stake*(b.odds-1);
+    if (b.result === "lost") return a - b.stake;
+    return a;
+  }, 0);
+  const roi = totalStake > 0 ? (totalProfit/totalStake*100).toFixed(1) : "—";
+  const hitRate = settled.length > 0 ? (won/settled.length*100).toFixed(1) : "—";
+  const avgEV = myBets.length > 0 ? (myBets.reduce((a,b)=>a+b.ev,0)/myBets.length).toFixed(1) : "—";
+
+  const profitEl = document.getElementById("a-profit");
+  profitEl.textContent = totalProfit >= 0 ? `+${totalProfit.toFixed(2)}€` : `${totalProfit.toFixed(2)}€`;
+  profitEl.className = "stat-value " + (totalProfit > 0 ? "green" : totalProfit < 0 ? "red" : "");
+  document.getElementById("a-roi").textContent = roi !== "—" ? roi + "%" : "—";
+  document.getElementById("a-roi").className = "stat-value " + (parseFloat(roi) > 0 ? "green" : "red");
+  document.getElementById("a-hit").textContent = hitRate !== "—" ? hitRate + "%" : "—";
+  document.getElementById("a-avgev").textContent = avgEV !== "—" ? "+" + avgEV + "%" : "—";
+
+  const br = parseFloat(document.getElementById("bankroll").value)||1000;
+  let running = br;
+  const brLabels = ["Alku"];
+  const brData = [br];
+  [...myBets].reverse().forEach((b,i) => {
+    if (b.result === "won") running += b.stake*(b.odds-1);
+    else if (b.result === "lost") running -= b.stake;
+    brLabels.push(`B${i+1}`);
+    brData.push(parseFloat(running.toFixed(2)));
+  });
+
+  if (bankrollChart) bankrollChart.destroy();
+  bankrollChart = new Chart(document.getElementById("bankroll-chart"), {
+    type: "line",
+    data: {
+      labels: brLabels,
+      datasets: [{
+        label: "Kassa (€)",
+        data: brData,
+        borderColor: "#00e676",
+        backgroundColor: "rgba(0,230,118,0.05)",
+        borderWidth: 2,
+        pointRadius: 3,
+        tension: 0.3,
+        fill: true,
+      }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: "#4a5568" }, grid: { color: "rgba(255,255,255,0.04)" } }, y: { ticks: { color: "#4a5568" }, grid: { color: "rgba(255,255,255,0.04)" } } } }
+  });
+
+  const plLabels = [...myBets].reverse().map((b,i) => `B${i+1}`);
+  const plData = [...myBets].reverse().map(b => {
+    if (b.result === "won") return parseFloat((b.stake*(b.odds-1)).toFixed(2));
+    if (b.result === "lost") return -b.stake;
+    return 0;
+  });
+
+  if (plChart) plChart.destroy();
+  plChart = new Chart(document.getElementById("pl-chart"), {
+    type: "bar",
+    data: {
+      labels: plLabels,
+      datasets: [{
+        label: "P&L (€)",
+        data: plData,
+        backgroundColor: plData.map(v => v >= 0 ? "rgba(0,230,118,0.6)" : "rgba(255,68,68,0.6)"),
+        borderRadius: 4,
+      }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: "#4a5568" }, grid: { color: "rgba(255,255,255,0.04)" } }, y: { ticks: { color: "#4a5568" }, grid: { color: "rgba(255,255,255,0.04)" } } } }
+  });
+
+  const avgStake = myBets.length > 0 ? myBets.reduce((a,b)=>a+b.stake,0)/myBets.length : 10;
+  const avgEvPct = parseFloat(avgEV)||3;
+  const betsPerWeek = 5;
+  const weeklyEV = avgStake * (avgEvPct/100) * betsPerWeek;
+
+  const forecastEl = document.getElementById("forecast-rows");
+  forecastEl.innerHTML = [
+    { label: "Avg panos", value: avgStake.toFixed(0) + "€", cls: "" },
+    { label: "Avg EV %", value: "+" + avgEvPct.toFixed(1) + "%", cls: "green" },
+    { label: "Betsejä / viikko (oletus)", value: betsPerWeek, cls: "" },
+    { label: "Odotettu tuotto / viikko", value: "+" + weeklyEV.toFixed(2) + "€", cls: "green" },
+    { label: "Odotettu tuotto / kk (4vk)", value: "+" + (weeklyEV*4).toFixed(2) + "€", cls: "green" },
+    { label: "Nykyinen kassa", value: br.toLocaleString("fi-FI") + "€", cls: "amber" },
+    { label: "Ennuste kassa 1kk", value: (br + weeklyEV*4).toFixed(2) + "€", cls: "green" },
+    { label: "Ennuste kassa 3kk", value: (br + weeklyEV*12).toFixed(2) + "€", cls: "green" },
+  ].map(r => `<div class="forecast-row"><span class="label">${r.label}</span><span class="value ${r.cls}">${r.value}</span></div>`).join("");
+}
+
+// --- BETTI PENA CHAT ---
+function toggleChat() {
+  const w = document.getElementById("chat-window");
+  w.classList.toggle("open");
+}
+
+const chatResponses = {
+  "kelly": "Kelly-kaava on f* = (bp - q) / b, missä b=kerroin-1, p=todennäköisyys voittaa, q=todennäköisyys hävitä. Käytä aina fraktioitua Kellyä (25-50%) vähentääksesi riskiä! 📊",
+  "ev": "Expected Value (EV) kertoo odotetun tuoton per panos. Positiivinen EV tarkoittaa pitkällä aikavälillä voittoa. Esim +5% EV tarkoittaa 5€ tuottoa per 100€ panostettu. 💚",
+  "roi": "ROI (Return on Investment) = (Voitot - Panokset) / Panokset × 100%. Hyvä EV-bettaaja tavoittelee +3-8% ROI pitkällä aikavälillä. 📈",
+  "pinnacle": "Pinnacle on sharpbook - heillä on pienin marginaali ja he hyväksyvät voittajia. Heidän kertoimensa ovat paras arvio todellisesta todennäköisyydestä! 🎯",
+  "flat": "Flat betting tarkoittaa saman summan panostamista joka betsiin. Turvallinen tapa aloittaa, tyypillisesti 0.5-2% bankrollista per betsi. 💰",
+  "bankroll": "Bankroll management on kaikkein tärkein asia! Älä koskaan riskeeraa yli 2-3% bankrollista yhdessä betsissa. Kelly-kaava auttaa optimoimaan panokset. 🛡️",
+  "default": "Hyvä kysymys! Voin auttaa sinua EV-bettauksessa, Kelly-kaavassa, ROI-laskennassa ja strategiassa. Kysy lisää! 🤖"
+};
+
+function sendChat() {
+  const input = document.getElementById("chat-input");
+  const msgs = document.getElementById("chat-msgs");
+  const text = input.value.trim();
+  if (!text) return;
+  msgs.innerHTML += `<div class="msg user">${text}</div>`;
+  input.value = "";
+  const key = Object.keys(chatResponses).find(k => text.toLowerCase().includes(k)) || "default";
+  setTimeout(() => {
+    msgs.innerHTML += `<div class="msg bot">${chatResponses[key]}</div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 600);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// --- INIT ---
+fetchEV();
+startTimer();
+renderMyBets();
+</script>
+</body>
+</html>
