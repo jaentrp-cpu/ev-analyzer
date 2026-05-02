@@ -396,9 +396,12 @@ main {
   border-radius: 4px;
 }
 
-.result-badge.voitto  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,214,143,0.2); }
-.result-badge.tappio  { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,69,96,0.2); }
-.result-badge.kesken  { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(255,176,32,0.2); }
+.result-badge.voitto    { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,214,143,0.2); }
+.result-badge.tappio    { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,69,96,0.2); }
+.result-badge.kesken    { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(255,176,32,0.2); }
+.result-badge.half-win  { background: rgba(0,214,143,0.05); color: var(--green); border: 1px solid rgba(0,214,143,0.15); }
+.result-badge.half-loss { background: rgba(255,69,96,0.05); color: var(--red); border: 1px solid rgba(255,69,96,0.15); }
+.result-badge.push      { background: var(--blue-dim); color: var(--blue-lt); border: 1px solid rgba(61,127,255,0.2); }
 
 .clv-pos { color: var(--green); font-weight: 700; }
 .clv-neg { color: var(--red); font-weight: 700; }
@@ -592,6 +595,9 @@ main {
           <button class="tfilter active" onclick="filterBets('all', this)" data-fi="Kaikki" data-en="All">Kaikki</button>
           <button class="tfilter" onclick="filterBets('voitto', this)" data-fi="Voitot" data-en="Won">Voitot</button>
           <button class="tfilter" onclick="filterBets('tappio', this)" data-fi="Tappiot" data-en="Lost">Tappiot</button>
+          <button class="tfilter" onclick="filterBets('half win', this)" data-fi="Half Win" data-en="Half Win">Half Win</button>
+          <button class="tfilter" onclick="filterBets('half loss', this)" data-fi="Half Loss" data-en="Half Loss">Half Loss</button>
+          <button class="tfilter" onclick="filterBets('push', this)" data-fi="Push" data-en="Push">Push</button>
           <button class="tfilter" onclick="filterBets('kesken', this)" data-fi="Kesken" data-en="Pending">Kesken</button>
         </div>
       </div>
@@ -717,8 +723,8 @@ function renderAll() {
 // ===== STATS =====
 function renderStats() {
   const fi = lang === "fi";
-  const settled = allBets.filter(b => b.tulos === "voitto" || b.tulos === "tappio");
-  const won = settled.filter(b => b.tulos === "voitto");
+  const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
+  const won = settled.filter(b => b.tulos === "voitto" || b.tulos === "half win");
   const pending = allBets.filter(b => b.tulos === "kesken");
 
   const totalProfit = settled.reduce((a, b) => a + b.tuotto, 0);
@@ -1045,8 +1051,18 @@ function renderTable() {
     const clvStr = b.clvKerroin > 0 ? b.clvKerroin.toFixed(3) : "—";
     const clvPctStr = b.clvKerroin > 0 ? (b.clvPct >= 0 ? "+" : "") + b.clvPct.toFixed(2) + "%" : "—";
     const clvClass = b.clvPct > 0 ? "clv-pos" : b.clvPct < 0 ? "clv-neg" : "clv-neu";
-    const tulosLabel = b.tulos === "voitto" ? (fi?"Voitto":"Won") : b.tulos === "tappio" ? (fi?"Tappio":"Lost") : (fi?"Kesken":"Pending");
-    const tulosClass = b.tulos === "voitto" ? "voitto" : b.tulos === "tappio" ? "tappio" : "kesken";
+    const tulosLabel = b.tulos === "voitto" ? (fi?"Voitto":"Won")
+      : b.tulos === "tappio" ? (fi?"Tappio":"Lost")
+      : b.tulos === "half win" ? "Half Win"
+      : b.tulos === "half loss" ? "Half Loss"
+      : b.tulos === "push" ? "Push"
+      : (fi?"Kesken":"Pending");
+    const tulosClass = b.tulos === "voitto" ? "voitto"
+      : b.tulos === "tappio" ? "tappio"
+      : b.tulos === "half win" ? "half-win"
+      : b.tulos === "half loss" ? "half-loss"
+      : b.tulos === "push" ? "push"
+      : "kesken";
     const brStr = b.bankrollJlk > 0 ? b.bankrollJlk.toFixed(2) + "€" : "—";
 
     return `<tr>
