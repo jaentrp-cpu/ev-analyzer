@@ -1155,7 +1155,7 @@ function renderBets() {
   document.getElementById("s-bankroll").textContent = br.toLocaleString("fi-FI") + "€";
 
   list.innerHTML = filtered.map((b, i) => {
-    const pinnProb = parseFloat(b.pinnProb) / 100 || 0.5;
+    const pinnProb = parseFloat((b.pinnProb||"0").replace(",",".").replace("%","")) / 100 || 0.5;
     const ks = kelly(pinnProb, b.kerroin, kf, br);
     const rec = ks > 0 ? Math.min(ks, br * 0.05) : br * 0.01;
     const kpct = ((ks / br) * 100).toFixed(1);
