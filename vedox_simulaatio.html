@@ -767,19 +767,26 @@ function renderStats() {
 // ===== HIT PIE =====
 function renderHitPie() {
   const fi = lang === "fi";
-  const won  = allBets.filter(b => b.tulos === "voitto").length;
-  const lost = allBets.filter(b => b.tulos === "tappio").length;
-  const pend = allBets.filter(b => b.tulos === "kesken").length;
+  const won      = allBets.filter(b => b.tulos === "voitto").length;
+  const lost     = allBets.filter(b => b.tulos === "tappio").length;
+  const halfWin  = allBets.filter(b => b.tulos === "half win").length;
+  const halfLoss = allBets.filter(b => b.tulos === "half loss").length;
+  const push     = allBets.filter(b => b.tulos === "push").length;
+  const pend     = allBets.filter(b => b.tulos === "kesken").length;
 
   if (charts.hit) charts.hit.destroy();
   charts.hit = new Chart(document.getElementById("chart-hit"), {
     type: "doughnut",
     data: {
-      labels: [fi?"Voitto":"Won", fi?"Tappio":"Lost", fi?"Kesken":"Pending"],
+      labels: [fi?"Voitto":"Won", "Half Win", fi?"Tappio":"Lost", "Half Loss", "Push", fi?"Kesken":"Pending"],
       datasets: [{
-        data: [won, lost, pend],
-        backgroundColor: ["rgba(0,214,143,0.8)", "rgba(255,69,96,0.8)", "rgba(255,176,32,0.5)"],
-        borderColor: ["#00d68f", "#ff4560", "#ffb020"],
+        data: [won, halfWin, lost, halfLoss, push, pend],
+        backgroundColor: [
+          "rgba(0,214,143,0.8)", "rgba(0,214,143,0.4)",
+          "rgba(255,69,96,0.8)", "rgba(255,69,96,0.4)",
+          "rgba(77,166,255,0.6)", "rgba(255,176,32,0.5)"
+        ],
+        borderColor: ["#00d68f","#00d68f","#ff4560","#ff4560","#4da6ff","#ffb020"],
         borderWidth: 1,
       }]
     },
@@ -789,11 +796,14 @@ function renderHitPie() {
     }
   });
 
-  const total = won + lost + pend;
+  const total = won + halfWin + lost + halfLoss + push + pend;
   document.getElementById("legend-hit").innerHTML = [
-    { label: fi?"Voitot":"Won", val: won, pct: total > 0 ? (won/total*100).toFixed(1) : 0, color: "#00d68f" },
-    { label: fi?"Tappiot":"Lost", val: lost, pct: total > 0 ? (lost/total*100).toFixed(1) : 0, color: "#ff4560" },
-    { label: fi?"Kesken":"Pending", val: pend, pct: total > 0 ? (pend/total*100).toFixed(1) : 0, color: "#ffb020" },
+    { label: fi?"Voitot":"Won",     val: won,      pct: total > 0 ? (won/total*100).toFixed(1) : 0,      color: "#00d68f" },
+    { label: "Half Win",             val: halfWin,  pct: total > 0 ? (halfWin/total*100).toFixed(1) : 0,  color: "#00a86b" },
+    { label: fi?"Tappiot":"Lost",   val: lost,     pct: total > 0 ? (lost/total*100).toFixed(1) : 0,     color: "#ff4560" },
+    { label: "Half Loss",            val: halfLoss, pct: total > 0 ? (halfLoss/total*100).toFixed(1) : 0, color: "#cc2233" },
+    { label: "Push",                 val: push,     pct: total > 0 ? (push/total*100).toFixed(1) : 0,     color: "#4da6ff" },
+    { label: fi?"Kesken":"Pending", val: pend,     pct: total > 0 ? (pend/total*100).toFixed(1) : 0,     color: "#ffb020" },
   ].map(item => `
     <div class="legend-item">
       <div class="legend-dot" style="background:${item.color}"></div>
@@ -814,12 +824,12 @@ function renderEVRangeBars() {
     { label: "7–8%",  min: 7,   max: 8.1 },
   ];
 
-  const settled = allBets.filter(b => b.tulos === "voitto" || b.tulos === "tappio");
+  const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
   const maxAbs = 30;
 
   document.getElementById("ev-range-bars").innerHTML = ranges.map(r => {
     const inRange = settled.filter(b => b.ev >= r.min && b.ev < r.max);
-    const won = inRange.filter(b => b.tulos === "voitto");
+    const won = inRange.filter(b => b.tulos === "voitto" || b.tulos === "half win");
     const stake = inRange.reduce((a, b) => a + b.panos, 0);
     const profit = inRange.reduce((a, b) => a + b.tuotto, 0);
     const roi = stake > 0 ? (profit / stake * 100).toFixed(1) : 0;
@@ -880,7 +890,7 @@ function renderBankrollChart() {
 // ===== MARKET BARS =====
 function renderMarketBars() {
   const fi = lang === "fi";
-  const settled = allBets.filter(b => b.tulos === "voitto" || b.tulos === "tappio");
+  const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
   const markets = {};
   settled.forEach(b => {
     const m = b.markkina || "other";
@@ -913,7 +923,7 @@ function renderMarketBars() {
 // ===== WAVE BARS =====
 function renderWaveBars() {
   const fi = lang === "fi";
-  const settled = allBets.filter(b => b.tulos === "voitto" || b.tulos === "tappio");
+  const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
   const waves = {};
   settled.forEach(b => {
     const w = b.aalto || "?";
