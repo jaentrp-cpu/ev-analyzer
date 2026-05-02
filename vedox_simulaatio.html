@@ -682,6 +682,8 @@ function parseSimCSV(text) {
     }
     cols.push(cur.trim());
     if (cols.length < 16 || !cols[0]) continue;
+    // Korjaa pilkku→piste desimaalierottimeksi (suomalainen Sheets)
+    const toNum = s => parseFloat((s||"0").replace(",",".").replace("+","").replace("%","")) || 0;
     rows.push({
       id:          cols[0],
       aika:        cols[1],
@@ -689,18 +691,18 @@ function parseSimCSV(text) {
       kohde:       cols[3],
       markkina:    cols[4],
       aalto:       cols[5],
-      ev:          parseFloat((cols[6]||"0").replace("+","").replace("%","")) || 0,
-      kerroin:     parseFloat(cols[7]) || 0,
-      pinnacle:    parseFloat(cols[8]) || 0,
+      ev:          toNum(cols[6]),
+      kerroin:     toNum(cols[7]),
+      pinnacle:    toNum(cols[8]),
       pinnProb:    cols[9],
-      panos:       parseFloat(cols[10]) || 0,
-      bankrollEnn: parseFloat(cols[11]) || 0,
-      clvKerroin:  parseFloat(cols[12]) || 0,
-      clvPct:      parseFloat((cols[13]||"0").replace("%","")) || 0,
+      panos:       toNum(cols[10]),
+      bankrollEnn: toNum(cols[11]),
+      clvKerroin:  toNum(cols[12]),
+      clvPct:      toNum(cols[13]),
       alkaa:       cols[14],
       tulos:       (cols[15]||"Kesken").toLowerCase(),
-      tuotto:      parseFloat(cols[16]) || 0,
-      bankrollJlk: parseFloat(cols[17]) || 0,
+      tuotto:      toNum(cols[16]),
+      bankrollJlk: toNum(cols[17]),
       liiga:       cols[18] || "",
     });
   }
