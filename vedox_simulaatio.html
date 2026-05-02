@@ -605,7 +605,7 @@ main {
         <table class="sim-table">
           <thead>
             <tr>
-              <th data-fi="Aika" data-en="Time">Aika</th>
+              <th data-fi="Alkaa" data-en="Starts">Alkaa</th>
               <th data-fi="Ottelu" data-en="Match">Ottelu</th>
               <th data-fi="Kohde" data-en="Selection">Kohde</th>
               <th data-fi="Markkina" data-en="Market">Markkina</th>
@@ -1076,7 +1076,7 @@ function renderTable() {
     const brStr = b.bankrollJlk > 0 ? b.bankrollJlk.toFixed(2) + "€" : "—";
 
     return `<tr>
-      <td style="font-size:0.7rem;color:var(--white3)">${b.aika}</td>
+      <td style="font-size:0.7rem;color:var(--white3)">${b.alkaa}</td>
       <td style="color:var(--white)">${b.ottelu}</td>
       <td style="color:var(--white);font-weight:600">${b.kohde}</td>
       <td><span style="font-size:0.65rem;background:var(--bg3);padding:2px 6px;border-radius:3px;border:1px solid var(--border)">${b.markkina}</span></td>
