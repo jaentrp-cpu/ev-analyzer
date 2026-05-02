@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vedox — Simulaatio</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:        #070d1a;
+  --bg2:       #0b1425;
+  --bg3:       #0f1b30;
+  --bg4:       #142038;
+  --blue:      #1a5ce8;
+  --blue-lt:   #3d7fff;
+  --blue-dim:  rgba(26,92,232,0.12);
+  --blue-dim2: rgba(26,92,232,0.25);
+  --border:    rgba(61,127,255,0.12);
+  --border2:   rgba(61,127,255,0.25);
+  --white:     #e2eaf8;
+  --white2:    #7a8fb0;
+  --white3:    #3d5070;
+  --green:     #00d68f;
+  --green-dim: rgba(0,214,143,0.1);
+  --red:       #ff4560;
+  --red-dim:   rgba(255,69,96,0.1);
+  --amber:     #ffb020;
+  --amber-dim: rgba(255,176,32,0.1);
+  --purple:    #a855f7;
+  --purple-dim:rgba(168,85,247,0.1);
+  --radius:    10px;
+  --radius-sm: 6px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(26,92,232,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26,92,232,0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== HEADER ===== */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(7,13,26,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo-icon { width: 36px; height: 36px; }
+
+.logo-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 1.5rem;
+  letter-spacing: 0.06em;
+  color: #fff;
+}
+
+.logo-name span { color: var(--blue-lt); }
+
+.logo-tagline {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.5rem;
+  letter-spacing: 0.22em;
+  color: var(--white3);
+  text-transform: uppercase;
+  display: block;
+  margin-top: 1px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sim-badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--purple);
+  background: var(--purple-dim);
+  border: 1px solid rgba(168,85,247,0.25);
+  padding: 5px 14px;
+  border-radius: 20px;
+}
+
+.back-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--white2);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.18s;
+}
+.back-btn:hover { color: var(--white); border-color: var(--blue-lt); }
+
+.lang-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--white2);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.lang-btn:hover, .lang-btn.active { color: var(--blue-lt); border-color: var(--blue); }
+
+/* ===== MAIN ===== */
+main {
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem 2rem;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+/* ===== STATS ===== */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--purple), var(--blue-lt));
+}
+
+.stat-lbl {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--white3);
+  margin-bottom: 8px;
+}
+
+.stat-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+}
+
+.stat-val.green  { color: var(--green); }
+.stat-val.red    { color: var(--red); }
+.stat-val.amber  { color: var(--amber); }
+.stat-val.blue   { color: var(--blue-lt); }
+.stat-val.purple { color: var(--purple); }
+
+.stat-sub {
+  font-size: 0.65rem;
+  color: var(--white3);
+  margin-top: 4px;
+}
+
+/* ===== CHARTS GRID ===== */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 1.25rem;
+}
+
+.chart-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.chart-card.full {
+  grid-column: span 2;
+}
+
+.chart-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--white3);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chart-title span {
+  font-size: 0.65rem;
+  color: var(--white3);
+  font-weight: 400;
+}
+
+/* Pie chart container */
+.pie-wrap {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.pie-canvas { max-width: 200px; max-height: 200px; }
+
+.pie-legend { flex: 1; }
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+}
+
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-label { color: var(--white2); flex: 1; }
+.legend-val { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: #fff; }
+
+/* ROI bars */
+.roi-bar-wrap { margin-bottom: 10px; }
+
+.roi-bar-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 0.72rem;
+}
+
+.roi-bar-label { color: var(--white2); }
+.roi-bar-val { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
+.roi-bar-val.pos { color: var(--green); }
+.roi-bar-val.neg { color: var(--red); }
+
+.roi-bar-bg {
+  height: 6px;
+  background: var(--bg3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.roi-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+
+/* ===== BETS TABLE ===== */
+.table-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.table-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.table-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--white3);
+}
+
+.table-filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tfilter {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--white2);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 5px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.tfilter:hover, .tfilter.active { color: var(--white); background: var(--blue-dim2); border-color: var(--blue-lt); }
+
+.sim-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.sim-table th {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--white3);
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+  white-space: nowrap;
+}
+
+.sim-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--white2);
+  vertical-align: middle;
+}
+
+.sim-table tr:last-child td { border-bottom: none; }
+.sim-table tr:hover td { background: var(--bg3); }
+
+.result-badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.result-badge.voitto  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,214,143,0.2); }
+.result-badge.tappio  { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,69,96,0.2); }
+.result-badge.kesken  { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(255,176,32,0.2); }
+
+.clv-pos { color: var(--green); font-weight: 700; }
+.clv-neg { color: var(--red); font-weight: 700; }
+.clv-neu { color: var(--white3); }
+
+/* ===== DRAWDOWN ===== */
+.drawdown-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ===== LOADING ===== */
+.loading-box {
+  text-align: center;
+  padding: 4rem;
+  color: var(--white3);
+  font-size: 0.85rem;
+}
+
+.spinner {
+  width: 32px; height: 32px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--purple);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+.content { animation: fadeUp 0.3s ease; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 900px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .charts-grid { grid-template-columns: 1fr; }
+  .chart-card.full { grid-column: span 1; }
+  main { padding: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html">
+    <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 8 L20 32 L36 8" stroke="url(#g1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M14 8 L20 20 L26 8" stroke="url(#g2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M26 8 L34 2" stroke="url(#g3)" stroke-width="3" stroke-linecap="round"/>
+      <defs>
+        <linearGradient id="g1" x1="4" y1="8" x2="36" y2="32" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a0b4d0"/>
+        </linearGradient>
+        <linearGradient id="g2" x1="14" y1="8" x2="26" y2="20" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#1a5ce8"/><stop offset="100%" stop-color="#3d7fff"/>
+        </linearGradient>
+        <linearGradient id="g3" x1="26" y1="8" x2="34" y2="2" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#3d7fff"/><stop offset="100%" stop-color="#60a0ff"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div>
+      <div class="logo-name">VEDO<span>X</span></div>
+      <span class="logo-tagline">Logic Over Luck</span>
+    </div>
+  </a>
+
+  <div class="header-right">
+    <div class="sim-badge">⚡ SIMULAATIO</div>
+    <a href="index.html" class="back-btn">← Takaisin</a>
+    <button class="lang-btn active" onclick="setLang('fi')" id="btn-fi">FI</button>
+    <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+  </div>
+</header>
+
+<main>
+  <div class="loading-box" id="loading">
+    <div class="spinner"></div>
+    <div id="loading-txt">Ladataan simulaatiodataa...</div>
+  </div>
+
+  <div class="content" id="content" style="display:none">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-lbl" data-fi="Simulaatio Bankroll" data-en="Sim Bankroll">Simulaatio Bankroll</div>
+        <div class="stat-val purple" id="s-bankroll">—</div>
+        <div class="stat-sub" id="s-bankroll-change">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl" data-fi="Kokonaistuotto" data-en="Total Profit">Kokonaistuotto</div>
+        <div class="stat-val" id="s-profit">—</div>
+        <div class="stat-sub" id="s-roi">ROI: —</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl" data-fi="Osumisprosentti" data-en="Hit Rate">Osumisprosentti</div>
+        <div class="stat-val blue" id="s-hitrate">—</div>
+        <div class="stat-sub" id="s-wl">— / —</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl" data-fi="Avg CLV %" data-en="Avg CLV %">Avg CLV %</div>
+        <div class="stat-val green" id="s-clv">—</div>
+        <div class="stat-sub" data-fi="Closing line value" data-en="Closing line value">Closing line value</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl" data-fi="Betsejä yhteensä" data-en="Total bets">Betsejä yhteensä</div>
+        <div class="stat-val amber" id="s-total">—</div>
+        <div class="stat-sub" id="s-pending">— kesken</div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW 1 -->
+    <div class="charts-grid">
+
+      <!-- Pie 1: Hit rate -->
+      <div class="chart-card">
+        <div class="chart-title">
+          <span data-fi="Osumisprosentti" data-en="Hit Rate">Osumisprosentti</span>
+        </div>
+        <div class="pie-wrap">
+          <canvas class="pie-canvas" id="chart-hit"></canvas>
+          <div class="pie-legend" id="legend-hit"></div>
+        </div>
+      </div>
+
+      <!-- Pie 2: EV range performance -->
+      <div class="chart-card">
+        <div class="chart-title">
+          <span data-fi="ROI per EV-range" data-en="ROI per EV range">ROI per EV-range</span>
+          <span data-fi="Osuminen per EV-taso" data-en="Hit rate per EV level">Osuminen per EV-taso</span>
+        </div>
+        <div id="ev-range-bars"></div>
+      </div>
+
+      <!-- Bankroll kasvukäyrä -->
+      <div class="chart-card full">
+        <div class="chart-title">
+          <span data-fi="Bankrollin kehitys" data-en="Bankroll Growth">Bankrollin kehitys</span>
+          <span id="br-start-end">—</span>
+        </div>
+        <canvas id="chart-bankroll" height="120"></canvas>
+      </div>
+
+      <!-- ROI per markkina -->
+      <div class="chart-card">
+        <div class="chart-title">
+          <span data-fi="ROI per markkina" data-en="ROI per market">ROI per markkina</span>
+        </div>
+        <div id="market-bars"></div>
+      </div>
+
+      <!-- ROI per aalto -->
+      <div class="chart-card">
+        <div class="chart-title">
+          <span data-fi="ROI per aalto" data-en="ROI per wave">ROI per aalto</span>
+        </div>
+        <div id="wave-bars"></div>
+      </div>
+
+      <!-- CLV jakauma -->
+      <div class="chart-card">
+        <div class="chart-title">
+          <span data-fi="CLV-jakauma" data-en="CLV Distribution">CLV-jakauma</span>
+        </div>
+        <canvas id="chart-clv" height="180"></canvas>
+      </div>
+
+      <!-- Drawdown -->
+      <div class="chart-card">
+        <div class="chart-title">
+          <span data-fi="Drawdown-analyysi" data-en="Drawdown Analysis">Drawdown-analyysi</span>
+        </div>
+        <canvas id="chart-drawdown" height="180"></canvas>
+      </div>
+
+    </div>
+
+    <!-- BETS TABLE -->
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title" data-fi="Kaikki simulaatiobetit" data-en="All simulation bets">Kaikki simulaatiobetit</div>
+        <div class="table-filters">
+          <button class="tfilter active" onclick="filterBets('all', this)" data-fi="Kaikki" data-en="All">Kaikki</button>
+          <button class="tfilter" onclick="filterBets('voitto', this)" data-fi="Voitot" data-en="Won">Voitot</button>
+          <button class="tfilter" onclick="filterBets('tappio', this)" data-fi="Tappiot" data-en="Lost">Tappiot</button>
+          <button class="tfilter" onclick="filterBets('kesken', this)" data-fi="Kesken" data-en="Pending">Kesken</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="sim-table">
+          <thead>
+            <tr>
+              <th data-fi="Aika" data-en="Time">Aika</th>
+              <th data-fi="Ottelu" data-en="Match">Ottelu</th>
+              <th data-fi="Kohde" data-en="Selection">Kohde</th>
+              <th data-fi="Markkina" data-en="Market">Markkina</th>
+              <th data-fi="Aalto" data-en="Wave">Aalto</th>
+              <th data-fi="EV %" data-en="EV %">EV %</th>
+              <th data-fi="Kerroin" data-en="Odds">Kerroin</th>
+              <th data-fi="CLV kerroin" data-en="CLV odds">CLV</th>
+              <th data-fi="CLV %" data-en="CLV %">CLV %</th>
+              <th data-fi="Panos €" data-en="Stake €">Panos €</th>
+              <th data-fi="Tulos" data-en="Result">Tulos</th>
+              <th data-fi="Tuotto €" data-en="P&L €">Tuotto €</th>
+              <th data-fi="Bankroll" data-en="Bankroll">Bankroll</th>
+            </tr>
+          </thead>
+          <tbody id="bets-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// ===== CONFIG =====
+const SHEET_ID = "1t8vBG7HNKcR-YZLnQ_BBpI0R8_OtIptY_yomZhwipEo";
+const SIM_GID  = "SIM_GID_TÄHÄN"; // ← Vaihda Simulaatio-välilehden GID
+const START_BANKROLL = 1000;
+
+let allBets = [];
+let lang = localStorage.getItem("vedox_lang") || "fi";
+let activeFilter = "all";
+let charts = {};
+
+// ===== LANGUAGE =====
+function setLang(l) {
+  lang = l;
+  localStorage.setItem("vedox_lang", l);
+  document.getElementById("btn-fi").classList.toggle("active", l === "fi");
+  document.getElementById("btn-en").classList.toggle("active", l === "en");
+  document.querySelectorAll("[data-fi]").forEach(el => {
+    const txt = el.getAttribute(`data-${l}`);
+    if (txt && !["INPUT","SELECT","OPTION"].includes(el.tagName)) el.textContent = txt;
+  });
+  renderAll();
+}
+
+// ===== FETCH =====
+async function fetchSimData() {
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SIM_GID}&t=${Date.now()}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Sheet ei vastaa");
+    const text = await res.text();
+    allBets = parseSimCSV(text);
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("content").style.display = "block";
+    renderAll();
+  } catch(e) {
+    document.getElementById("loading-txt").textContent = "Virhe ladattaessa dataa: " + e.message;
+  }
+}
+
+// ===== PARSE CSV =====
+function parseSimCSV(text) {
+  const lines = text.trim().split("\n");
+  if (lines.length < 2) return [];
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = []; let cur = "", inQ = false;
+    for (const ch of lines[i]) {
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
+      else { cur += ch; }
+    }
+    cols.push(cur.trim());
+    if (cols.length < 16 || !cols[0]) continue;
+    rows.push({
+      id:          cols[0],
+      aika:        cols[1],
+      ottelu:      cols[2],
+      kohde:       cols[3],
+      markkina:    cols[4],
+      aalto:       cols[5],
+      ev:          parseFloat((cols[6]||"0").replace("+","").replace("%","")) || 0,
+      kerroin:     parseFloat(cols[7]) || 0,
+      pinnacle:    parseFloat(cols[8]) || 0,
+      pinnProb:    cols[9],
+      panos:       parseFloat(cols[10]) || 0,
+      bankrollEnn: parseFloat(cols[11]) || 0,
+      clvKerroin:  parseFloat(cols[12]) || 0,
+      clvPct:      parseFloat((cols[13]||"0").replace("%","")) || 0,
+      alkaa:       cols[14],
+      tulos:       (cols[15]||"Kesken").toLowerCase(),
+      tuotto:      parseFloat(cols[16]) || 0,
+      bankrollJlk: parseFloat(cols[17]) || 0,
+      liiga:       cols[18] || "",
+    });
+  }
+  return rows;
+}
+
+// ===== RENDER ALL =====
+function renderAll() {
+  renderStats();
+  renderHitPie();
+  renderEVRangeBars();
+  renderBankrollChart();
+  renderMarketBars();
+  renderWaveBars();
+  renderCLVChart();
+  renderDrawdownChart();
+  renderTable();
+}
+
+// ===== STATS =====
+function renderStats() {
+  const fi = lang === "fi";
+  const settled = allBets.filter(b => b.tulos === "voitto" || b.tulos === "tappio");
+  const won = settled.filter(b => b.tulos === "voitto");
+  const pending = allBets.filter(b => b.tulos === "kesken");
+
+  const totalProfit = settled.reduce((a, b) => a + b.tuotto, 0);
+  const totalStake  = settled.reduce((a, b) => a + b.panos, 0);
+  const roi = totalStake > 0 ? (totalProfit / totalStake * 100).toFixed(1) : 0;
+  const hitRate = settled.length > 0 ? (won.length / settled.length * 100).toFixed(1) : 0;
+
+  // Bankroll
+  const lastBr = allBets.length > 0
+    ? (allBets[allBets.length - 1].bankrollJlk || START_BANKROLL)
+    : START_BANKROLL;
+  const brChange = lastBr - START_BANKROLL;
+
+  // CLV avg
+  const clvBets = allBets.filter(b => b.clvKerroin > 0);
+  const avgCLV = clvBets.length > 0
+    ? (clvBets.reduce((a, b) => a + b.clvPct, 0) / clvBets.length).toFixed(2)
+    : 0;
+
+  document.getElementById("s-bankroll").textContent = lastBr.toFixed(2) + "€";
+  document.getElementById("s-bankroll-change").textContent =
+    (brChange >= 0 ? "+" : "") + brChange.toFixed(2) + "€ " + (fi ? "alusta" : "from start");
+
+  const profEl = document.getElementById("s-profit");
+  profEl.textContent = (totalProfit >= 0 ? "+" : "") + totalProfit.toFixed(2) + "€";
+  profEl.className = "stat-val " + (totalProfit >= 0 ? "green" : "red");
+  document.getElementById("s-roi").textContent = `ROI: ${roi}%`;
+
+  document.getElementById("s-hitrate").textContent = hitRate + "%";
+  document.getElementById("s-wl").textContent = `${won.length} / ${settled.length - won.length}`;
+
+  const clvEl = document.getElementById("s-clv");
+  clvEl.textContent = (avgCLV >= 0 ? "+" : "") + avgCLV + "%";
+  clvEl.className = "stat-val " + (avgCLV >= 0 ? "green" : "red");
+
+  document.getElementById("s-total").textContent = allBets.length;
+  document.getElementById("s-pending").textContent = pending.length + (fi ? " kesken" : " pending");
+}
+
+// ===== HIT PIE =====
+function renderHitPie() {
+  const fi = lang === "fi";
+  const won  = allBets.filter(b => b.tulos === "voitto").length;
+  const lost = allBets.filter(b => b.tulos === "tappio").length;
+  const pend = allBets.filter(b => b.tulos === "kesken").length;
+
+  if (charts.hit) charts.hit.destroy();
+  charts.hit = new Chart(document.getElementById("chart-hit"), {
+    type: "doughnut",
+    data: {
+      labels: [fi?"Voitto":"Won", fi?"Tappio":"Lost", fi?"Kesken":"Pending"],
+      datasets: [{
+        data: [won, lost, pend],
+        backgroundColor: ["rgba(0,214,143,0.8)", "rgba(255,69,96,0.8)", "rgba(255,176,32,0.5)"],
+        borderColor: ["#00d68f", "#ff4560", "#ffb020"],
+        borderWidth: 1,
+      }]
+    },
+    options: {
+      cutout: "65%",
+      plugins: { legend: { display: false } },
+    }
+  });
+
+  const total = won + lost + pend;
+  document.getElementById("legend-hit").innerHTML = [
+    { label: fi?"Voitot":"Won", val: won, pct: total > 0 ? (won/total*100).toFixed(1) : 0, color: "#00d68f" },
+    { label: fi?"Tappiot":"Lost", val: lost, pct: total > 0 ? (lost/total*100).toFixed(1) : 0, color: "#ff4560" },
+    { label: fi?"Kesken":"Pending", val: pend, pct: total > 0 ? (pend/total*100).toFixed(1) : 0, color: "#ffb020" },
+  ].map(item => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${item.color}"></div>
+      <span class="legend-label">${item.label}</span>
+      <span class="legend-val">${item.val} <span style="color:var(--white3);font-size:0.7rem">(${item.pct}%)</span></span>
+    </div>
+  `).join("");
+}
+
+// ===== EV RANGE BARS =====
+function renderEVRangeBars() {
+  const fi = lang === "fi";
+  const ranges = [
+    { label: "3–4%",  min: 3,   max: 4   },
+    { label: "4–5%",  min: 4,   max: 5   },
+    { label: "5–6%",  min: 5,   max: 6   },
+    { label: "6–7%",  min: 6,   max: 7   },
+    { label: "7–8%",  min: 7,   max: 8.1 },
+  ];
+
+  const settled = allBets.filter(b => b.tulos === "voitto" || b.tulos === "tappio");
+  const maxAbs = 30;
+
+  document.getElementById("ev-range-bars").innerHTML = ranges.map(r => {
+    const inRange = settled.filter(b => b.ev >= r.min && b.ev < r.max);
+    const won = inRange.filter(b => b.tulos === "voitto");
+    const stake = inRange.reduce((a, b) => a + b.panos, 0);
+    const profit = inRange.reduce((a, b) => a + b.tuotto, 0);
+    const roi = stake > 0 ? (profit / stake * 100).toFixed(1) : 0;
+    const hitRate = inRange.length > 0 ? (won.length / inRange.length * 100).toFixed(0) : 0;
+    const roiNum = parseFloat(roi);
+    const barW = Math.min(Math.abs(roiNum) / maxAbs * 100, 100);
+    const isPos = roiNum >= 0;
+
+    return `<div class="roi-bar-wrap">
+      <div class="roi-bar-header">
+        <span class="roi-bar-label">${r.label} <span style="color:var(--white3)">(${inRange.length} ${fi?"bettiä":"bets"}, ${hitRate}% ${fi?"osui":"hit"})</span></span>
+        <span class="roi-bar-val ${isPos?"pos":"neg"}">${isPos?"+":""}${roi}% ROI</span>
+      </div>
+      <div class="roi-bar-bg">
+        <div class="roi-bar-fill" style="width:${barW}%;background:${isPos?"var(--green)":"var(--red)"}"></div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ===== BANKROLL CHART =====
+function renderBankrollChart() {
+  const fi = lang === "fi";
+  const settled = allBets.filter(b => b.bankrollJlk > 0);
+
+  const labels = [fi ? "Alku" : "Start", ...settled.map((_, i) => `B${i+1}`)];
+  const data   = [START_BANKROLL, ...settled.map(b => b.bankrollJlk)];
+
+  document.getElementById("br-start-end").textContent =
+    `${START_BANKROLL}€ → ${data[data.length-1]?.toFixed(2) || START_BANKROLL}€`;
+
+  if (charts.bankroll) charts.bankroll.destroy();
+  charts.bankroll = new Chart(document.getElementById("chart-bankroll"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: "#a855f7",
+        backgroundColor: "rgba(168,85,247,0.06)",
+        borderWidth: 2,
+        pointRadius: data.length < 50 ? 3 : 0,
+        tension: 0.3,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#3d5070", maxTicksLimit: 10 }, grid: { color: "rgba(61,127,255,0.06)" } },
+        y: { ticks: { color: "#3d5070" }, grid: { color: "rgba(61,127,255,0.06)" } }
+      }
+    }
+  });
+}
+
+// ===== MARKET BARS =====
+function renderMarketBars() {
+  const fi = lang === "fi";
+  const settled = allBets.filter(b => b.tulos === "voitto" || b.tulos === "tappio");
+  const markets = {};
+  settled.forEach(b => {
+    const m = b.markkina || "other";
+    if (!markets[m]) markets[m] = { stake: 0, profit: 0, count: 0 };
+    markets[m].stake  += b.panos;
+    markets[m].profit += b.tuotto;
+    markets[m].count++;
+  });
+
+  const sorted = Object.entries(markets).sort((a, b) => b[1].count - a[1].count);
+  const maxAbs = 30;
+
+  document.getElementById("market-bars").innerHTML = sorted.map(([mkt, d]) => {
+    const roi = d.stake > 0 ? (d.profit / d.stake * 100).toFixed(1) : 0;
+    const isPos = parseFloat(roi) >= 0;
+    const barW = Math.min(Math.abs(parseFloat(roi)) / maxAbs * 100, 100);
+    const label = mkt.replace(/_/g, " ").toUpperCase();
+    return `<div class="roi-bar-wrap">
+      <div class="roi-bar-header">
+        <span class="roi-bar-label">${label} <span style="color:var(--white3)">(${d.count})</span></span>
+        <span class="roi-bar-val ${isPos?"pos":"neg"}">${isPos?"+":""}${roi}%</span>
+      </div>
+      <div class="roi-bar-bg">
+        <div class="roi-bar-fill" style="width:${barW}%;background:${isPos?"var(--green)":"var(--red)"}"></div>
+      </div>
+    </div>`;
+  }).join("") || `<div style="color:var(--white3);font-size:0.8rem;padding:1rem 0">${fi?"Ei dataa vielä":"No data yet"}</div>`;
+}
+
+// ===== WAVE BARS =====
+function renderWaveBars() {
+  const fi = lang === "fi";
+  const settled = allBets.filter(b => b.tulos === "voitto" || b.tulos === "tappio");
+  const waves = {};
+  settled.forEach(b => {
+    const w = b.aalto || "?";
+    if (!waves[w]) waves[w] = { stake: 0, profit: 0, count: 0 };
+    waves[w].stake  += b.panos;
+    waves[w].profit += b.tuotto;
+    waves[w].count++;
+  });
+
+  const colors = { Aalto1: "#3d7fff", Aalto2: "#00d68f", Aalto3: "#ffb020", Aalto4: "#a855f7" };
+  const maxAbs = 30;
+
+  document.getElementById("wave-bars").innerHTML = Object.entries(waves).sort().map(([wave, d]) => {
+    const roi = d.stake > 0 ? (d.profit / d.stake * 100).toFixed(1) : 0;
+    const isPos = parseFloat(roi) >= 0;
+    const barW = Math.min(Math.abs(parseFloat(roi)) / maxAbs * 100, 100);
+    const color = colors[wave] || "var(--blue-lt)";
+    return `<div class="roi-bar-wrap">
+      <div class="roi-bar-header">
+        <span class="roi-bar-label" style="color:${color}">${wave} <span style="color:var(--white3)">(${d.count})</span></span>
+        <span class="roi-bar-val ${isPos?"pos":"neg"}">${isPos?"+":""}${roi}%</span>
+      </div>
+      <div class="roi-bar-bg">
+        <div class="roi-bar-fill" style="width:${barW}%;background:${color}"></div>
+      </div>
+    </div>`;
+  }).join("") || `<div style="color:var(--white3);font-size:0.8rem;padding:1rem 0">${fi?"Ei dataa vielä":"No data yet"}</div>`;
+}
+
+// ===== CLV CHART =====
+function renderCLVChart() {
+  const fi = lang === "fi";
+  const clvBets = allBets.filter(b => b.clvKerroin > 0);
+
+  // Bucketeissa: <-3, -3 to -1, -1 to 0, 0 to 1, 1 to 3, >3
+  const buckets = [
+    { label: "<-3%", min: -999, max: -3 },
+    { label: "-3 to -1%", min: -3, max: -1 },
+    { label: "-1 to 0%", min: -1, max: 0 },
+    { label: "0 to 1%", min: 0, max: 1 },
+    { label: "1 to 3%", min: 1, max: 3 },
+    { label: ">3%", min: 3, max: 999 },
+  ];
+
+  const counts = buckets.map(b => clvBets.filter(bet => bet.clvPct >= b.min && bet.clvPct < b.max).length);
+  const colors = counts.map((_, i) => i < 2 ? "rgba(255,69,96,0.7)" : i < 3 ? "rgba(255,176,32,0.7)" : "rgba(0,214,143,0.7)");
+
+  if (charts.clv) charts.clv.destroy();
+  charts.clv = new Chart(document.getElementById("chart-clv"), {
+    type: "bar",
+    data: {
+      labels: buckets.map(b => b.label),
+      datasets: [{
+        data: counts,
+        backgroundColor: colors,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#3d5070", font: { size: 10 } }, grid: { color: "rgba(61,127,255,0.06)" } },
+        y: { ticks: { color: "#3d5070" }, grid: { color: "rgba(61,127,255,0.06)" } }
+      }
+    }
+  });
+}
+
+// ===== DRAWDOWN CHART =====
+function renderDrawdownChart() {
+  const fi = lang === "fi";
+  const settled = allBets.filter(b => b.bankrollJlk > 0);
+  let peak = START_BANKROLL;
+  const drawdowns = [0, ...settled.map(b => {
+    if (b.bankrollJlk > peak) peak = b.bankrollJlk;
+    return parseFloat(((b.bankrollJlk - peak) / peak * 100).toFixed(2));
+  })];
+  const labels = [fi?"Alku":"Start", ...settled.map((_, i) => `B${i+1}`)];
+
+  const maxDD = Math.min(...drawdowns);
+  document.getElementById("s-bankroll-change").textContent +=
+    ` | Max DD: ${maxDD.toFixed(1)}%`;
+
+  if (charts.drawdown) charts.drawdown.destroy();
+  charts.drawdown = new Chart(document.getElementById("chart-drawdown"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        data: drawdowns,
+        borderColor: "#ff4560",
+        backgroundColor: "rgba(255,69,96,0.06)",
+        borderWidth: 1.5,
+        pointRadius: 0,
+        tension: 0.3,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#3d5070", maxTicksLimit: 8 }, grid: { color: "rgba(61,127,255,0.06)" } },
+        y: { ticks: { color: "#3d5070", callback: v => v + "%" }, grid: { color: "rgba(61,127,255,0.06)" } }
+      }
+    }
+  });
+}
+
+// ===== TABLE =====
+function filterBets(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll(".tfilter").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderTable();
+}
+
+function renderTable() {
+  const fi = lang === "fi";
+  const filtered = activeFilter === "all"
+    ? allBets
+    : allBets.filter(b => b.tulos === activeFilter);
+
+  const tbody = document.getElementById("bets-tbody");
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;color:var(--white3);padding:2rem">${fi?"Ei bettejä":"No bets"}</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = [...filtered].reverse().map(b => {
+    const isPos = b.tuotto > 0;
+    const tuottoStr = b.tuotto !== 0 ? (isPos ? "+" : "") + b.tuotto.toFixed(2) + "€" : "—";
+    const clvStr = b.clvKerroin > 0 ? b.clvKerroin.toFixed(3) : "—";
+    const clvPctStr = b.clvKerroin > 0 ? (b.clvPct >= 0 ? "+" : "") + b.clvPct.toFixed(2) + "%" : "—";
+    const clvClass = b.clvPct > 0 ? "clv-pos" : b.clvPct < 0 ? "clv-neg" : "clv-neu";
+    const tulosLabel = b.tulos === "voitto" ? (fi?"Voitto":"Won") : b.tulos === "tappio" ? (fi?"Tappio":"Lost") : (fi?"Kesken":"Pending");
+    const tulosClass = b.tulos === "voitto" ? "voitto" : b.tulos === "tappio" ? "tappio" : "kesken";
+    const brStr = b.bankrollJlk > 0 ? b.bankrollJlk.toFixed(2) + "€" : "—";
+
+    return `<tr>
+      <td style="font-size:0.7rem;color:var(--white3)">${b.aika}</td>
+      <td style="color:var(--white)">${b.ottelu}</td>
+      <td style="color:var(--white);font-weight:600">${b.kohde}</td>
+      <td><span style="font-size:0.65rem;background:var(--bg3);padding:2px 6px;border-radius:3px;border:1px solid var(--border)">${b.markkina}</span></td>
+      <td style="color:var(--blue-lt)">${b.aalto}</td>
+      <td style="color:var(--green);font-family:'Barlow Condensed',sans-serif;font-weight:700">+${b.ev.toFixed(1)}%</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:#fff">${b.kerroin.toFixed(2)}</td>
+      <td>${clvStr}</td>
+      <td class="${clvClass}">${clvPctStr}</td>
+      <td style="color:var(--amber)">${b.panos.toFixed(2)}€</td>
+      <td><span class="result-badge ${tulosClass}">${tulosLabel}</span></td>
+      <td style="color:${isPos?"var(--green)":b.tuotto<0?"var(--red)":"var(--white3)"};font-family:'Barlow Condensed',sans-serif;font-weight:700">${tuottoStr}</td>
+      <td style="color:var(--white2)">${brStr}</td>
+    </tr>`;
+  }).join("");
+}
+
+// ===== INIT =====
+setLang(lang);
+fetchSimData();
+// Päivitä 5 min välein
+setInterval(fetchSimData, 5 * 60 * 1000);
+</script>
+</body>
+</html>
