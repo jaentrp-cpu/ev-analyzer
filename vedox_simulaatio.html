@@ -577,13 +577,7 @@ main {
         <canvas id="chart-clv" height="180"></canvas>
       </div>
 
-      <!-- Drawdown -->
-      <div class="chart-card">
-        <div class="chart-title">
-          <span data-fi="Drawdown-analyysi" data-en="Drawdown Analysis">Drawdown-analyysi</span>
-        </div>
-        <canvas id="chart-drawdown" height="180"></canvas>
-      </div>
+
 
     </div>
 
@@ -655,7 +649,7 @@ function setLang(l) {
 // ===== FETCH =====
 async function fetchSimData() {
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SIM_GID}&t=${Date.now()}`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=tsv&gid=${SIM_GID}&t=${Date.now()}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error("Sheet ei vastaa");
     const text = await res.text();
@@ -674,15 +668,8 @@ function parseSimCSV(text) {
   if (lines.length < 2) return [];
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
-    const cols = []; let cur = "", inQ = false;
-    for (const ch of lines[i]) {
-      if (ch === '"') { inQ = !inQ; }
-      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
-      else { cur += ch; }
-    }
-    cols.push(cur.trim());
+    const cols = lines[i].split("\t");
     if (cols.length < 16 || !cols[0]) continue;
-    // Korjaa pilkku→piste desimaalierottimeksi (suomalainen Sheets)
     const toNum = s => parseFloat((s||"0").replace(",",".").replace("+","").replace("%","")) || 0;
     rows.push({
       id:          cols[0],
@@ -775,20 +762,22 @@ function renderHitPie() {
   const halfLoss = allBets.filter(b => b.tulos === "half loss").length;
   const push     = allBets.filter(b => b.tulos === "push").length;
   const pend     = allBets.filter(b => b.tulos === "kesken").length;
+  // Piirakkakaavioon vain selvitetyt betit
+  const settled  = won + halfWin + lost + halfLoss + push;
 
   if (charts.hit) charts.hit.destroy();
   charts.hit = new Chart(document.getElementById("chart-hit"), {
     type: "doughnut",
     data: {
-      labels: [fi?"Voitto":"Won", "Half Win", fi?"Tappio":"Lost", "Half Loss", "Push", fi?"Kesken":"Pending"],
+      labels: [fi?"Voitto":"Won", "Half Win", fi?"Tappio":"Lost", "Half Loss", "Push"],
       datasets: [{
-        data: [won, halfWin, lost, halfLoss, push, pend],
+        data: [won, halfWin, lost, halfLoss, push],
         backgroundColor: [
           "rgba(0,214,143,0.8)", "rgba(0,214,143,0.4)",
           "rgba(255,69,96,0.8)", "rgba(255,69,96,0.4)",
-          "rgba(77,166,255,0.6)", "rgba(255,176,32,0.5)"
+          "rgba(77,166,255,0.6)"
         ],
-        borderColor: ["#00d68f","#00d68f","#ff4560","#ff4560","#4da6ff","#ffb020"],
+        borderColor: ["#00d68f","#00d68f","#ff4560","#ff4560","#4da6ff"],
         borderWidth: 1,
       }]
     },
@@ -798,19 +787,18 @@ function renderHitPie() {
     }
   });
 
-  const total = won + halfWin + lost + halfLoss + push + pend;
   document.getElementById("legend-hit").innerHTML = [
-    { label: fi?"Voitot":"Won",     val: won,      pct: total > 0 ? (won/total*100).toFixed(1) : 0,      color: "#00d68f" },
-    { label: "Half Win",             val: halfWin,  pct: total > 0 ? (halfWin/total*100).toFixed(1) : 0,  color: "#00a86b" },
-    { label: fi?"Tappiot":"Lost",   val: lost,     pct: total > 0 ? (lost/total*100).toFixed(1) : 0,     color: "#ff4560" },
-    { label: "Half Loss",            val: halfLoss, pct: total > 0 ? (halfLoss/total*100).toFixed(1) : 0, color: "#cc2233" },
-    { label: "Push",                 val: push,     pct: total > 0 ? (push/total*100).toFixed(1) : 0,     color: "#4da6ff" },
-    { label: fi?"Kesken":"Pending", val: pend,     pct: total > 0 ? (pend/total*100).toFixed(1) : 0,     color: "#ffb020" },
+    { label: fi?"Voitot":"Won",     val: won,      pct: settled > 0 ? (won/settled*100).toFixed(1) : 0,      color: "#00d68f" },
+    { label: "Half Win",             val: halfWin,  pct: settled > 0 ? (halfWin/settled*100).toFixed(1) : 0,  color: "#00a86b" },
+    { label: fi?"Tappiot":"Lost",   val: lost,     pct: settled > 0 ? (lost/settled*100).toFixed(1) : 0,     color: "#ff4560" },
+    { label: "Half Loss",            val: halfLoss, pct: settled > 0 ? (halfLoss/settled*100).toFixed(1) : 0, color: "#cc2233" },
+    { label: "Push",                 val: push,     pct: settled > 0 ? (push/settled*100).toFixed(1) : 0,     color: "#4da6ff" },
+    { label: fi?"Kesken":"Pending", val: pend,     pct: "",     color: "#ffb020" },
   ].map(item => `
     <div class="legend-item">
       <div class="legend-dot" style="background:${item.color}"></div>
       <span class="legend-label">${item.label}</span>
-      <span class="legend-val">${item.val} <span style="color:var(--white3);font-size:0.7rem">(${item.pct}%)</span></span>
+      <span class="legend-val">${item.val} ${item.pct ? '<span style="color:var(--white3);font-size:0.7rem">('+item.pct+'%)</span>' : ''}</span>
     </div>
   `).join("");
 }
