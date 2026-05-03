@@ -716,14 +716,16 @@ function renderStats() {
   const won = settled.filter(b => b.tulos === "voitto" || b.tulos === "half win");
   const pending = allBets.filter(b => b.tulos === "kesken");
 
-  const totalProfit = settled.reduce((a, b) => a + b.tuotto, 0);
-  const totalStake  = settled.reduce((a, b) => a + b.panos, 0);
+  // Kokonaistuotto = summa selvitetyistä beteistä (tuotto-sarake)
+  const totalProfit = settled.reduce((a, b) => a + (b.tuotto || 0), 0);
+  const totalStake  = settled.reduce((a, b) => a + (b.panos || 0), 0);
   const roi = totalStake > 0 ? (totalProfit / totalStake * 100).toFixed(1) : 0;
   const hitRate = settled.length > 0 ? (won.length / settled.length * 100).toFixed(1) : 0;
 
-  // Bankroll
-  const lastBr = allBets.length > 0
-    ? (allBets[allBets.length - 1].bankrollJlk || START_BANKROLL)
+  // Bankroll = viimeisin selvitetty bankroll-arvo
+  const settledWithBr = allBets.filter(b => b.bankrollJlk > 0);
+  const lastBr = settledWithBr.length > 0
+    ? settledWithBr[settledWithBr.length - 1].bankrollJlk
     : START_BANKROLL;
   const brChange = lastBr - START_BANKROLL;
 
