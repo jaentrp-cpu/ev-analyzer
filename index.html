@@ -1039,20 +1039,23 @@ function parseCSV(text) {
     }
     cols.push(cur.trim());
     if (cols.length >= 9 && cols[0] && !cols[0].includes("Ei plus-EV")) {
-      rows.push({
-        ottelu:    cols[0],
-        alkaa:     cols[1],
-        markkina:  cols[2],
-        kohde:     cols[3],
-        kerroin:   parseFloat(cols[4]) || 0,
-        kirja:     cols[5],
-        pinnacle:  parseFloat(cols[6]) || 0,
-        pinnProb:  cols[7],
-        ev:        parseFloat((cols[8] || "0").replace("+","").replace("%","")) || 0,
-        liiga:     cols[9] || "",
-        aalto:     cols[10] || "",
-        paivitetty:cols[11] || "",
-      });
+      const isInt = s => /^\d+$/.test((s||"").trim());
+      const fixN = s => parseFloat((s||"0").replace("+","").replace("%","").replace(",",".")) || 0;
+      // Suomalainen Sheets: "2,26" pilkkoutuu sarakkeisiin "2" ja "26"
+      // Jos cols[4] ja cols[5] ovat molemmat kokonaislukuja → kerroin on jaettu
+      const kerroinJaettu = isInt(cols[4]) && isInt(cols[5]) && cols[5].length <= 3;
+      const kerroin  = kerroinJaettu ? parseFloat(cols[4] + "." + cols[5]) : fixN(cols[4]);
+      const o = kerroinJaettu ? 1 : 0;
+      const kirja    = cols[5 + o];
+      const pinnJaettu = isInt(cols[6+o]) && isInt(cols[7+o]) && (cols[7+o]||"").length <= 3;
+      const pinnacle = pinnJaettu ? parseFloat(cols[6+o] + "." + cols[7+o]) : fixN(cols[6+o]);
+      const o2 = o + (pinnJaettu ? 1 : 0);
+      const pinnProb = cols[7+o2];
+      const ev       = fixN(cols[8+o2]);
+      const liiga    = cols[9+o2] || "";
+      const aalto    = cols[10+o2] || "";
+      const paiv     = cols[11+o2] || "";
+      rows.push({ ottelu: cols[0], alkaa: cols[1], markkina: cols[2], kohde: cols[3], kerroin, kirja, pinnacle, pinnProb, ev, liiga, aalto, paivitetty: paiv });
     }
   }
   return rows;
@@ -1063,11 +1066,11 @@ async function fetchAll() {
   const allRows = [];
   for (const [name, gid] of Object.entries(SHEETS)) {
     try {
-      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=tsv&gid=${gid}&t=${Date.now()}`;
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}&t=${Date.now()}`;
       const res = await fetch(url);
       if (!res.ok) continue;
       const text = await res.text();
-      const rows = parseTSV(text).map(r => ({ ...r, aalto: name }));
+      const rows = parseCSV(text).map(r => ({ ...r, aalto: name }));
       allRows.push(...rows);
     } catch(e) {}
   }
