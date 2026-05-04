@@ -9,7 +9,6 @@
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* ===== DARK MODE (default) ===== */
 :root, [data-theme="dark"] {
   --bg:        #000000;
   --bg2:       #080f1e;
@@ -34,7 +33,6 @@
   --header-bg: rgba(0,0,0,0.94);
 }
 
-/* ===== LIGHT MODE ===== */
 [data-theme="light"] {
   --bg:        #ffffff;
   --bg2:       #f4f7fc;
@@ -78,7 +76,6 @@ body {
   z-index: 0;
 }
 
-/* ===== HEADER ===== */
 header {
   position: sticky;
   top: 0;
@@ -172,7 +169,6 @@ header {
 }
 .lang-btn:hover, .lang-btn.active { color: var(--blue-lt); border-color: var(--blue); }
 
-/* Theme toggle */
 .theme-btn {
   background: var(--bg3);
   border: 1px solid var(--border2);
@@ -187,7 +183,6 @@ header {
 }
 .theme-btn:hover { border-color: var(--blue-lt); color: var(--text); }
 
-/* ===== MAIN ===== */
 main {
   position: relative;
   z-index: 1;
@@ -196,7 +191,7 @@ main {
   margin: 0 auto;
 }
 
-/* ===== STATS ===== */
+/* ===== STATS — no top accent bar, all values blue ===== */
 .stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -211,15 +206,7 @@ main {
   padding: 1rem 1.25rem;
   position: relative;
   overflow: hidden;
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--blue), var(--blue-lt));
-  opacity: 0.5;
+  /* NO ::before accent bar */
 }
 
 .stat-lbl {
@@ -237,13 +224,8 @@ main {
   font-size: 1.8rem;
   font-weight: 800;
   line-height: 1;
-  color: var(--text);
+  color: var(--blue-lt); /* always blue */
 }
-
-.stat-val.green  { color: var(--green); }
-.stat-val.red    { color: var(--red); }
-.stat-val.amber  { color: var(--amber); }
-.stat-val.blue   { color: var(--blue-lt); }
 
 .stat-sub {
   font-size: 0.65rem;
@@ -308,7 +290,7 @@ main {
 .legend-label { color: var(--text2); flex: 1; }
 .legend-val { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: var(--text); }
 
-/* ROI bars */
+/* ROI bars — single blue, no color coding */
 .roi-bar-wrap { margin-bottom: 10px; }
 
 .roi-bar-header {
@@ -320,9 +302,11 @@ main {
 
 .roi-bar-label { color: var(--text); }
 .roi-bar-count { color: var(--text3); }
-.roi-bar-val { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: var(--text); }
-.roi-bar-val.pos { color: var(--green); }
-.roi-bar-val.neg { color: var(--red); }
+.roi-bar-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  color: var(--blue-lt); /* always blue, no green/red */
+}
 
 .roi-bar-bg {
   height: 5px;
@@ -334,7 +318,7 @@ main {
 .roi-bar-fill {
   height: 100%;
   border-radius: 3px;
-  background: var(--text3);
+  background: var(--blue-lt); /* single blue bar */
   transition: width 0.8s ease;
 }
 
@@ -431,6 +415,7 @@ main {
   border-radius: 3px;
 }
 
+/* Keep result badges with colors — they're like the pie chart, need distinction */
 .result-badge.voitto    { background: rgba(46,204,142,0.12); color: var(--green); border: 1px solid rgba(46,204,142,0.25); }
 .result-badge.tappio    { background: rgba(224,58,82,0.12); color: var(--red); border: 1px solid rgba(224,58,82,0.25); }
 .result-badge.kesken    { background: rgba(212,146,26,0.12); color: var(--amber); border: 1px solid rgba(212,146,26,0.25); }
@@ -438,11 +423,11 @@ main {
 .result-badge.half-loss { background: rgba(224,58,82,0.07); color: var(--red); border: 1px solid rgba(224,58,82,0.18); }
 .result-badge.push      { background: var(--blue-dim); color: var(--blue-lt); border: 1px solid var(--border2); }
 
-.clv-pos { color: var(--green); font-weight: 700; }
-.clv-neg { color: var(--red); font-weight: 700; }
+/* CLV still color-coded in table for quick scanning */
+.clv-pos { color: var(--blue-lt); font-weight: 700; }
+.clv-neg { color: var(--blue-lt); font-weight: 700; }
 .clv-neu { color: var(--text3); }
 
-/* ===== LOADING ===== */
 .loading-box {
   text-align: center;
   padding: 4rem;
@@ -526,17 +511,17 @@ main {
       </div>
       <div class="stat-card">
         <div class="stat-lbl" data-fi="Osumisprosentti" data-en="Hit Rate">Osumisprosentti</div>
-        <div class="stat-val blue" id="s-hitrate">—</div>
+        <div class="stat-val" id="s-hitrate">—</div>
         <div class="stat-sub" id="s-wl">— / —</div>
       </div>
       <div class="stat-card">
         <div class="stat-lbl" data-fi="Avg CLV %" data-en="Avg CLV %">Avg CLV %</div>
-        <div class="stat-val green" id="s-clv">—</div>
+        <div class="stat-val" id="s-clv">—</div>
         <div class="stat-sub" data-fi="Closing line value" data-en="Closing line value">Closing line value</div>
       </div>
       <div class="stat-card">
         <div class="stat-lbl" data-fi="Betsejä yhteensä" data-en="Total bets">Betsejä yhteensä</div>
-        <div class="stat-val amber" id="s-total">—</div>
+        <div class="stat-val" id="s-total">—</div>
         <div class="stat-sub" id="s-pending">— kesken</div>
       </div>
     </div>
@@ -650,13 +635,11 @@ let activeFilter = "all";
 let charts = {};
 let currentTheme = localStorage.getItem("vedox_theme") || "dark";
 
-// ===== THEME =====
 function applyTheme(t) {
   currentTheme = t;
   document.documentElement.setAttribute("data-theme", t);
   localStorage.setItem("vedox_theme", t);
   document.getElementById("theme-icon").textContent = t === "dark" ? "☀️" : "🌙";
-  // Redraw charts for new tick colors
   if (allBets.length > 0) {
     renderBankrollChart();
     renderCLVChart();
@@ -667,7 +650,6 @@ function toggleTheme() {
   applyTheme(currentTheme === "dark" ? "light" : "dark");
 }
 
-// ===== LANGUAGE =====
 function setLang(l) {
   lang = l;
   localStorage.setItem("vedox_lang", l);
@@ -680,7 +662,6 @@ function setLang(l) {
   renderAll();
 }
 
-// ===== FETCH =====
 async function fetchSimData() {
   try {
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=tsv&gid=${SIM_GID}&t=${Date.now()}`;
@@ -696,7 +677,6 @@ async function fetchSimData() {
   }
 }
 
-// ===== PARSE — korjattu kerroin-parsinta =====
 function parseSimCSV(text) {
   const lines = text.trim().split("\n");
   if (lines.length < 2) return [];
@@ -704,16 +684,11 @@ function parseSimCSV(text) {
   for (let i = 1; i < lines.length; i++) {
     const cols = lines[i].split("\t");
     if (cols.length < 16 || !cols[0]) continue;
-    // toNum: käsittelee sekä "1,85" että "1.85" muodot
     const toNum = s => {
       if (!s) return 0;
       const cleaned = s.trim().replace(/\+/g,"").replace(/%/g,"").replace(/€/g,"").replace(/\s/g,"");
-      // Suomalainen: pilkku desimaalierottimena, piste tuhaterottimena
-      // Tunnista: jos on pilkku JA piste → "1.234,56" → en-muoto 1234.56
-      // Jos vain pilkku → "1,85" → 1.85
       let normalized = cleaned;
       if (cleaned.includes(",") && cleaned.includes(".")) {
-        // molemmat: esim "1.234,56"
         normalized = cleaned.replace(/\./g,"").replace(",",".");
       } else if (cleaned.includes(",")) {
         normalized = cleaned.replace(",",".");
@@ -745,7 +720,6 @@ function parseSimCSV(text) {
   return rows;
 }
 
-// ===== HELPERS =====
 function getTickColor() {
   return currentTheme === "dark" ? "#3a4f6a" : "#6080a8";
 }
@@ -765,7 +739,6 @@ function renderAll() {
   renderTable();
 }
 
-// ===== STATS =====
 function renderStats() {
   const fi = lang === "fi";
   const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
@@ -785,24 +758,20 @@ function renderStats() {
     ? (clvBets.reduce((a,b) => a + b.clvPct, 0) / clvBets.length).toFixed(2)
     : 0;
 
-  const brEl = document.getElementById("s-bankroll");
-  brEl.textContent = lastBr.toFixed(2) + "€";
-  brEl.className = "stat-val " + (brChange >= 0 ? "green" : "red");
+  // All stat values → always blue (no green/red on stat cards)
+  document.getElementById("s-bankroll").textContent = lastBr.toFixed(2) + "€";
   document.getElementById("s-bankroll-change").textContent =
     (brChange >= 0 ? "+" : "") + brChange.toFixed(2) + "€ " + (fi ? "alusta" : "from start");
 
   document.getElementById("s-hitrate").textContent = hitRate + "%";
   document.getElementById("s-wl").textContent = `${won} / ${lost}`;
 
-  const clvEl = document.getElementById("s-clv");
-  clvEl.textContent = (avgCLV >= 0 ? "+" : "") + avgCLV + "%";
-  clvEl.className = "stat-val " + (parseFloat(avgCLV) >= 0 ? "green" : "red");
+  document.getElementById("s-clv").textContent = (avgCLV >= 0 ? "+" : "") + avgCLV + "%";
 
   document.getElementById("s-total").textContent = allBets.length;
   document.getElementById("s-pending").textContent = pending.length + (fi ? " kesken" : " pending");
 }
 
-// ===== HIT PIE =====
 function renderHitPie() {
   const fi = lang === "fi";
   const won      = allBets.filter(b => b.tulos === "voitto").length;
@@ -849,17 +818,16 @@ function renderHitPie() {
   `).join("");
 }
 
-// ===== ROI BARS helper =====
+// ROI bars — always blue value, no pos/neg coloring
 function roiBars(items, containerId, maxAbs = 80) {
   const fi = lang === "fi";
   document.getElementById(containerId).innerHTML = items.length ? items.map(item => {
     const roiNum = parseFloat(item.roi);
-    const isPos  = roiNum >= 0;
     const barW   = Math.min(Math.abs(roiNum) / maxAbs * 100, 100);
     return `<div class="roi-bar-wrap">
       <div class="roi-bar-header">
         <span class="roi-bar-label">${item.label} <span class="roi-bar-count">(${item.count}${item.extra||""})</span></span>
-        <span class="roi-bar-val ${isPos?"pos":"neg"}">${isPos?"+":""}${item.roi}%</span>
+        <span class="roi-bar-val">${roiNum >= 0 ? "+" : ""}${item.roi}%</span>
       </div>
       <div class="roi-bar-bg">
         <div class="roi-bar-fill" style="width:${barW}%"></div>
@@ -868,7 +836,6 @@ function roiBars(items, containerId, maxAbs = 80) {
   }).join("") : `<div style="color:var(--text3);font-size:0.8rem;padding:1rem 0">${fi?"Ei dataa vielä":"No data yet"}</div>`;
 }
 
-// ===== EV RANGE BARS =====
 function renderEVRangeBars() {
   const fi = lang === "fi";
   const ranges = [
@@ -888,7 +855,6 @@ function renderEVRangeBars() {
   }), "ev-range-bars");
 }
 
-// ===== BANKROLL CHART =====
 function renderBankrollChart() {
   const fi = lang === "fi";
   const settled = allBets.filter(b => b.bankrollJlk > 0);
@@ -905,8 +871,8 @@ function renderBankrollChart() {
       labels,
       datasets: [{
         data,
-        borderColor: "#7c5cbf",
-        backgroundColor: "rgba(124,92,191,0.05)",
+        borderColor: "#2d6ae0",
+        backgroundColor: "rgba(26,79,196,0.06)",
         borderWidth: 1.8,
         pointRadius: data.length < 50 ? 2 : 0,
         tension: 0.3,
@@ -924,7 +890,6 @@ function renderBankrollChart() {
   });
 }
 
-// ===== MARKET BARS =====
 function renderMarketBars() {
   const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
   const map = {};
@@ -940,7 +905,6 @@ function renderMarketBars() {
   })), "market-bars");
 }
 
-// ===== WAVE BARS =====
 function renderWaveBars() {
   const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
   const map = {};
@@ -956,7 +920,6 @@ function renderWaveBars() {
   })), "wave-bars");
 }
 
-// ===== ODDS RANGE BARS — kerroin korjattu =====
 function renderOddsRangeBars() {
   const fi = lang === "fi";
   const ranges = [
@@ -968,16 +931,12 @@ function renderOddsRangeBars() {
   ];
   const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
 
-  // Debug: log a few kerroin values to verify parsing
   if (settled.length > 0) {
     console.log("Sample kerroin values:", settled.slice(0,5).map(b=>b.kerroin));
   }
 
   roiBars(ranges.map(r => {
-    const inRange = settled.filter(b => {
-      const k = b.kerroin;
-      return k >= r.min && k < r.max;
-    });
+    const inRange = settled.filter(b => b.kerroin >= r.min && b.kerroin < r.max);
     const won    = inRange.filter(b => b.tulos==="voitto"||b.tulos==="half win");
     const stake  = inRange.reduce((a,b)=>a+b.panos,0);
     const profit = inRange.reduce((a,b)=>a+b.tuotto,0);
@@ -987,7 +946,6 @@ function renderOddsRangeBars() {
   }), "odds-range-bars");
 }
 
-// ===== CLV CHART =====
 function renderCLVChart() {
   const clvBets = allBets.filter(b => b.clvKerroin > 0);
   const buckets = [
@@ -1016,7 +974,6 @@ function renderCLVChart() {
   });
 }
 
-// ===== TABLE =====
 function filterBets(filter, btn) {
   activeFilter = filter;
   document.querySelectorAll(".tfilter").forEach(b=>b.classList.remove("active"));
@@ -1041,7 +998,6 @@ function renderTable() {
     const tuottoStr = b.tuotto!==0 ? (isPos?"+":"")+b.tuotto.toFixed(2)+"€" : "—";
     const clvStr    = b.clvKerroin>0 ? b.clvKerroin.toFixed(3) : "—";
     const clvPctStr = b.clvKerroin>0 ? (b.clvPct>=0?"+":"")+b.clvPct.toFixed(2)+"%" : "—";
-    const clvClass  = b.clvPct>0?"clv-pos":b.clvPct<0?"clv-neg":"clv-neu";
     const tulosLabel = {voitto:fi?"Voitto":"Won",tappio:fi?"Tappio":"Lost","half win":"Half Win","half loss":"Half Loss",push:"Push"}[b.tulos]||(fi?"Kesken":"Pending");
     const tulosClass = {voitto:"voitto",tappio:"tappio","half win":"half-win","half loss":"half-loss",push:"push"}[b.tulos]||"kesken";
     const brStr = b.bankrollJlk>0 ? b.bankrollJlk.toFixed(2)+"€" : "—";
@@ -1052,19 +1008,18 @@ function renderTable() {
       <td style="color:var(--text);font-weight:600">${b.kohde}</td>
       <td><span style="font-size:0.65rem;background:var(--bg3);padding:2px 6px;border-radius:3px;border:1px solid var(--border)">${b.markkina}</span></td>
       <td style="color:var(--blue-lt)">${b.aalto}</td>
-      <td style="color:var(--green);font-family:'Barlow Condensed',sans-serif;font-weight:700">+${b.ev.toFixed(1)}%</td>
+      <td style="color:var(--blue-lt);font-family:'Barlow Condensed',sans-serif;font-weight:700">+${b.ev.toFixed(1)}%</td>
       <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--text)">${b.kerroin.toFixed(2)}</td>
-      <td>${clvStr}</td>
-      <td class="${clvClass}">${clvPctStr}</td>
-      <td style="color:var(--amber)">${b.panos.toFixed(2)}€</td>
+      <td style="color:var(--text2)">${clvStr}</td>
+      <td style="color:var(--blue-lt);font-weight:700">${clvPctStr}</td>
+      <td style="color:var(--blue-lt)">${b.panos.toFixed(2)}€</td>
       <td><span class="result-badge ${tulosClass}">${tulosLabel}</span></td>
-      <td style="color:${isPos?"var(--green)":b.tuotto<0?"var(--red)":"var(--text3)"};font-family:'Barlow Condensed',sans-serif;font-weight:700">${tuottoStr}</td>
+      <td style="color:var(--blue-lt);font-family:'Barlow Condensed',sans-serif;font-weight:700">${tuottoStr}</td>
       <td style="color:var(--text2)">${brStr}</td>
     </tr>`;
   }).join("");
 }
 
-// ===== INIT =====
 applyTheme(currentTheme);
 setLang(lang);
 fetchSimData();
