@@ -741,11 +741,20 @@ function renderAll() {
 
 function renderStats() {
   const fi = lang === "fi";
-  const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
-  const won     = settled.filter(b => b.tulos === "voitto" || b.tulos === "half win").length;
-  const lost    = settled.filter(b => b.tulos === "tappio" || b.tulos === "half loss").length;
-  const pending = allBets.filter(b => b.tulos === "kesken");
-  const hitRate = settled.length > 0 ? (won / settled.length * 100).toFixed(1) : 0;
+  const settled  = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
+  const won      = settled.filter(b => b.tulos === "voitto").length;
+  const lost     = settled.filter(b => b.tulos === "tappio").length;
+  const halfWon  = settled.filter(b => b.tulos === "half win").length;
+  const halfLost = settled.filter(b => b.tulos === "half loss").length;
+  const push     = settled.filter(b => b.tulos === "push").length;
+  const pending  = allBets.filter(b => b.tulos === "kesken");
+  // Win = voitto + half win (bankroll kasvaa)
+  // Loss = tappio + half loss (bankroll pienenee)
+  // Push = ei vaikuta osumisprosenttiin (±0)
+  const positiveCount = won + halfWon;
+  const negativeCount = lost + halfLost;
+  const decidedCount  = positiveCount + negativeCount;
+  const hitRate = decidedCount > 0 ? (positiveCount / decidedCount * 100).toFixed(1) : 0;
 
   const settledWithBr = allBets.filter(b => b.bankrollJlk > 0);
   const lastBr = settledWithBr.length > 0
@@ -764,7 +773,10 @@ function renderStats() {
     (brChange >= 0 ? "+" : "") + brChange.toFixed(2) + "€ " + (fi ? "alusta" : "from start");
 
   document.getElementById("s-hitrate").textContent = hitRate + "%";
-  document.getElementById("s-wl").textContent = `${won} / ${lost}`;
+  // Näyttää: (voitot + half win) / (tappiot + half loss) · push erikseen
+  let wlParts = `${positiveCount}W / ${negativeCount}L`;
+  if (push > 0) wlParts += ` · ${push}P`;
+  document.getElementById("s-wl").textContent = wlParts;
 
   document.getElementById("s-clv").textContent = (avgCLV >= 0 ? "+" : "") + avgCLV + "%";
 
