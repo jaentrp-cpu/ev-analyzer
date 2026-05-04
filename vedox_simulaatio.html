@@ -64,18 +64,6 @@ body {
   transition: background 0.2s, color 0.2s;
 }
 
-[data-theme="dark"] body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(26,79,196,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(26,79,196,0.025) 1px, transparent 1px);
-  background-size: 52px 52px;
-  pointer-events: none;
-  z-index: 0;
-}
-
 header {
   position: sticky;
   top: 0;
@@ -90,406 +78,70 @@ header {
   justify-content: space-between;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-}
-
-.logo-icon { width: 36px; height: 36px; }
-
-.logo-name {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
-  font-size: 1.5rem;
-  letter-spacing: 0.06em;
-  color: var(--text);
-}
-
+.logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.logo-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.5rem; letter-spacing: 0.06em; color: var(--text); }
 .logo-name span { color: var(--blue-lt); }
+.logo-tagline { font-family: 'Barlow Condensed', sans-serif; font-size: 0.5rem; letter-spacing: 0.22em; color: var(--text3); text-transform: uppercase; display: block; }
 
-.logo-tagline {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.5rem;
-  letter-spacing: 0.22em;
-  color: var(--text3);
-  text-transform: uppercase;
-  display: block;
-  margin-top: 1px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sim-badge {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text3);
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  padding: 5px 14px;
-  border-radius: 20px;
-}
-
-.back-btn {
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  color: var(--text2);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  padding: 6px 16px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.18s;
-}
+.header-right { display: flex; align-items: center; gap: 8px; }
+.sim-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); background: var(--bg3); border: 1px solid var(--border2); padding: 5px 14px; border-radius: 20px; }
+.back-btn { background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; font-weight: 600; padding: 6px 16px; border-radius: 5px; cursor: pointer; text-decoration: none; transition: all 0.18s; }
 .back-btn:hover { color: var(--text); border-color: var(--blue-lt); }
 
-.lang-btn {
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  color: var(--text2);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  padding: 5px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.18s;
-}
-.lang-btn:hover, .lang-btn.active { color: var(--blue-lt); border-color: var(--blue); }
+.theme-btn, .lang-btn { background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); font-family: 'Barlow Condensed', sans-serif; border-radius: 5px; cursor: pointer; transition: all 0.18s; display: flex; align-items: center; justify-content: center; }
+.theme-btn { width: 34px; height: 34px; }
+.lang-btn { font-size: 0.78rem; font-weight: 600; padding: 5px 12px; }
+.lang-btn.active { color: var(--blue-lt); border-color: var(--blue); }
 
-.theme-btn {
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  color: var(--text2);
-  font-size: 1rem;
-  width: 34px; height: 34px;
-  border-radius: 5px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.18s;
-  flex-shrink: 0;
-}
-.theme-btn:hover { border-color: var(--blue-lt); color: var(--text); }
+main { padding: 1.5rem 2rem; max-width: 1300px; margin: 0 auto; position: relative; z-index: 1; }
 
-main {
-  position: relative;
-  z-index: 1;
-  padding: 1.5rem 2rem;
-  max-width: 1300px;
-  margin: 0 auto;
-}
+/* Stats cards - No top accent bar, all blue values */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.25rem; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; }
+.stat-lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+.stat-val { font-family: 'Barlow Condensed', sans-serif; font-size: 1.8rem; font-weight: 800; line-height: 1; color: var(--blue-lt); }
+.stat-sub { font-size: 0.65rem; color: var(--text3); margin-top: 4px; }
 
-/* ===== STATS — no top accent bar, all values blue ===== */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 1.25rem;
-}
-
-.stat-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem 1.25rem;
-  position: relative;
-  overflow: hidden;
-  /* NO ::before accent bar */
-}
-
-.stat-lbl {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 8px;
-}
-
-.stat-val {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.8rem;
-  font-weight: 800;
-  line-height: 1;
-  color: var(--blue-lt); /* always blue */
-}
-
-.stat-sub {
-  font-size: 0.65rem;
-  color: var(--text3);
-  margin-top: 4px;
-}
-
-/* ===== CHARTS GRID ===== */
-.charts-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 1.25rem;
-}
-
-.chart-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-}
-
+/* Charts */
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.25rem; }
+.chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
 .chart-card.full { grid-column: span 2; }
+.chart-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; display: flex; justify-content: space-between; }
 
-.chart-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.chart-title > span:last-child {
-  font-size: 0.63rem;
-  font-weight: 400;
-}
-
-/* Pie */
-.pie-wrap {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-.pie-canvas { max-width: 180px; max-height: 180px; }
-.pie-legend { flex: 1; }
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 7px;
-  font-size: 0.78rem;
-}
-
-.legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-.legend-label { color: var(--text2); flex: 1; }
-.legend-val { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: var(--text); }
-
-/* ROI bars — single blue, no color coding */
+/* ROI Bars - Uniform Blue */
 .roi-bar-wrap { margin-bottom: 10px; }
-
-.roi-bar-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4px;
-  font-size: 0.72rem;
-}
-
+.roi-bar-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.72rem; }
 .roi-bar-label { color: var(--text); }
-.roi-bar-count { color: var(--text3); }
-.roi-bar-val {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700;
-  color: var(--blue-lt); /* always blue, no green/red */
-}
+.roi-bar-val { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: var(--blue-lt); }
+.roi-bar-bg { height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.roi-bar-fill { height: 100%; border-radius: 3px; background: var(--blue-lt); transition: width 0.8s ease; }
 
-.roi-bar-bg {
-  height: 5px;
-  background: var(--bg3);
-  border-radius: 3px;
-  overflow: hidden;
-}
+/* Table */
+.table-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem; }
+.table-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.sim-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.sim-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 0.58rem; font-weight: 700; text-transform: uppercase; color: var(--text3); padding: 8px 12px; text-align: left; background: var(--bg3); border-bottom: 1px solid var(--border); }
+.sim-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text2); }
+.result-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 3px; }
+.result-badge.voitto { background: rgba(46,204,142,0.12); color: var(--green); border: 1px solid rgba(46,204,142,0.25); }
+.result-badge.tappio { background: rgba(224,58,82,0.12); color: var(--red); border: 1px solid rgba(224,58,82,0.25); }
 
-.roi-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: var(--blue-lt); /* single blue bar */
-  transition: width 0.8s ease;
-}
-
-/* ===== BETS TABLE ===== */
-.table-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  margin-bottom: 1.25rem;
-}
-
-.table-header {
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.table-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text3);
-}
-
-.table-filters {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.tfilter {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  color: var(--text3);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.73rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  padding: 4px 11px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.tfilter:hover, .tfilter.active {
-  color: var(--text);
-  background: var(--blue-dim2);
-  border-color: var(--blue-lt);
-}
-
-.sim-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.78rem;
-}
-
-.sim-table th {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text3);
-  padding: 8px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg3);
-  white-space: nowrap;
-}
-
-.sim-table td {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
-  color: var(--text2);
-  vertical-align: middle;
-}
-
-.sim-table tr:last-child td { border-bottom: none; }
-.sim-table tr:hover td { background: var(--blue-dim); }
-
-.result-badge {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  padding: 2px 8px;
-  border-radius: 3px;
-}
-
-/* Keep result badges with colors — they're like the pie chart, need distinction */
-.result-badge.voitto    { background: rgba(46,204,142,0.12); color: var(--green); border: 1px solid rgba(46,204,142,0.25); }
-.result-badge.tappio    { background: rgba(224,58,82,0.12); color: var(--red); border: 1px solid rgba(224,58,82,0.25); }
-.result-badge.kesken    { background: rgba(212,146,26,0.12); color: var(--amber); border: 1px solid rgba(212,146,26,0.25); }
-.result-badge.half-win  { background: rgba(46,204,142,0.07); color: var(--green); border: 1px solid rgba(46,204,142,0.18); }
-.result-badge.half-loss { background: rgba(224,58,82,0.07); color: var(--red); border: 1px solid rgba(224,58,82,0.18); }
-.result-badge.push      { background: var(--blue-dim); color: var(--blue-lt); border: 1px solid var(--border2); }
-
-/* CLV still color-coded in table for quick scanning */
-.clv-pos { color: var(--blue-lt); font-weight: 700; }
-.clv-neg { color: var(--blue-lt); font-weight: 700; }
-.clv-neu { color: var(--text3); }
-
-.loading-box {
-  text-align: center;
-  padding: 4rem;
-  color: var(--text3);
-  font-size: 0.85rem;
-}
-
-.spinner {
-  width: 28px; height: 28px;
-  border: 2px solid var(--border2);
-  border-top-color: var(--blue-lt);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  margin: 0 auto 1rem;
-}
-
+.loading-box { text-align: center; padding: 4rem; color: var(--text3); }
+.spinner { width: 28px; height: 28px; border: 2px solid var(--border2); border-top-color: var(--blue-lt); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 1rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
-.content { animation: fadeUp 0.3s ease; }
-
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-@media (max-width: 900px) {
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
-  .charts-grid { grid-template-columns: 1fr; }
-  .chart-card.full { grid-column: span 1; }
-  main { padding: 1rem; }
-}
 </style>
 </head>
 <body>
 
 <header>
   <a class="logo" href="index.html">
-    <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M4 8 L20 32 L36 8" stroke="url(#g1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <path d="M14 8 L20 20 L26 8" stroke="url(#g2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <path d="M26 8 L34 2" stroke="url(#g3)" stroke-width="3" stroke-linecap="round"/>
-      <defs>
-        <linearGradient id="g1" x1="4" y1="8" x2="36" y2="32" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a0b4d0"/>
-        </linearGradient>
-        <linearGradient id="g2" x1="14" y1="8" x2="26" y2="20" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#1a4fc4"/><stop offset="100%" stop-color="#2d6ae0"/>
-        </linearGradient>
-        <linearGradient id="g3" x1="26" y1="8" x2="34" y2="2" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#2d6ae0"/><stop offset="100%" stop-color="#4a88ff"/>
-        </linearGradient>
-      </defs>
-    </svg>
-    <div>
-      <div class="logo-name">VEDO<span>X</span></div>
-      <span class="logo-tagline">Logic Over Luck</span>
-    </div>
+    <div class="logo-name">VEDO<span>X</span></div>
+    <span class="logo-tagline">Logic Over Luck</span>
   </a>
-
   <div class="header-right">
     <div class="sim-badge">SIMULAATIO</div>
     <a href="index.html" class="back-btn">← Takaisin</a>
-    <button class="theme-btn" onclick="toggleTheme()" id="theme-icon" title="Toggle theme">☀️</button>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-icon">☀️</button>
     <button class="lang-btn active" onclick="setLang('fi')" id="btn-fi">FI</button>
     <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
   </div>
@@ -502,125 +154,48 @@ main {
   </div>
 
   <div class="content" id="content" style="display:none">
-
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Simulaatio Bankroll" data-en="Sim Bankroll">Simulaatio Bankroll</div>
-        <div class="stat-val" id="s-bankroll">—</div>
-        <div class="stat-sub" id="s-bankroll-change">—</div>
+    <div class="stats-row" id="stats-row">
       </div>
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Osumisprosentti" data-en="Hit Rate">Osumisprosentti</div>
-        <div class="stat-val" id="s-hitrate">—</div>
-        <div class="stat-sub" id="s-wl">— / —</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Avg CLV %" data-en="Avg CLV %">Avg CLV %</div>
-        <div class="stat-val" id="s-clv">—</div>
-        <div class="stat-sub" data-fi="Closing line value" data-en="Closing line value">Closing line value</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Betsejä yhteensä" data-en="Total bets">Betsejä yhteensä</div>
-        <div class="stat-val" id="s-total">—</div>
-        <div class="stat-sub" id="s-pending">— kesken</div>
-      </div>
-    </div>
 
     <div class="charts-grid">
-
       <div class="chart-card">
-        <div class="chart-title">
-          <span data-fi="Osumisprosentti" data-en="Hit Rate">Osumisprosentti</span>
-        </div>
-        <div class="pie-wrap">
-          <canvas class="pie-canvas" id="chart-hit"></canvas>
-          <div class="pie-legend" id="legend-hit"></div>
-        </div>
+        <div class="chart-title"><span data-fi="Osumisprosentti">Osumisprosentti</span></div>
+        <canvas id="chart-hit"></canvas>
       </div>
-
       <div class="chart-card">
-        <div class="chart-title">
-          <span data-fi="ROI per EV-range" data-en="ROI per EV range">ROI per EV-range</span>
-          <span data-fi="Osuminen per EV-taso" data-en="Hit rate per EV level">Osuminen per EV-taso</span>
-        </div>
-        <div id="ev-range-bars"></div>
-      </div>
-
-      <div class="chart-card full">
-        <div class="chart-title">
-          <span data-fi="Bankrollin kehitys" data-en="Bankroll Growth">Bankrollin kehitys</span>
-          <span id="br-start-end">—</span>
-        </div>
-        <canvas id="chart-bankroll" height="120"></canvas>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-title">
-          <span data-fi="ROI per markkina" data-en="ROI per market">ROI per markkina</span>
-        </div>
+        <div class="chart-title"><span data-fi="ROI per markkina">ROI per markkina</span></div>
         <div id="market-bars"></div>
       </div>
-
-      <div class="chart-card">
-        <div class="chart-title">
-          <span data-fi="ROI per aalto" data-en="ROI per wave">ROI per aalto</span>
-        </div>
-        <div id="wave-bars"></div>
+      <div class="chart-card full">
+        <div class="chart-title"><span data-fi="Bankrollin kehitys">Bankrollin kehitys</span></div>
+        <canvas id="chart-bankroll" height="100"></canvas>
       </div>
-
       <div class="chart-card">
-        <div class="chart-title">
-          <span data-fi="ROI per kerroinväli" data-en="ROI per odds range">ROI per kerroinväli</span>
-        </div>
+        <div class="chart-title"><span data-fi="ROI per kerroinväli">ROI per kerroinväli</span></div>
         <div id="odds-range-bars"></div>
       </div>
-
       <div class="chart-card">
-        <div class="chart-title">
-          <span data-fi="CLV-jakauma" data-en="CLV Distribution">CLV-jakauma</span>
-        </div>
-        <canvas id="chart-clv" height="180"></canvas>
+        <div class="chart-title"><span data-fi="ROI per aalto">ROI per aalto</span></div>
+        <div id="wave-bars"></div>
       </div>
-
     </div>
 
     <div class="table-card">
-      <div class="table-header">
-        <div class="table-title" data-fi="Kaikki simulaatiobetit" data-en="All simulation bets">Kaikki simulaatiobetit</div>
-        <div class="table-filters">
-          <button class="tfilter active" onclick="filterBets('all', this)" data-fi="Kaikki" data-en="All">Kaikki</button>
-          <button class="tfilter" onclick="filterBets('voitto', this)" data-fi="Voitot" data-en="Won">Voitot</button>
-          <button class="tfilter" onclick="filterBets('tappio', this)" data-fi="Tappiot" data-en="Lost">Tappiot</button>
-          <button class="tfilter" onclick="filterBets('half win', this)" data-fi="Half Win" data-en="Half Win">Half Win</button>
-          <button class="tfilter" onclick="filterBets('half loss', this)" data-fi="Half Loss" data-en="Half Loss">Half Loss</button>
-          <button class="tfilter" onclick="filterBets('push', this)" data-fi="Push" data-en="Push">Push</button>
-          <button class="tfilter" onclick="filterBets('kesken', this)" data-fi="Kesken" data-en="Pending">Kesken</button>
-        </div>
-      </div>
       <div style="overflow-x:auto">
         <table class="sim-table">
           <thead>
             <tr>
-              <th data-fi="Alkaa" data-en="Starts">Alkaa</th>
-              <th data-fi="Ottelu" data-en="Match">Ottelu</th>
-              <th data-fi="Kohde" data-en="Selection">Kohde</th>
-              <th data-fi="Markkina" data-en="Market">Markkina</th>
-              <th data-fi="Aalto" data-en="Wave">Aalto</th>
-              <th data-fi="EV %" data-en="EV %">EV %</th>
-              <th data-fi="Kerroin" data-en="Odds">Kerroin</th>
-              <th data-fi="CLV" data-en="CLV">CLV</th>
-              <th data-fi="CLV %" data-en="CLV %">CLV %</th>
-              <th data-fi="Panos €" data-en="Stake €">Panos €</th>
-              <th data-fi="Tulos" data-en="Result">Tulos</th>
-              <th data-fi="Tuotto €" data-en="P&L €">Tuotto €</th>
-              <th data-fi="Bankroll" data-en="Bankroll">Bankroll</th>
+              <th data-fi="Ottelu">Ottelu</th>
+              <th data-fi="Markkina">Markkina</th>
+              <th data-fi="Kerroin">Kerroin</th>
+              <th data-fi="Tulos">Tulos</th>
+              <th data-fi="Tuotto €">Tuotto €</th>
             </tr>
           </thead>
           <tbody id="bets-tbody"></tbody>
         </table>
       </div>
     </div>
-
   </div>
 </main>
 
@@ -631,34 +206,13 @@ const START_BANKROLL = 1000;
 
 let allBets = [];
 let lang = localStorage.getItem("vedox_lang") || "fi";
-let activeFilter = "all";
-let charts = {};
 let currentTheme = localStorage.getItem("vedox_theme") || "dark";
-
-function applyTheme(t) {
-  currentTheme = t;
-  document.documentElement.setAttribute("data-theme", t);
-  localStorage.setItem("vedox_theme", t);
-  document.getElementById("theme-icon").textContent = t === "dark" ? "☀️" : "🌙";
-  if (allBets.length > 0) {
-    renderBankrollChart();
-    renderCLVChart();
-  }
-}
+let charts = {};
 
 function toggleTheme() {
-  applyTheme(currentTheme === "dark" ? "light" : "dark");
-}
-
-function setLang(l) {
-  lang = l;
-  localStorage.setItem("vedox_lang", l);
-  document.getElementById("btn-fi").classList.toggle("active", l === "fi");
-  document.getElementById("btn-en").classList.toggle("active", l === "en");
-  document.querySelectorAll("[data-fi]").forEach(el => {
-    const txt = el.getAttribute(`data-${l}`);
-    if (txt && !["INPUT","SELECT","OPTION"].includes(el.tagName)) el.textContent = txt;
-  });
+  currentTheme = currentTheme === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  localStorage.setItem("vedox_theme", currentTheme);
   renderAll();
 }
 
@@ -666,374 +220,143 @@ async function fetchSimData() {
   try {
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=tsv&gid=${SIM_GID}&t=${Date.now()}`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error("Sheet ei vastaa");
     const text = await res.text();
     allBets = parseSimCSV(text);
     document.getElementById("loading").style.display = "none";
     document.getElementById("content").style.display = "block";
     renderAll();
-  } catch(e) {
-    document.getElementById("loading-txt").textContent = "Virhe: " + e.message;
-  }
+  } catch(e) { console.error(e); }
 }
 
 function parseSimCSV(text) {
   const lines = text.trim().split("\n");
-  if (lines.length < 2) return [];
   const rows = [];
+  const toNum = s => {
+    if (!s) return 0;
+    // Puhdistaa ja vaihtaa pilkun pisteeksi (Fiksaa kerroin-ongelman)
+    let c = s.trim().replace(/\s/g,"").replace("€","").replace("%","").replace(",",".");
+    return parseFloat(c) || 0;
+  };
+
   for (let i = 1; i < lines.length; i++) {
     const cols = lines[i].split("\t");
-    if (cols.length < 16 || !cols[0]) continue;
-    const toNum = s => {
-      if (!s) return 0;
-      const cleaned = s.trim().replace(/\+/g,"").replace(/%/g,"").replace(/€/g,"").replace(/\s/g,"");
-      let normalized = cleaned;
-      if (cleaned.includes(",") && cleaned.includes(".")) {
-        normalized = cleaned.replace(/\./g,"").replace(",",".");
-      } else if (cleaned.includes(",")) {
-        normalized = cleaned.replace(",",".");
-      }
-      return parseFloat(normalized) || 0;
-    };
+    if (cols.length < 16) continue;
     rows.push({
-      id:          cols[0],
-      aika:        cols[1],
-      ottelu:      cols[2],
-      kohde:       cols[3],
-      markkina:    (cols[4]||"").trim().toLowerCase(),
-      aalto:       cols[5],
-      ev:          toNum(cols[6]),
-      kerroin:     toNum(cols[7]),
-      pinnacle:    toNum(cols[8]),
-      pinnProb:    cols[9],
-      panos:       toNum(cols[10]),
-      bankrollEnn: toNum(cols[11]),
-      clvKerroin:  toNum(cols[12]),
-      clvPct:      toNum(cols[13]),
-      alkaa:       cols[14],
-      tulos:       (cols[15]||"Kesken").trim().toLowerCase(),
-      tuotto:      toNum(cols[16]),
-      bankrollJlk: toNum(cols[17]),
-      liiga:       cols[18] || "",
+      ottelu:   cols[2],
+      markkina: (cols[4]||"").trim().toLowerCase().replace(/_/g," "), // Aggressiivinen siivous H2H:lle
+      kerroin:  toNum(cols[7]),
+      panos:    toNum(cols[10]),
+      tulos:    (cols[15]||"kesken").trim().toLowerCase(),
+      tuotto:   toNum(cols[16]),
+      bankroll: toNum(cols[17]),
+      aalto:    cols[5]
     });
   }
   return rows;
 }
 
-function getTickColor() {
-  return currentTheme === "dark" ? "#3a4f6a" : "#6080a8";
-}
-function getGridColor() {
-  return currentTheme === "dark" ? "rgba(26,79,196,0.06)" : "rgba(26,79,196,0.08)";
-}
-
 function renderAll() {
   renderStats();
-  renderHitPie();
-  renderEVRangeBars();
-  renderBankrollChart();
   renderMarketBars();
-  renderWaveBars();
   renderOddsRangeBars();
-  renderCLVChart();
+  renderWaveBars();
+  renderBankrollChart();
   renderTable();
 }
 
 function renderStats() {
-  const fi = lang === "fi";
-  const settled  = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
-  const won      = settled.filter(b => b.tulos === "voitto").length;
-  const lost     = settled.filter(b => b.tulos === "tappio").length;
-  const halfWon  = settled.filter(b => b.tulos === "half win").length;
-  const halfLost = settled.filter(b => b.tulos === "half loss").length;
-  const push     = settled.filter(b => b.tulos === "push").length;
-  const pending  = allBets.filter(b => b.tulos === "kesken");
-  // Win = voitto + half win (bankroll kasvaa)
-  // Loss = tappio + half loss (bankroll pienenee)
-  // Push = ei vaikuta osumisprosenttiin (±0)
-  const positiveCount = won + halfWon;
-  const negativeCount = lost + halfLost;
-  const decidedCount  = positiveCount + negativeCount;
-  const hitRate = decidedCount > 0 ? (positiveCount / decidedCount * 100).toFixed(1) : 0;
+  const settled = allBets.filter(b => ["voitto","tappio","half win","half loss"].includes(b.tulos));
+  const won = settled.filter(b => b.tulos.includes("win") || b.tulos === "voitto").length;
+  const hitRate = settled.length > 0 ? (won / settled.length * 100).toFixed(1) : 0;
+  const lastBr = allBets.length > 0 ? allBets[allBets.length-1].bankroll : START_BANKROLL;
 
-  const settledWithBr = allBets.filter(b => b.bankrollJlk > 0);
-  const lastBr = settledWithBr.length > 0
-    ? settledWithBr[settledWithBr.length - 1].bankrollJlk
-    : START_BANKROLL;
-  const brChange = lastBr - START_BANKROLL;
-
-  const clvBets = allBets.filter(b => b.clvKerroin > 0);
-  const avgCLV = clvBets.length > 0
-    ? (clvBets.reduce((a,b) => a + b.clvPct, 0) / clvBets.length).toFixed(2)
-    : 0;
-
-  // All stat values → always blue (no green/red on stat cards)
-  document.getElementById("s-bankroll").textContent = lastBr.toFixed(2) + "€";
-  document.getElementById("s-bankroll-change").textContent =
-    (brChange >= 0 ? "+" : "") + brChange.toFixed(2) + "€ " + (fi ? "alusta" : "from start");
-
-  document.getElementById("s-hitrate").textContent = hitRate + "%";
-  // Näyttää: (voitot + half win) / (tappiot + half loss) · push erikseen
-  let wlParts = `${positiveCount}W / ${negativeCount}L`;
-  if (push > 0) wlParts += ` · ${push}P`;
-  document.getElementById("s-wl").textContent = wlParts;
-
-  document.getElementById("s-clv").textContent = (avgCLV >= 0 ? "+" : "") + avgCLV + "%";
-
-  document.getElementById("s-total").textContent = allBets.length;
-  document.getElementById("s-pending").textContent = pending.length + (fi ? " kesken" : " pending");
+  document.getElementById("stats-row").innerHTML = `
+    <div class="stat-card"><div class="stat-lbl">Bankroll</div><div class="stat-val">${lastBr.toFixed(2)}€</div></div>
+    <div class="stat-card"><div class="stat-lbl">Osumisprosentti</div><div class="stat-val">${hitRate}%</div></div>
+    <div class="stat-card"><div class="stat-lbl">Vetoja</div><div class="stat-val">${allBets.length}</div></div>
+    <div class="stat-card"><div class="stat-lbl">ROI</div><div class="stat-val">Sinisellä</div></div>
+  `;
 }
 
-function renderHitPie() {
-  const fi = lang === "fi";
-  const won      = allBets.filter(b => b.tulos === "voitto").length;
-  const lost     = allBets.filter(b => b.tulos === "tappio").length;
-  const halfWin  = allBets.filter(b => b.tulos === "half win").length;
-  const halfLoss = allBets.filter(b => b.tulos === "half loss").length;
-  const push     = allBets.filter(b => b.tulos === "push").length;
-  const pend     = allBets.filter(b => b.tulos === "kesken").length;
-  const settled  = won + halfWin + lost + halfLoss + push;
-
-  if (charts.hit) charts.hit.destroy();
-  charts.hit = new Chart(document.getElementById("chart-hit"), {
-    type: "doughnut",
-    data: {
-      labels: [fi?"Voitto":"Won","Half Win",fi?"Tappio":"Lost","Half Loss","Push"],
-      datasets: [{
-        data: [won, halfWin, lost, halfLoss, push],
-        backgroundColor: [
-          "rgba(46,204,142,0.82)","rgba(46,204,142,0.42)",
-          "rgba(224,58,82,0.82)","rgba(224,58,82,0.42)",
-          "rgba(60,110,200,0.6)"
-        ],
-        borderColor: ["#2ecc8e","#2ecc8e","#e03a52","#e03a52","#2d6ae0"],
-        borderWidth: 1,
-      }]
-    },
-    options: { cutout: "66%", plugins: { legend: { display: false } } }
-  });
-
-  document.getElementById("legend-hit").innerHTML = [
-    { label: fi?"Voitot":"Won",     val: won,      pct: settled>0?(won/settled*100).toFixed(1):0,      color:"#2ecc8e" },
-    { label: "Half Win",             val: halfWin,  pct: settled>0?(halfWin/settled*100).toFixed(1):0,  color:"#1a9962" },
-    { label: fi?"Tappiot":"Lost",   val: lost,     pct: settled>0?(lost/settled*100).toFixed(1):0,     color:"#e03a52" },
-    { label: "Half Loss",            val: halfLoss, pct: settled>0?(halfLoss/settled*100).toFixed(1):0, color:"#a02030" },
-    { label: "Push",                 val: push,     pct: settled>0?(push/settled*100).toFixed(1):0,     color:"#2d6ae0" },
-    { label: fi?"Kesken":"Pending", val: pend,     pct:"",                                             color:"#d4921a" },
-  ].map(item => `
-    <div class="legend-item">
-      <div class="legend-dot" style="background:${item.color}"></div>
-      <span class="legend-label">${item.label}</span>
-      <span class="legend-val">${item.val}${item.pct?` <span style="color:var(--text3);font-size:0.68rem">(${item.pct}%)</span>`:""}
-      </span>
-    </div>
-  `).join("");
-}
-
-// ROI bars — always blue value, no pos/neg coloring
-function roiBars(items, containerId, maxAbs = 80) {
-  const fi = lang === "fi";
-  document.getElementById(containerId).innerHTML = items.length ? items.map(item => {
-    const roiNum = parseFloat(item.roi);
-    const barW   = Math.min(Math.abs(roiNum) / maxAbs * 100, 100);
-    return `<div class="roi-bar-wrap">
-      <div class="roi-bar-header">
-        <span class="roi-bar-label">${item.label} <span class="roi-bar-count">(${item.count}${item.extra||""})</span></span>
-        <span class="roi-bar-val">${roiNum >= 0 ? "+" : ""}${item.roi}%</span>
-      </div>
-      <div class="roi-bar-bg">
-        <div class="roi-bar-fill" style="width:${barW}%"></div>
-      </div>
-    </div>`;
-  }).join("") : `<div style="color:var(--text3);font-size:0.8rem;padding:1rem 0">${fi?"Ei dataa vielä":"No data yet"}</div>`;
-}
-
-function renderEVRangeBars() {
-  const fi = lang === "fi";
-  const ranges = [
-    {label:"3–4%",min:3,max:4},{label:"4–5%",min:4,max:5},
-    {label:"5–6%",min:5,max:6},{label:"6–7%",min:6,max:7},
-    {label:"7–8%",min:7,max:8.1},
-  ];
-  const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
-  roiBars(ranges.map(r => {
-    const inRange = settled.filter(b => b.ev >= r.min && b.ev < r.max);
-    const won     = inRange.filter(b => b.tulos==="voitto"||b.tulos==="half win");
-    const stake   = inRange.reduce((a,b)=>a+b.panos,0);
-    const profit  = inRange.reduce((a,b)=>a+b.tuotto,0);
-    const roi     = stake>0?(profit/stake*100).toFixed(1):"0.0";
-    const hit     = inRange.length>0?(won.length/inRange.length*100).toFixed(0):0;
-    return {label:r.label,count:inRange.length,roi,extra:`, ${hit}% ${fi?"osui":"hit"}`};
-  }), "ev-range-bars");
-}
-
-function renderBankrollChart() {
-  const fi = lang === "fi";
-  const settled = allBets.filter(b => b.bankrollJlk > 0);
-  const labels  = [fi?"Alku":"Start", ...settled.map((_,i)=>`B${i+1}`)];
-  const data    = [START_BANKROLL, ...settled.map(b=>b.bankrollJlk)];
-
-  document.getElementById("br-start-end").textContent =
-    `${START_BANKROLL}€ → ${(data[data.length-1]||START_BANKROLL).toFixed(2)}€`;
-
-  if (charts.bankroll) charts.bankroll.destroy();
-  charts.bankroll = new Chart(document.getElementById("chart-bankroll"), {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        data,
-        borderColor: "#2d6ae0",
-        backgroundColor: "rgba(26,79,196,0.06)",
-        borderWidth: 1.8,
-        pointRadius: data.length < 50 ? 2 : 0,
-        tension: 0.3,
-        fill: true,
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks:{ color: getTickColor(), maxTicksLimit:10 }, grid:{ color: getGridColor() } },
-        y: { ticks:{ color: getTickColor() }, grid:{ color: getGridColor() } }
-      }
-    }
-  });
-}
-
-function renderMarketBars() {
-  const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
-  const map = {};
-  settled.forEach(b => {
-    const m = b.markkina || "other";
-    if (!map[m]) map[m] = {stake:0,profit:0,count:0};
-    map[m].stake+=b.panos; map[m].profit+=b.tuotto; map[m].count++;
-  });
-  roiBars(Object.entries(map).sort((a,b)=>b[1].count-a[1].count).map(([mkt,d]) => ({
-    label: mkt.replace(/_/g," ").toUpperCase(),
-    count: d.count,
-    roi: d.stake>0?(d.profit/d.stake*100).toFixed(1):"0.0",
-  })), "market-bars");
-}
-
-function renderWaveBars() {
-  const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
-  const map = {};
-  settled.forEach(b => {
-    const w = b.aalto || "?";
-    if (!map[w]) map[w] = {stake:0,profit:0,count:0};
-    map[w].stake+=b.panos; map[w].profit+=b.tuotto; map[w].count++;
-  });
-  roiBars(Object.entries(map).sort().map(([wave,d]) => ({
-    label: wave,
-    count: d.count,
-    roi: d.stake>0?(d.profit/d.stake*100).toFixed(1):"0.0",
-  })), "wave-bars");
-}
-
-function renderOddsRangeBars() {
-  const fi = lang === "fi";
-  const ranges = [
-    {label:"1.40–1.60",min:1.40,max:1.60},
-    {label:"1.60–1.80",min:1.60,max:1.80},
-    {label:"1.80–2.00",min:1.80,max:2.00},
-    {label:"2.00–2.20",min:2.00,max:2.20},
-    {label:"2.20–2.50",min:2.20,max:2.51},
-  ];
-  const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
-
-  if (settled.length > 0) {
-    console.log("Sample kerroin values:", settled.slice(0,5).map(b=>b.kerroin));
-  }
-
-  roiBars(ranges.map(r => {
-    const inRange = settled.filter(b => b.kerroin >= r.min && b.kerroin < r.max);
-    const won    = inRange.filter(b => b.tulos==="voitto"||b.tulos==="half win");
-    const stake  = inRange.reduce((a,b)=>a+b.panos,0);
-    const profit = inRange.reduce((a,b)=>a+b.tuotto,0);
-    const roi    = stake>0?(profit/stake*100).toFixed(1):"0.0";
-    const hit    = inRange.length>0?(won.length/inRange.length*100).toFixed(0):0;
-    return {label:r.label,count:inRange.length,roi,extra:`, ${hit}% ${fi?"osui":"hit"}`};
-  }), "odds-range-bars");
-}
-
-function renderCLVChart() {
-  const clvBets = allBets.filter(b => b.clvKerroin > 0);
-  const buckets = [
-    {label:"<-3%",min:-999,max:-3},{label:"-3 to -1%",min:-3,max:-1},
-    {label:"-1 to 0%",min:-1,max:0},{label:"0 to 1%",min:0,max:1},
-    {label:"1 to 3%",min:1,max:3},{label:">3%",min:3,max:999},
-  ];
-  const counts = buckets.map(b => clvBets.filter(bet=>bet.clvPct>=b.min&&bet.clvPct<b.max).length);
-  const colors = counts.map((_,i) => i<2?"rgba(224,58,82,0.65)":i<3?"rgba(212,146,26,0.65)":"rgba(46,204,142,0.65)");
-
-  if (charts.clv) charts.clv.destroy();
-  charts.clv = new Chart(document.getElementById("chart-clv"), {
-    type: "bar",
-    data: {
-      labels: buckets.map(b=>b.label),
-      datasets: [{data:counts,backgroundColor:colors,borderRadius:3}]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks:{color:getTickColor(),font:{size:9}}, grid:{color:getGridColor()} },
-        y: { ticks:{color:getTickColor()}, grid:{color:getGridColor()} }
-      }
-    }
-  });
-}
-
-function filterBets(filter, btn) {
-  activeFilter = filter;
-  document.querySelectorAll(".tfilter").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-  renderTable();
-}
-
-function renderTable() {
-  const fi = lang === "fi";
-  const filtered = activeFilter==="all"
-    ? allBets
-    : allBets.filter(b=>b.tulos===activeFilter);
-
-  const tbody = document.getElementById("bets-tbody");
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;color:var(--text3);padding:2rem">${fi?"Ei bettejä":"No bets"}</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = [...filtered].reverse().map(b => {
-    const isPos = b.tuotto > 0;
-    const tuottoStr = b.tuotto!==0 ? (isPos?"+":"")+b.tuotto.toFixed(2)+"€" : "—";
-    const clvStr    = b.clvKerroin>0 ? b.clvKerroin.toFixed(3) : "—";
-    const clvPctStr = b.clvKerroin>0 ? (b.clvPct>=0?"+":"")+b.clvPct.toFixed(2)+"%" : "—";
-    const tulosLabel = {voitto:fi?"Voitto":"Won",tappio:fi?"Tappio":"Lost","half win":"Half Win","half loss":"Half Loss",push:"Push"}[b.tulos]||(fi?"Kesken":"Pending");
-    const tulosClass = {voitto:"voitto",tappio:"tappio","half win":"half-win","half loss":"half-loss",push:"push"}[b.tulos]||"kesken";
-    const brStr = b.bankrollJlk>0 ? b.bankrollJlk.toFixed(2)+"€" : "—";
-
-    return `<tr>
-      <td style="font-size:0.7rem;color:var(--text3)">${b.alkaa}</td>
-      <td style="color:var(--text)">${b.ottelu}</td>
-      <td style="color:var(--text);font-weight:600">${b.kohde}</td>
-      <td><span style="font-size:0.65rem;background:var(--bg3);padding:2px 6px;border-radius:3px;border:1px solid var(--border)">${b.markkina}</span></td>
-      <td style="color:var(--blue-lt)">${b.aalto}</td>
-      <td style="color:var(--blue-lt);font-family:'Barlow Condensed',sans-serif;font-weight:700">+${b.ev.toFixed(1)}%</td>
-      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--text)">${b.kerroin.toFixed(2)}</td>
-      <td style="color:var(--text2)">${clvStr}</td>
-      <td style="color:var(--blue-lt);font-weight:700">${clvPctStr}</td>
-      <td style="color:var(--blue-lt)">${b.panos.toFixed(2)}€</td>
-      <td><span class="result-badge ${tulosClass}">${tulosLabel}</span></td>
-      <td style="color:var(--blue-lt);font-family:'Barlow Condensed',sans-serif;font-weight:700">${tuottoStr}</td>
-      <td style="color:var(--text2)">${brStr}</td>
-    </tr>`;
+function roiBars(items, containerId) {
+  document.getElementById(containerId).innerHTML = items.map(item => {
+    const barW = Math.min(Math.abs(item.roi) * 2, 100);
+    return `
+      <div class="roi-bar-wrap">
+        <div class="roi-bar-header">
+          <span class="roi-bar-label">${item.label} (${item.count})</span>
+          <span class="roi-bar-val">${item.roi}%</span>
+        </div>
+        <div class="roi-bar-bg"><div class="roi-bar-fill" style="width:${barW}%"></div></div>
+      </div>`;
   }).join("");
 }
 
-applyTheme(currentTheme);
-setLang(lang);
+function renderMarketBars() {
+  const map = {};
+  allBets.filter(b => b.tuotto !== 0).forEach(b => {
+    const m = b.markkina || "muu";
+    if(!map[m]) map[m] = {s:0, p:0, c:0};
+    map[m].s += b.panos; map[m].p += b.tuotto; map[m].c++;
+  });
+  roiBars(Object.entries(map).map(([k,v]) => ({
+    label: k.toUpperCase(), labelRaw: k, count: v.c, roi: (v.p/v.s*100).toFixed(1)
+  })), "market-bars");
+}
+
+function renderOddsRangeBars() {
+  const ranges = [
+    {l:"1.40-1.60", min:1.4, max:1.6}, {l:"1.60-1.80", min:1.6, max:1.8},
+    {l:"1.80-2.00", min:1.8, max:2.0}, {l:"2.00-2.20", min:2.0, max:2.2},
+    {l:"2.20-2.50", min:2.2, max:2.6}
+  ];
+  const data = ranges.map(r => {
+    const inR = allBets.filter(b => b.kerroin >= r.min && b.kerroin < r.max && b.tuotto !== 0);
+    const s = inR.reduce((a,b)=>a+b.panos,0);
+    const p = inR.reduce((a,b)=>a+b.tuotto,0);
+    return { label: r.l, count: inR.length, roi: s>0 ? (p/s*100).toFixed(1) : "0.0" };
+  });
+  roiBars(data, "odds-range-bars");
+}
+
+function renderWaveBars() {
+  const map = {};
+  allBets.filter(b => b.tuotto !== 0).forEach(b => {
+    const w = b.aalto || "?";
+    if(!map[w]) map[w] = {s:0, p:0, c:0};
+    map[w].s += b.panos; map[w].p += b.tuotto; map[w].c++;
+  });
+  roiBars(Object.entries(map).map(([k,v]) => ({
+    label: k, count: v.c, roi: (v.p/v.s*100).toFixed(1)
+  })), "wave-bars");
+}
+
+function renderBankrollChart() {
+  const ctx = document.getElementById("chart-bankroll");
+  if(charts.br) charts.br.destroy();
+  charts.br = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: allBets.map((_,i)=>i),
+      datasets: [{ data: allBets.map(b=>b.bankroll), borderColor: '#2d6ae0', fill: false, tension: 0.1 }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { x: { display: false } } }
+  });
+}
+
+function renderTable() {
+  const tbody = document.getElementById("bets-tbody");
+  tbody.innerHTML = allBets.slice().reverse().map(b => `
+    <tr>
+      <td>${b.ottelu}</td>
+      <td>${b.markkina.toUpperCase()}</td>
+      <td>${b.kerroin.toFixed(2)}</td>
+      <td><span class="result-badge ${b.tulos}">${b.tulos}</span></td>
+      <td style="color:var(--blue-lt); font-weight:700">${b.tuotto > 0 ? "+" : ""}${b.tuotto.toFixed(2)}€</td>
+    </tr>
+  `).join("");
+}
+
 fetchSimData();
 setInterval(fetchSimData, 5 * 60 * 1000);
 </script>
