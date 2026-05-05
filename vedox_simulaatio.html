@@ -150,14 +150,67 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 .roi-bar-bg { height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
 .roi-bar-fill { height: 100%; border-radius: 3px; background: var(--blue-lt); transition: width 0.8s ease; }
 
-/* Sport/League breakdown */
-.sport-section { margin-bottom: 14px; }
-.sport-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
-.sport-name { font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--text); letter-spacing: 0.05em; text-transform: uppercase; }
-.sport-pct { font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--blue-lt); }
-.league-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0 3px 10px; font-size: 0.7rem; }
-.league-name { color: var(--text3); }
-.league-pct { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; color: var(--text2); font-size: 0.72rem; }
+/* Sport/League breakdown — advanced interactive */
+.sl-wrap { display: flex; gap: 16px; min-height: 320px; }
+
+.sl-sports { width: 220px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; }
+
+.sl-sport-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+.sl-sport-btn:hover { border-color: var(--border2); }
+.sl-sport-btn.active { background: var(--blue-dim2); border-color: var(--blue-lt); }
+
+.sl-sport-name { font-family: 'Barlow Condensed', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--text); letter-spacing: 0.04em; margin-bottom: 4px; }
+.sl-sport-meta { display: flex; gap: 8px; font-size: 0.62rem; color: var(--text3); }
+.sl-sport-meta span { display: flex; align-items: center; gap: 3px; }
+.sl-sport-meta .val { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: var(--blue-lt); }
+
+.sl-bar-mini { height: 3px; background: var(--bg4); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.sl-bar-mini-fill { height: 100%; border-radius: 2px; background: var(--blue-lt); }
+
+.sl-detail { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; overflow: hidden; }
+
+.sl-detail-header {
+  display: grid;
+  grid-template-columns: 1fr 70px 70px 80px 80px;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.sl-detail-header span {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  text-align: right;
+}
+.sl-detail-header span:first-child { text-align: left; }
+
+.sl-league-row {
+  display: grid;
+  grid-template-columns: 1fr 70px 70px 80px 80px;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+.sl-league-row:last-child { border-bottom: none; }
+
+.sl-league-name { font-size: 0.74rem; color: var(--text2); }
+.sl-league-val { font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 700; color: var(--text2); text-align: right; }
+.sl-league-roi { font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 700; color: var(--blue-lt); text-align: right; }
+.sl-league-bar { height: 4px; background: var(--bg4); border-radius: 2px; overflow: hidden; }
+.sl-league-bar-fill { height: 100%; border-radius: 2px; background: var(--blue-lt); transition: width 0.5s ease; }
 
 /* Bets table */
 .table-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem; }
@@ -349,10 +402,15 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 
       <div class="chart-card full">
         <div class="chart-title">
-          <span data-fi="ROI per laji & liiga" data-en="ROI per sport & league">ROI per laji &amp; liiga</span>
-          <span data-fi="Osuus kaikista beteistä" data-en="Share of all bets">Osuus kaikista beteistä</span>
+          <span data-fi="Laji &amp; liiga -analyysi" data-en="Sport &amp; league analysis">Laji &amp; liiga -analyysi</span>
+          <span id="sl-summary" style="font-weight:400">—</span>
         </div>
-        <div id="sport-league-bars"></div>
+        <div class="sl-wrap">
+          <div class="sl-sports" id="sl-sports"></div>
+          <div class="sl-detail" id="sl-detail">
+            <div style="color:var(--text3);font-size:0.8rem;padding:2rem 0;text-align:center" data-fi="Valitse laji vasemmalta" data-en="Select a sport on the left">Valitse laji vasemmalta</div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -793,62 +851,110 @@ function getLeagueName(liiga) {
   return parts.slice(2).join(" ").toUpperCase() || parts.join(" ").toUpperCase();
 }
 
+let activeSport = null;
+
 function renderSportLeagueBars() {
   const fi = lang === "fi";
   const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
-  const total = settled.length;
-  if (total === 0) {
-    document.getElementById("sport-league-bars").innerHTML = `<div style="color:var(--text3);font-size:0.8rem;padding:1rem 0">${fi?"Ei dataa vielä":"No data yet"}</div>`;
+  const totalBets  = settled.length;
+  const totalStake = settled.reduce((a,b) => a + b.panos, 0);
+
+  if (totalBets === 0) {
+    document.getElementById("sl-sports").innerHTML = `<div style="color:var(--text3);font-size:0.8rem">${fi?"Ei dataa":"No data"}</div>`;
     return;
   }
 
-  // Group by sport
   const sports = {};
   settled.forEach(b => {
-    const sport = getSportName(b.liiga);
+    const sport  = getSportName(b.liiga);
     const league = getLeagueName(b.liiga);
-    if (!sports[sport]) sports[sport] = {};
-    if (!sports[sport][league]) sports[sport][league] = {count:0, stake:0, profit:0};
-    sports[sport][league].count++;
-    sports[sport][league].stake += b.panos;
-    sports[sport][league].profit += b.tuotto;
+    if (!sports[sport]) sports[sport] = { bets:0, stake:0, profit:0, leagues:{} };
+    sports[sport].bets++;
+    sports[sport].stake  += b.panos;
+    sports[sport].profit += b.tuotto;
+    if (!sports[sport].leagues[league]) sports[sport].leagues[league] = {bets:0, stake:0, profit:0};
+    sports[sport].leagues[league].bets++;
+    sports[sport].leagues[league].stake  += b.panos;
+    sports[sport].leagues[league].profit += b.tuotto;
   });
 
-  const sorted = Object.entries(sports).sort((a,b) => {
-    const aTotal = Object.values(a[1]).reduce((s,v)=>s+v.count,0);
-    const bTotal = Object.values(b[1]).reduce((s,v)=>s+v.count,0);
-    return bTotal - aTotal;
-  });
+  const sorted = Object.entries(sports).sort((a,b) => b[1].stake - a[1].stake);
+  if (!activeSport || !sports[activeSport]) activeSport = sorted[0][0];
 
-  document.getElementById("sport-league-bars").innerHTML = sorted.map(([sport, leagues]) => {
-    const sportCount = Object.values(leagues).reduce((s,v)=>s+v.count,0);
-    const sportPct   = (sportCount / total * 100).toFixed(1);
-    const sportStake  = Object.values(leagues).reduce((s,v)=>s+v.stake,0);
-    const sportProfit = Object.values(leagues).reduce((s,v)=>s+v.profit,0);
-    const sportRoi    = sportStake > 0 ? (sportProfit/sportStake*100).toFixed(1) : "0.0";
-    const barW = Math.min(sportCount / total * 100, 100);
+  document.getElementById("sl-summary").textContent =
+    `${totalBets} ${fi?"bettiä":"bets"} · ${totalStake.toFixed(0)}€ ${fi?"panosta":"staked"}`;
 
-    const leagueRows = Object.entries(leagues).sort((a,b)=>b[1].count-a[1].count).map(([league, d]) => {
-      const pct = (d.count / total * 100).toFixed(1);
-      const roi = d.stake > 0 ? (d.profit/d.stake*100).toFixed(1) : "0.0";
-      return `<div class="league-row">
-        <span class="league-name">${league} <span style="color:var(--text3)">(${d.count})</span></span>
-        <span class="league-pct">${pct}% &nbsp; ROI <span style="color:var(--blue-lt)">${parseFloat(roi)>=0?"+":""}${roi}%</span></span>
-      </div>`;
-    }).join("");
-
-    return `<div class="sport-section">
-      <div class="sport-header">
-        <span class="sport-name">${sport} <span style="color:var(--text3);font-weight:400">(${sportCount})</span></span>
-        <div style="display:flex;align-items:center;gap:12px">
-          <span style="font-size:0.7rem;color:var(--text3)">ROI <span style="color:var(--blue-lt);font-weight:700">${parseFloat(sportRoi)>=0?"+":""}${sportRoi}%</span></span>
-          <span class="sport-pct">${sportPct}%</span>
-        </div>
+  document.getElementById("sl-sports").innerHTML = sorted.map(([sport, d]) => {
+    const stakePct = (d.stake / totalStake * 100).toFixed(1);
+    const roi = d.stake > 0 ? (d.profit / d.stake * 100).toFixed(1) : "0.0";
+    return `<button class="sl-sport-btn ${sport===activeSport?"active":""}" onclick="selectSport(${JSON.stringify(sport)})">
+      <div class="sl-sport-name">${sport}</div>
+      <div class="sl-sport-meta">
+        <span>${d.bets} ${fi?"bettiä":"bets"}</span>
+        <span>·</span>
+        <span>${fi?"Kassasta":"Stake"}: <span class="val">${stakePct}%</span></span>
+        <span>·</span>
+        <span>ROI: <span class="val">${parseFloat(roi)>=0?"+":""}${roi}%</span></span>
       </div>
-      <div class="roi-bar-bg" style="margin-bottom:6px"><div class="roi-bar-fill" style="width:${barW}%"></div></div>
-      ${leagueRows}
+      <div class="sl-bar-mini"><div class="sl-bar-mini-fill" style="width:${stakePct}%"></div></div>
+    </button>`;
+  }).join("");
+
+  renderLeagueDetail(sports, totalStake, totalBets);
+}
+
+function selectSport(sport) {
+  activeSport = sport;
+  renderSportLeagueBars();
+}
+
+function renderLeagueDetail(sports, totalStake, totalBets) {
+  const fi = lang === "fi";
+  const d = sports[activeSport];
+  if (!d) return;
+
+  const leagues = Object.entries(d.leagues).sort((a,b) => b[1].stake - a[1].stake);
+  const sportRoi = d.stake > 0 ? (d.profit / d.stake * 100).toFixed(1) : "0.0";
+  const sportStakePct = totalStake > 0 ? (d.stake / totalStake * 100).toFixed(1) : "0.0";
+
+  const rows = leagues.map(([league, ld]) => {
+    const ofTotal  = totalStake > 0 ? (ld.stake / totalStake * 100).toFixed(1) : "0.0";
+    const ofSport  = d.stake > 0 ? (ld.stake / d.stake * 100).toFixed(1) : "0.0";
+    const roi      = ld.stake > 0 ? (ld.profit / ld.stake * 100).toFixed(1) : "0.0";
+    const barW     = d.stake > 0 ? Math.min(ld.stake / d.stake * 100, 100) : 0;
+    const roiColor = parseFloat(roi) >= 0 ? "var(--blue-lt)" : "var(--red)";
+    return `<div class="sl-league-row">
+      <div>
+        <div class="sl-league-name">${league}</div>
+        <div class="sl-league-bar"><div class="sl-league-bar-fill" style="width:${barW}%"></div></div>
+      </div>
+      <div class="sl-league-val">${ld.bets}</div>
+      <div class="sl-league-val">${ofTotal}%</div>
+      <div class="sl-league-val">${ofSport}%</div>
+      <div class="sl-league-roi" style="color:${roiColor}">${parseFloat(roi)>=0?"+":""}${roi}%</div>
     </div>`;
   }).join("");
+
+  document.getElementById("sl-detail").innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--text)">${activeSport}</div>
+      <div style="display:flex;gap:16px;font-size:0.72rem;flex-wrap:wrap">
+        <span style="color:var(--text3)">${fi?"Betsit":"Bets"}: <span style="color:var(--text2);font-weight:700">${d.bets}</span></span>
+        <span style="color:var(--text3)">${fi?"Kassasta":"Of stake"}: <span style="color:var(--blue-lt);font-weight:700">${sportStakePct}%</span></span>
+        <span style="color:var(--text3)">${fi?"Panokset":"Staked"}: <span style="color:var(--text2);font-weight:700">${d.stake.toFixed(0)}€</span></span>
+        <span style="color:var(--text3)">ROI: <span style="color:${parseFloat(sportRoi)>=0?"var(--blue-lt)":"var(--red)"};font-weight:700">${parseFloat(sportRoi)>=0?"+":""}${sportRoi}%</span></span>
+        <span style="color:var(--text3)">${fi?"Tuotto":"P&L"}: <span style="color:${d.profit>=0?"var(--blue-lt)":"var(--red)"};font-weight:700">${d.profit>=0?"+":""}${d.profit.toFixed(2)}€</span></span>
+      </div>
+    </div>
+    <div class="sl-detail-header">
+      <span>${fi?"Liiga":"League"}</span>
+      <span>${fi?"Betsit":"Bets"}</span>
+      <span>${fi?"Kaikista":"Of total"}</span>
+      <span>${fi?"Lajissa":"In sport"}</span>
+      <span>ROI</span>
+    </div>
+    ${rows}
+  `;
 }
 
 function filterBets(filter, btn) {
