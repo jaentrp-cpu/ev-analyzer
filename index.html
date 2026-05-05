@@ -9,57 +9,55 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root, [data-theme="dark"] {
-  --bg:         #070d1a;
-  --bg2:        #0b1425;
-  --bg3:        #0f1b30;
-  --bg4:        #142038;
-  --blue:       #1a5ce8;
-  --blue-lt:    #3d7fff;
-  --blue-dim:   rgba(26,92,232,0.12);
-  --blue-dim2:  rgba(26,92,232,0.25);
-  --border:     rgba(61,127,255,0.12);
-  --border2:    rgba(61,127,255,0.25);
-  --white:      #e2eaf8;
-  --white2:     #7a8fb0;
-  --white3:     #3d5070;
-  --green:      #00d68f;
-  --green-dim:  rgba(0,214,143,0.1);
-  --red:        #ff4560;
-  --red-dim:    rgba(255,69,96,0.1);
-  --amber:      #ffb020;
-  --amber-dim:  rgba(255,176,32,0.1);
-  --radius:     10px;
-  --radius-sm:  6px;
-  --shadow:     0 8px 32px rgba(0,0,0,0.4);
-  --header-bg:  rgba(7,13,26,0.88);
-  --grid-color: rgba(26,92,232,0.035);
-  --tick-color: #3d5070;
+  --bg:        #000000;
+  --bg2:       #080f1e;
+  --bg3:       #0c1628;
+  --bg4:       #111f35;
+  --blue:      #1a4fc4;
+  --blue-lt:   #2d6ae0;
+  --blue-dim:  rgba(26,79,196,0.14);
+  --blue-dim2: rgba(26,79,196,0.22);
+  --border:    rgba(30,70,160,0.22);
+  --border2:   rgba(30,70,160,0.35);
+  --text:      #ffffff;
+  --text2:     #b0c4de;
+  --text3:     #5a7090;
+  --green:     #2ecc8e;
+  --green-dim: rgba(46,204,142,0.1);
+  --red:       #e03a52;
+  --red-dim:   rgba(224,58,82,0.1);
+  --amber:     #d4921a;
+  --amber-dim: rgba(212,146,26,0.1);
+  --radius:    8px;
+  --radius-sm: 5px;
+  --header-bg: rgba(0,0,0,0.94);
+  --grid-color: rgba(26,79,196,0.025);
+  --tick-color: #3a4f6a;
 }
 
 [data-theme="light"] {
-  --bg:         #ffffff;
-  --bg2:        #f4f7fc;
-  --bg3:        #e8edf6;
-  --bg4:        #dce5f4;
-  --blue:       #1a4fc4;
-  --blue-lt:    #2d6ae0;
-  --blue-dim:   rgba(26,79,196,0.08);
-  --blue-dim2:  rgba(26,79,196,0.14);
-  --border:     rgba(26,79,196,0.15);
-  --border2:    rgba(26,79,196,0.25);
-  --white:      #0a0a0a;
-  --white2:     #2a3a52;
-  --white3:     #6080a8;
-  --green:      #1a9962;
-  --green-dim:  rgba(26,153,98,0.1);
-  --red:        #c02030;
-  --red-dim:    rgba(192,32,48,0.1);
-  --amber:      #b07010;
-  --amber-dim:  rgba(176,112,16,0.1);
-  --radius:     10px;
-  --radius-sm:  6px;
-  --shadow:     0 8px 32px rgba(0,0,0,0.1);
-  --header-bg:  rgba(255,255,255,0.96);
+  --bg:        #ffffff;
+  --bg2:       #f4f7fc;
+  --bg3:       #e8edf6;
+  --bg4:       #dce5f4;
+  --blue:      #1a4fc4;
+  --blue-lt:   #2d6ae0;
+  --blue-dim:  rgba(26,79,196,0.08);
+  --blue-dim2: rgba(26,79,196,0.14);
+  --border:    rgba(26,79,196,0.15);
+  --border2:   rgba(26,79,196,0.25);
+  --text:      #000000;
+  --text2:     #2a3a52;
+  --text3:     #6080a8;
+  --green:     #1a9962;
+  --green-dim: rgba(26,153,98,0.1);
+  --red:       #c02030;
+  --red-dim:   rgba(192,32,48,0.1);
+  --amber:     #b07010;
+  --amber-dim: rgba(176,112,16,0.1);
+  --radius:    8px;
+  --radius-sm: 5px;
+  --header-bg: rgba(255,255,255,0.96);
   --grid-color: rgba(26,79,196,0.04);
   --tick-color: #6080a8;
 }
@@ -68,35 +66,21 @@ html { scroll-behavior: smooth; }
 
 body {
   background: var(--bg);
-  color: var(--white);
+  color: var(--text);
   font-family: 'Barlow', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
   transition: background 0.2s, color 0.2s;
 }
 
-/* Grid overlay */
-body::before {
+[data-theme="dark"] body::before {
   content: '';
   position: fixed;
   inset: 0;
   background-image:
     linear-gradient(var(--grid-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-  background-size: 48px 48px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Glow orbs */
-body::after {
-  content: '';
-  position: fixed;
-  top: -20%;
-  left: -10%;
-  width: 60%;
-  height: 60%;
-  background: radial-gradient(ellipse, rgba(26,92,232,0.06) 0%, transparent 70%);
+  background-size: 52px 52px;
   pointer-events: none;
   z-index: 0;
 }
@@ -124,11 +108,7 @@ header {
   text-decoration: none;
 }
 
-.logo-icon {
-  width: 36px;
-  height: 36px;
-}
-
+.logo-icon { width: 36px; height: 36px; }
 .logo-text-wrap { line-height: 1; }
 
 .logo-name {
@@ -136,16 +116,15 @@ header {
   font-weight: 900;
   font-size: 1.5rem;
   letter-spacing: 0.06em;
-  color: #fff;
+  color: var(--text);
 }
-
 .logo-name span { color: var(--blue-lt); }
 
 .logo-tagline {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.5rem;
   letter-spacing: 0.22em;
-  color: var(--white3);
+  color: var(--text3);
   text-transform: uppercase;
   margin-top: 1px;
   display: block;
@@ -163,7 +142,7 @@ nav {
 .nav-btn {
   background: none;
   border: none;
-  color: var(--white2);
+  color: var(--text3);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.88rem;
   font-weight: 600;
@@ -175,14 +154,13 @@ nav {
   transition: all 0.18s;
   white-space: nowrap;
 }
-
-.nav-btn:hover { color: var(--white); background: var(--blue-dim); }
+.nav-btn:hover { color: var(--text); background: var(--blue-dim); }
 .nav-btn.active { color: #fff; background: var(--blue); }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .live-pill {
@@ -196,7 +174,7 @@ nav {
   text-transform: uppercase;
   color: var(--green);
   background: var(--green-dim);
-  border: 1px solid rgba(0,214,143,0.2);
+  border: 1px solid rgba(46,204,142,0.2);
   padding: 5px 12px;
   border-radius: 20px;
 }
@@ -214,7 +192,7 @@ nav {
 .lang-btn {
   background: var(--bg3);
   border: 1px solid var(--border2);
-  color: var(--white2);
+  color: var(--text3);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
@@ -229,7 +207,7 @@ nav {
 .theme-btn {
   background: var(--bg3);
   border: 1px solid var(--border2);
-  color: var(--white2);
+  color: var(--text3);
   font-size: 1rem;
   width: 34px; height: 34px;
   border-radius: 5px;
@@ -239,13 +217,6 @@ nav {
   flex-shrink: 0;
 }
 .theme-btn:hover { border-color: var(--blue-lt); }
-
-#countdown-pill {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  color: var(--white3);
-}
 
 /* ===== MAIN ===== */
 main {
@@ -278,25 +249,15 @@ main {
   overflow: hidden;
   transition: border-color 0.2s, transform 0.2s;
 }
-
 .stat-card:hover { border-color: var(--border2); transform: translateY(-1px); }
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--blue), var(--blue-lt));
-  opacity: 0.8;
-}
 
 .stat-lbl {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--white3);
+  color: var(--text3);
   margin-bottom: 8px;
 }
 
@@ -305,13 +266,8 @@ main {
   font-size: 2rem;
   font-weight: 800;
   line-height: 1;
-  color: #fff;
+  color: var(--blue-lt);
 }
-
-.stat-val.blue  { color: var(--blue-lt); }
-.stat-val.green { color: var(--green); }
-.stat-val.red   { color: var(--red); }
-.stat-val.amber { color: var(--amber); }
 
 /* ===== TOOLBAR ===== */
 .toolbar {
@@ -334,13 +290,13 @@ main {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--white3);
+  color: var(--text3);
 }
 
 .fg input, .fg select {
   background: var(--bg);
   border: 1px solid var(--border2);
-  color: var(--white);
+  color: var(--text);
   font-family: 'Barlow', sans-serif;
   font-size: 0.82rem;
   padding: 7px 10px;
@@ -349,13 +305,12 @@ main {
   outline: none;
   transition: border-color 0.18s;
 }
-
 .fg input:focus, .fg select:focus { border-color: var(--blue-lt); }
 .fg select option { background: var(--bg2); }
 
 .btn-reset {
   background: var(--red-dim);
-  border: 1px solid rgba(255,69,96,0.25);
+  border: 1px solid rgba(224,58,82,0.25);
   color: var(--red);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.75rem;
@@ -368,13 +323,13 @@ main {
   align-self: flex-end;
   transition: all 0.18s;
 }
-.btn-reset:hover { background: rgba(255,69,96,0.22); }
+.btn-reset:hover { background: rgba(224,58,82,0.18); }
 
 .filter-info {
   align-self: flex-end;
   padding-bottom: 7px;
   font-size: 0.7rem;
-  color: var(--white3);
+  color: var(--text3);
   margin-left: auto;
 }
 .filter-info strong { color: var(--blue-lt); }
@@ -387,7 +342,7 @@ main {
   margin-bottom: 8px;
   overflow: hidden;
   position: relative;
-  transition: border-color 0.18s, transform 0.15s;
+  transition: border-color 0.18s;
 }
 
 .bet-card::before {
@@ -397,19 +352,16 @@ main {
   width: 3px;
   background: var(--blue-lt);
 }
-
 .bet-card.high::before { background: var(--amber); }
-.bet-card.top::before  { background: var(--green); box-shadow: 0 0 12px rgba(0,214,143,0.5); }
-
-.bet-card:hover { border-color: var(--border2); transform: translateX(2px); }
+.bet-card.top::before  { background: var(--green); }
+.bet-card:hover { border-color: var(--border2); }
 
 .bet-main {
   padding: 0.85rem 1.25rem 0.85rem 1.5rem;
   display: grid;
-  grid-template-columns: 1fr 100px 120px 150px;
+  grid-template-columns: 1fr 90px 110px 180px;
   gap: 1.5rem;
   align-items: center;
-  cursor: pointer;
 }
 
 .match-top {
@@ -428,18 +380,16 @@ main {
   padding: 2px 7px;
   border-radius: 3px;
 }
+.badge-sport { background: var(--blue-dim2); color: var(--blue-lt); border: 1px solid var(--border2); }
+.badge-mkt   { background: var(--bg3); color: var(--text3); border: 1px solid var(--border); }
 
-.badge-sport { background: var(--blue-dim2); color: var(--blue-lt); border: 1px solid rgba(61,127,255,0.25); }
-.badge-wave  { background: var(--bg3); color: var(--white3); border: 1px solid var(--border); }
-.badge-mkt   { background: var(--bg3); color: var(--white2); border: 1px solid var(--border); }
-
-.match-name { font-size: 0.58rem; color: var(--white3); letter-spacing: 0.03em; }
+.match-name { font-size: 0.58rem; color: var(--text3); letter-spacing: 0.03em; margin-bottom: 3px; }
 
 .bet-target {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text);
   letter-spacing: 0.02em;
   margin-bottom: 4px;
 }
@@ -452,7 +402,7 @@ main {
 
 .meta-tag {
   font-size: 0.6rem;
-  color: var(--white2);
+  color: var(--text2);
   background: var(--bg3);
   padding: 2px 7px;
   border-radius: 3px;
@@ -467,7 +417,7 @@ main {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--white3);
+  color: var(--text3);
   margin-bottom: 4px;
 }
 
@@ -475,81 +425,79 @@ main {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.15rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--blue-lt);
   line-height: 1;
 }
 
-.cell-sub { font-size: 0.58rem; color: var(--white3); margin-top: 3px; }
+.cell-sub { font-size: 0.58rem; color: var(--text3); margin-top: 3px; }
 
-.ev-num { color: var(--blue-lt); }
-.bet-card.high .ev-num { color: var(--amber); }
-.bet-card.top  .ev-num { color: var(--green); }
-
-.kelly-box {
-  background: linear-gradient(135deg, var(--blue-dim), var(--green-dim));
+/* Stake box — replaces kelly-box */
+.stake-box {
+  background: var(--bg3);
   border: 1px solid var(--border2);
   border-radius: 8px;
   padding: 10px 12px;
   text-align: center;
 }
 
-.kelly-amt {
+.stake-amt {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 800;
-  color: var(--green);
+  color: var(--blue-lt);
   line-height: 1;
+  margin-bottom: 2px;
 }
 
-.kelly-pct { font-size: 0.6rem; color: var(--white2); margin-top: 3px; }
-.kelly-lbl { font-size: 0.55rem; color: var(--white3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
-
-/* Detail panel */
-.bet-detail {
-  display: none;
-  border-top: 1px solid var(--border);
-  padding: 1.1rem 1.5rem;
-  background: var(--bg3);
-}
-
-.bet-detail.open { display: block; animation: fadeUp 0.2s ease; }
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  margin-bottom: 1rem;
-}
-
-.detail-cell {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 8px 10px;
-  text-align: center;
-}
-
-.detail-cell-lbl {
-  font-family: 'Barlow Condensed', sans-serif;
+.stake-lbl {
   font-size: 0.55rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  color: var(--text3);
   text-transform: uppercase;
-  color: var(--white3);
-  margin-bottom: 4px;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
 }
 
-.detail-cell-val {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
+.stake-btns {
+  display: flex;
+  gap: 5px;
 }
+
+.btn-placed {
+  flex: 1;
+  background: var(--blue-dim2);
+  border: 1px solid var(--border2);
+  color: var(--blue-lt);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 5px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-placed:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+.btn-skip {
+  flex: 1;
+  background: var(--red-dim);
+  border: 1px solid rgba(224,58,82,0.2);
+  color: var(--red);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 5px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-skip:hover { background: rgba(224,58,82,0.2); }
 
 /* ===== MY BETS ===== */
 .add-bet-btn {
   background: var(--green-dim);
-  border: 1px solid rgba(0,214,143,0.25);
+  border: 1px solid rgba(46,204,142,0.25);
   color: var(--green);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.85rem;
@@ -562,7 +510,7 @@ main {
   margin-bottom: 1rem;
   transition: all 0.18s;
 }
-.add-bet-btn:hover { background: rgba(0,214,143,0.18); }
+.add-bet-btn:hover { background: rgba(46,204,142,0.18); }
 
 .add-form {
   display: none;
@@ -589,13 +537,13 @@ main {
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--white3);
+  color: var(--text3);
 }
 
 .form-group input, .form-group select {
   background: var(--bg);
   border: 1px solid var(--border2);
-  color: var(--white);
+  color: var(--text);
   font-family: 'Barlow', sans-serif;
   font-size: 0.85rem;
   padding: 8px 12px;
@@ -603,7 +551,6 @@ main {
   outline: none;
   transition: border-color 0.18s;
 }
-
 .form-group input:focus, .form-group select:focus { border-color: var(--blue-lt); }
 
 .form-actions { display: flex; gap: 10px; }
@@ -627,7 +574,7 @@ main {
 .btn-secondary {
   background: none;
   border: 1px solid var(--border2);
-  color: var(--white2);
+  color: var(--text2);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.82rem;
   font-weight: 600;
@@ -638,7 +585,7 @@ main {
   cursor: pointer;
   transition: all 0.18s;
 }
-.btn-secondary:hover { color: var(--white); border-color: var(--white2); }
+.btn-secondary:hover { color: var(--text); border-color: var(--text2); }
 
 .mybet-card {
   background: var(--bg2);
@@ -652,24 +599,23 @@ main {
   align-items: center;
   transition: border-color 0.18s;
 }
-
 .mybet-card:hover { border-color: var(--border2); }
 .mybet-card.won  { border-left: 3px solid var(--green); }
 .mybet-card.lost { border-left: 3px solid var(--red); }
 .mybet-card.pending { border-left: 3px solid var(--amber); }
 
-.mybet-match { font-size: 0.6rem; color: var(--white3); margin-bottom: 2px; }
-.mybet-target { font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; color: #fff; }
-.mybet-book { font-size: 0.6rem; color: var(--white3); margin-top: 2px; }
+.mybet-match  { font-size: 0.6rem; color: var(--text3); margin-bottom: 2px; }
+.mybet-target { font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text); }
+.mybet-book   { font-size: 0.6rem; color: var(--text3); margin-top: 2px; }
 
 .mybet-cell { text-align: center; }
-.mybet-lbl { font-size: 0.55rem; color: var(--white3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
-.mybet-val { font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; }
+.mybet-lbl  { font-size: 0.55rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+.mybet-val  { font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text2); }
 
 .result-select {
   background: var(--bg);
   border: 1px solid var(--border2);
-  color: var(--white);
+  color: var(--text);
   font-family: 'Barlow', sans-serif;
   font-size: 0.75rem;
   padding: 5px 8px;
@@ -681,7 +627,7 @@ main {
 
 .btn-delete {
   background: var(--red-dim);
-  border: 1px solid rgba(255,69,96,0.2);
+  border: 1px solid rgba(224,58,82,0.2);
   color: var(--red);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.72rem;
@@ -693,7 +639,7 @@ main {
   transition: all 0.18s;
   width: 100%;
 }
-.btn-delete:hover { background: rgba(255,69,96,0.2); }
+.btn-delete:hover { background: rgba(224,58,82,0.2); }
 
 /* ===== ANALYTICS ===== */
 .analytics-grid {
@@ -712,11 +658,11 @@ main {
 
 .chart-title {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--white3);
+  color: var(--text3);
   margin-bottom: 1rem;
 }
 
@@ -736,10 +682,9 @@ main {
   border-bottom: 1px solid var(--border);
   font-size: 0.82rem;
 }
-
 .forecast-row:last-child { border-bottom: none; }
-.forecast-row .label { color: var(--white2); }
-.forecast-row .value { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.95rem; }
+.forecast-row .label { color: var(--text2); }
+.forecast-row .value { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--blue-lt); }
 .forecast-row .value.green { color: var(--green); }
 .forecast-row .value.amber { color: var(--amber); }
 
@@ -747,7 +692,7 @@ main {
 .empty-box, .loading-box {
   text-align: center;
   padding: 4rem 2rem;
-  color: var(--white3);
+  color: var(--text3);
   font-size: 0.85rem;
 }
 
@@ -759,19 +704,16 @@ main {
   animation: spin 0.7s linear infinite;
   margin: 0 auto 1rem;
 }
-
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
   .stats-row { grid-template-columns: repeat(2, 1fr); }
   .bet-main { grid-template-columns: 1fr 1fr; }
-  .kelly-box { grid-column: span 2; }
+  .stake-box { grid-column: span 2; }
   .analytics-grid { grid-template-columns: 1fr; }
   .mybet-card { grid-template-columns: 1fr 1fr 1fr; }
   main { padding: 1rem; }
@@ -784,23 +726,19 @@ main {
 
 <header>
   <a class="logo" href="#">
-    <!-- SVG Logo mark matching Vedox logo -->
     <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M4 8 L20 32 L36 8" stroke="url(#grad1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       <path d="M14 8 L20 20 L26 8" stroke="url(#grad2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       <path d="M26 8 L34 2" stroke="url(#grad3)" stroke-width="3" stroke-linecap="round"/>
       <defs>
         <linearGradient id="grad1" x1="4" y1="8" x2="36" y2="32" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#ffffff"/>
-          <stop offset="100%" stop-color="#a0b4d0"/>
+          <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a0b4d0"/>
         </linearGradient>
         <linearGradient id="grad2" x1="14" y1="8" x2="26" y2="20" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#1a5ce8"/>
-          <stop offset="100%" stop-color="#3d7fff"/>
+          <stop offset="0%" stop-color="#1a4fc4"/><stop offset="100%" stop-color="#2d6ae0"/>
         </linearGradient>
         <linearGradient id="grad3" x1="26" y1="8" x2="34" y2="2" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#3d7fff"/>
-          <stop offset="100%" stop-color="#60a0ff"/>
+          <stop offset="0%" stop-color="#2d6ae0"/><stop offset="100%" stop-color="#4a88ff"/>
         </linearGradient>
       </defs>
     </svg>
@@ -821,7 +759,6 @@ main {
       <span class="live-dot"></span>
       <span id="live-txt">LIVE</span>
     </div>
-    <span id="countdown-pill">—</span>
     <button class="theme-btn" onclick="toggleTheme()" id="theme-icon" title="Toggle theme">☀️</button>
     <button class="lang-btn active" onclick="setLang('fi')" id="btn-fi">FI</button>
     <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
@@ -835,19 +772,19 @@ main {
     <div class="stats-row" id="bets-stats" style="display:none">
       <div class="stat-card">
         <div class="stat-lbl" data-fi="Kohteet" data-en="Opportunities">Kohteet</div>
-        <div class="stat-val blue" id="s-count">—</div>
+        <div class="stat-val" id="s-count">—</div>
       </div>
       <div class="stat-card">
         <div class="stat-lbl" data-fi="Paras EV" data-en="Best EV">Paras EV</div>
-        <div class="stat-val green" id="s-bestev">—</div>
+        <div class="stat-val" id="s-bestev">—</div>
       </div>
       <div class="stat-card">
         <div class="stat-lbl" data-fi="Keskiarvo EV" data-en="Avg EV">Keskiarvo EV</div>
-        <div class="stat-val green" id="s-avgev">—</div>
+        <div class="stat-val" id="s-avgev">—</div>
       </div>
       <div class="stat-card">
         <div class="stat-lbl" data-fi="Bankroll" data-en="Bankroll">Bankroll</div>
-        <div class="stat-val amber" id="s-bankroll">—</div>
+        <div class="stat-val" id="s-bankroll">—</div>
       </div>
     </div>
 
@@ -876,6 +813,8 @@ main {
           <option value="basketball" data-fi="Koripallo" data-en="Basketball">Koripallo</option>
           <option value="icehockey" data-fi="Jääkiekko" data-en="Ice Hockey">Jääkiekko</option>
           <option value="tennis" data-fi="Tennis" data-en="Tennis">Tennis</option>
+          <option value="baseball" data-fi="Baseball" data-en="Baseball">Baseball</option>
+          <option value="rugby" data-fi="Rugby" data-en="Rugby">Rugby</option>
         </select>
       </div>
       <button class="btn-reset" onclick="resetFilters()" data-fi="Nollaa" data-en="Reset">Nollaa</button>
@@ -895,15 +834,15 @@ main {
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-lbl" data-fi="Betsit yhteensä" data-en="Total Bets">Betsit yhteensä</div>
-        <div class="stat-val blue" id="mb-total">0</div>
+        <div class="stat-val" id="mb-total">0</div>
       </div>
       <div class="stat-card">
         <div class="stat-lbl" data-fi="Voitettu" data-en="Won">Voitettu</div>
-        <div class="stat-val green" id="mb-won">0</div>
+        <div class="stat-val" id="mb-won">0</div>
       </div>
       <div class="stat-card">
         <div class="stat-lbl" data-fi="Hävitty" data-en="Lost">Hävitty</div>
-        <div class="stat-val red" id="mb-lost">0</div>
+        <div class="stat-val" id="mb-lost">0</div>
       </div>
       <div class="stat-card">
         <div class="stat-lbl" data-fi="ROI" data-en="ROI">ROI</div>
@@ -933,7 +872,7 @@ main {
         </div>
         <div class="form-group">
           <label data-fi="Panos (€)" data-en="Stake (€)">Panos (€)</label>
-          <input type="number" id="f-stake" placeholder="esim. 25">
+          <input type="number" id="f-stake" placeholder="esim. 10">
         </div>
         <div class="form-group">
           <label data-fi="EV %" data-en="EV %">EV %</label>
@@ -976,11 +915,11 @@ main {
       </div>
       <div class="stat-card">
         <div class="stat-lbl" data-fi="Osumisprosentti" data-en="Hit Rate">Osumisprosentti</div>
-        <div class="stat-val blue" id="an-hit">—</div>
+        <div class="stat-val" id="an-hit">—</div>
       </div>
       <div class="stat-card">
         <div class="stat-lbl" data-fi="Avg EV" data-en="Avg EV">Avg EV</div>
-        <div class="stat-val green" id="an-avgev">—</div>
+        <div class="stat-val" id="an-avgev">—</div>
       </div>
     </div>
 
@@ -1009,30 +948,29 @@ const SHEET_ID = "1t8vBG7HNKcR-YZLnQ_BBpI0R8_OtIptY_yomZhwipEo";
 const SHEETS = {
   Aalto1: "1713319366",
   Aalto3: "1997257579",
-  AaltoX: "1612126584",  // Vaihda oikeaksi GID:ksi kun luot välilehden Sheetissä
-  AaltoY: "1712699361"   // Vaihda oikeaksi GID:ksi kun luot välilehden Sheetissä
+  AaltoX: "1612126584",
+  AaltoY: "1712699361"
 };
-const REFRESH = 120; // 2 min
+const REFRESH = 120;
 
 // ===== STATE =====
 let allBets = [];
 let myBets = JSON.parse(localStorage.getItem("vedox_bets") || "[]");
+let skippedIds = JSON.parse(localStorage.getItem("vedox_skipped") || "[]");
 let countdown = REFRESH;
 let timer;
 let lang = localStorage.getItem("vedox_lang") || "fi";
 let currentTheme = localStorage.getItem("vedox_theme") || "dark";
+let bankrollChart, plChart;
 
+// ===== THEME =====
 function applyTheme(t) {
   currentTheme = t;
   document.documentElement.setAttribute("data-theme", t);
   localStorage.setItem("vedox_theme", t);
   document.getElementById("theme-icon").textContent = t === "dark" ? "☀️" : "🌙";
 }
-
-function toggleTheme() {
-  applyTheme(currentTheme === "dark" ? "light" : "dark");
-}
-let bankrollChart, plChart;
+function toggleTheme() { applyTheme(currentTheme === "dark" ? "light" : "dark"); }
 
 // ===== LANGUAGE =====
 function setLang(l) {
@@ -1042,9 +980,7 @@ function setLang(l) {
   document.getElementById("btn-en").classList.toggle("active", l === "en");
   document.querySelectorAll("[data-fi]").forEach(el => {
     const txt = el.getAttribute(`data-${l}`);
-    if (txt && el.tagName !== "INPUT" && el.tagName !== "SELECT" && el.tagName !== "OPTION") {
-      el.textContent = txt;
-    }
+    if (txt && !["INPUT","SELECT","OPTION"].includes(el.tagName)) el.textContent = txt;
   });
   document.querySelectorAll("option[data-fi]").forEach(el => {
     el.textContent = el.getAttribute(`data-${l}`) || el.textContent;
@@ -1079,28 +1015,25 @@ function parseCSV(text) {
     cols.push(cur.trim());
     if (cols.length >= 9 && cols[0] && !cols[0].includes("Ei plus-EV")) {
       const isInt = s => /^\d+$/.test((s||"").trim());
-      const fixN = s => parseFloat((s||"0").replace("+","").replace("%","").replace(",",".")) || 0;
-      // Suomalainen Sheets: "2,26" pilkkoutuu sarakkeisiin "2" ja "26"
-      // Jos cols[4] ja cols[5] ovat molemmat kokonaislukuja → kerroin on jaettu
+      const fixN  = s => parseFloat((s||"0").replace("+","").replace("%","").replace(",",".")) || 0;
       const kerroinJaettu = isInt(cols[4]) && isInt(cols[5]) && cols[5].length <= 3;
-      const kerroin  = kerroinJaettu ? parseFloat(cols[4] + "." + cols[5]) : fixN(cols[4]);
+      const kerroin = kerroinJaettu ? parseFloat(cols[4] + "." + cols[5]) : fixN(cols[4]);
       const o = kerroinJaettu ? 1 : 0;
-      const kirja    = cols[5 + o];
+      const kirja = cols[5 + o];
       const pinnJaettu = isInt(cols[6+o]) && isInt(cols[7+o]) && (cols[7+o]||"").length <= 3;
       const pinnacle = pinnJaettu ? parseFloat(cols[6+o] + "." + cols[7+o]) : fixN(cols[6+o]);
       const o2 = o + (pinnJaettu ? 1 : 0);
       const pinnProb = cols[7+o2];
-      const ev       = fixN(cols[8+o2]);
-      const liiga    = cols[9+o2] || "";
-      const aalto    = cols[10+o2] || "";
-      const paiv     = cols[11+o2] || "";
-      rows.push({ ottelu: cols[0], alkaa: cols[1], markkina: cols[2], kohde: cols[3], kerroin, kirja, pinnacle, pinnProb, ev, liiga, aalto, paivitetty: paiv });
+      const ev   = fixN(cols[8+o2]);
+      const liiga = cols[9+o2] || "";
+      const aalto = cols[10+o2] || "";
+      rows.push({ ottelu: cols[0], alkaa: cols[1], markkina: cols[2], kohde: cols[3], kerroin, kirja, pinnacle, pinnProb, ev, liiga, aalto });
     }
   }
   return rows;
 }
 
-// ===== FETCH ALL SHEETS =====
+// ===== FETCH =====
 async function fetchAll() {
   const allRows = [];
   for (const [name, gid] of Object.entries(SHEETS)) {
@@ -1114,10 +1047,15 @@ async function fetchAll() {
     } catch(e) {}
   }
   allBets = allRows.sort((a, b) => b.ev - a.ev);
+  // Clean up skipped IDs older than 24h (use betId = ottelu+kohde+aalto)
   renderBets();
   document.getElementById("bets-loading").style.display = "none";
-  const upd = allBets[0]?.paivitetty || new Date().toLocaleString("fi-FI");
   countdown = REFRESH;
+}
+
+// ===== BET ID =====
+function betId(b) {
+  return `${b.ottelu}|${b.kohde}|${b.aalto}`;
 }
 
 // ===== FILTERS =====
@@ -1126,12 +1064,12 @@ function getFiltered() {
   const oddsMin = parseFloat(document.getElementById("f-odds-min").value) || 0;
   const oddsMax = parseFloat(document.getElementById("f-odds-max").value) || 99;
   const sport   = document.getElementById("f-sport").value;
-
   return allBets.filter(b =>
     b.ev >= evMin &&
     b.kerroin >= oddsMin &&
     b.kerroin <= oddsMax &&
-    (!sport || b.liiga.includes(sport))
+    (!sport || b.liiga.includes(sport)) &&
+    !skippedIds.includes(betId(b))
   );
 }
 
@@ -1143,18 +1081,14 @@ function resetFilters() {
   renderBets();
 }
 
-// ===== KELLY =====
-function kelly(prob, odds, frac, br) {
-  const b = odds - 1, q = 1 - prob;
-  return Math.max(0, (b * prob - q) / b) * frac * br;
-}
-
 // ===== SPORT LABEL =====
 function sportLabel(liiga) {
-  if (liiga.includes("soccer")) return "⚽";
+  if (liiga.includes("soccer"))     return "⚽";
   if (liiga.includes("basketball")) return "🏀";
-  if (liiga.includes("icehockey")) return "🏒";
-  if (liiga.includes("tennis")) return "🎾";
+  if (liiga.includes("icehockey"))  return "🏒";
+  if (liiga.includes("tennis"))     return "🎾";
+  if (liiga.includes("baseball"))   return "⚾";
+  if (liiga.includes("rugby"))      return "🏉";
   return "🏆";
 }
 
@@ -1164,16 +1098,59 @@ function evClass(ev) {
   return "";
 }
 
+// ===== PLACE BET (Laitoin) =====
+function placeBet(idx) {
+  const filtered = getFiltered();
+  const b = filtered[idx];
+  if (!b) return;
+  const br = parseFloat(document.getElementById("bankroll").value) || 1000;
+  const stake = parseFloat((br * 0.01).toFixed(2));
+  const pot = parseFloat((stake * b.kerroin).toFixed(2));
+  const mktLabel = b.markkina.replace(/_/g," ");
+
+  myBets.unshift({
+    id: Date.now(),
+    date: new Date().toLocaleDateString("fi-FI"),
+    match: b.ottelu,
+    target: b.kohde,
+    book: b.kirja,
+    odds: b.kerroin,
+    stake,
+    ev: b.ev,
+    pinn: parseFloat((b.pinnProb||"0").replace(",",".").replace("%","")) || 0,
+    result: "pending",
+    market: mktLabel,
+    potential: pot,
+  });
+  saveBets();
+
+  // Remove from list
+  skippedIds.push(betId(b));
+  localStorage.setItem("vedox_skipped", JSON.stringify(skippedIds));
+  renderBets();
+  renderMyBets();
+}
+
+// ===== SKIP BET (En laittanut) =====
+function skipBet(idx) {
+  const filtered = getFiltered();
+  const b = filtered[idx];
+  if (!b) return;
+  skippedIds.push(betId(b));
+  localStorage.setItem("vedox_skipped", JSON.stringify(skippedIds));
+  renderBets();
+}
+
 // ===== RENDER BETS =====
 function renderBets() {
-  const br   = parseFloat(document.getElementById("bankroll").value) || 1000;
-  const kf   = 0.25;
-  const list = document.getElementById("bets-list");
+  const br = parseFloat(document.getElementById("bankroll").value) || 1000;
+  const stake = parseFloat((br * 0.01).toFixed(2));
+  const list  = document.getElementById("bets-list");
   const empty = document.getElementById("bets-empty");
   const stats = document.getElementById("bets-stats");
   const filtered = getFiltered();
-
   const fi = lang === "fi";
+
   document.getElementById("filter-info").innerHTML =
     `<strong>${filtered.length}</strong> / ${allBets.length} ${fi ? "kohdetta" : "opportunities"}`;
 
@@ -1194,22 +1171,16 @@ function renderBets() {
   document.getElementById("s-bankroll").textContent = br.toLocaleString("fi-FI") + "€";
 
   list.innerHTML = filtered.map((b, i) => {
-    const pinnProb = parseFloat((b.pinnProb||"0").replace(",",".").replace("%","")) / 100 || 0.5;
-    const ks = kelly(pinnProb, b.kerroin, kf, br);
-    const rec = ks > 0 ? Math.min(ks, br * 0.05) : br * 0.01;
-    const kpct = ((ks / br) * 100).toFixed(1);
-    const pot = (rec * b.kerroin).toFixed(0);
     const ec = evClass(b.ev);
-    const did = `d-${i}`;
     const icon = sportLabel(b.liiga);
     const mktLabel = b.markkina.replace(/_/g, " ").toUpperCase();
+    const pot = (stake * b.kerroin).toFixed(0);
 
-    return `<div class="bet-card ${ec}">
-      <div class="bet-main" onclick="toggleDetail('${did}')">
+    return `<div class="bet-card ${ec}" id="betcard-${i}">
+      <div class="bet-main">
         <div>
           <div class="match-top">
             <span class="badge badge-sport">${icon} ${b.liiga.split("_")[1]?.toUpperCase() || "SPT"}</span>
-            <span class="badge badge-wave">${b.aalto}</span>
             <span class="badge badge-mkt">${mktLabel}</span>
           </div>
           <div class="match-name">${b.ottelu} · ${b.alkaa}</div>
@@ -1227,46 +1198,20 @@ function renderBets() {
         </div>
         <div class="cell">
           <div class="cell-lbl">EV</div>
-          <div class="cell-val ev-num">+${b.ev.toFixed(1)}%</div>
+          <div class="cell-val">+${b.ev.toFixed(1)}%</div>
           <div class="cell-sub">vs Pinnacle</div>
         </div>
-        <div class="kelly-box">
-          <div class="kelly-amt">${rec.toFixed(0)}€</div>
-          <div class="kelly-pct">Kelly ${kpct}%</div>
-          <div class="kelly-lbl">${fi ? "Suositeltu panos" : "Recommended stake"}</div>
-        </div>
-      </div>
-      <div class="bet-detail" id="${did}">
-        <div class="detail-grid">
-          <div class="detail-cell">
-            <div class="detail-cell-lbl">${fi ? "Paras kerroin" : "Best odds"}</div>
-            <div class="detail-cell-val" style="color:var(--green)">${b.kerroin.toFixed(3)}</div>
-          </div>
-          <div class="detail-cell">
-            <div class="detail-cell-lbl">Pinnacle</div>
-            <div class="detail-cell-val" style="color:var(--white2)">${b.pinnacle.toFixed(3)}</div>
-          </div>
-          <div class="detail-cell">
-            <div class="detail-cell-lbl">${fi ? "No-vig tod." : "No-vig prob."}</div>
-            <div class="detail-cell-val" style="color:var(--blue-lt)">${b.pinnProb}</div>
-          </div>
-          <div class="detail-cell">
-            <div class="detail-cell-lbl">EV %</div>
-            <div class="detail-cell-val" style="color:var(--green)">+${b.ev.toFixed(2)}%</div>
-          </div>
-          <div class="detail-cell">
-            <div class="detail-cell-lbl">${fi ? "Panos" : "Stake"}</div>
-            <div class="detail-cell-val" style="color:var(--amber)">${rec.toFixed(0)}€</div>
+        <div class="stake-box">
+          <div class="stake-amt">${stake.toFixed(0)}€</div>
+          <div class="stake-lbl">${fi ? "Suositeltu panos" : "Recommended stake"}</div>
+          <div class="stake-btns">
+            <button class="btn-placed" onclick="placeBet(${i})">${fi ? "Laitoin ✓" : "Placed ✓"}</button>
+            <button class="btn-skip" onclick="skipBet(${i})">${fi ? "Ohita ✗" : "Skip ✗"}</button>
           </div>
         </div>
       </div>
     </div>`;
   }).join("");
-}
-
-function toggleDetail(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.toggle("open");
 }
 
 // ===== MY BETS =====
@@ -1278,9 +1223,12 @@ function toggleAddForm() {
 }
 
 function saveBet() {
-  const match = document.getElementById("f-match").value.trim();
+  const match  = document.getElementById("f-match").value.trim();
   const target = document.getElementById("f-target").value.trim();
-  if (!match || !target) { alert(lang === "fi" ? "Täytä ainakin ottelu ja kohde." : "Fill in at least match and selection."); return; }
+  if (!match || !target) {
+    alert(lang === "fi" ? "Täytä ainakin ottelu ja kohde." : "Fill in at least match and selection.");
+    return;
+  }
   myBets.unshift({
     id: Date.now(),
     date: new Date().toLocaleDateString("fi-FI"),
@@ -1308,12 +1256,12 @@ function deleteBet(id) {
 
 function renderMyBets() {
   const fi = lang === "fi";
-  const won = myBets.filter(b => b.result === "won").length;
+  const won  = myBets.filter(b => b.result === "won").length;
   const lost = myBets.filter(b => b.result === "lost").length;
   const settled = myBets.filter(b => b.result !== "pending");
-  const totalStake = settled.reduce((a, b) => a + b.stake, 0);
+  const totalStake  = settled.reduce((a, b) => a + b.stake, 0);
   const totalProfit = myBets.reduce((a, b) => {
-    if (b.result === "won") return a + b.stake * (b.odds - 1);
+    if (b.result === "won")  return a + b.stake * (b.odds - 1);
     if (b.result === "lost") return a - b.stake;
     return a;
   }, 0);
@@ -1322,20 +1270,18 @@ function renderMyBets() {
   document.getElementById("mb-total").textContent = myBets.length;
   document.getElementById("mb-won").textContent = won;
   document.getElementById("mb-lost").textContent = lost;
-  const roiEl = document.getElementById("mb-roi");
-  roiEl.textContent = roi !== "—" ? roi + "%" : "—";
-  roiEl.className = "stat-val " + (parseFloat(roi) > 0 ? "green" : parseFloat(roi) < 0 ? "red" : "");
+  document.getElementById("mb-roi").textContent = roi !== "—" ? roi + "%" : "—";
 
   const list = document.getElementById("mybets-list");
   if (myBets.length === 0) {
-    list.innerHTML = `<div class="empty-box" data-fi="Ei betsejä vielä." data-en="No bets yet.">${fi ? "Ei betsejä vielä." : "No bets yet."}</div>`;
+    list.innerHTML = `<div class="empty-box">${fi ? "Ei betsejä vielä." : "No bets yet."}</div>`;
     return;
   }
 
   list.innerHTML = myBets.map(b => {
     const pl = b.result === "won" ? b.stake * (b.odds - 1) : b.result === "lost" ? -b.stake : null;
-    const plStr = pl !== null ? (pl > 0 ? `+${pl.toFixed(2)}€` : `${pl.toFixed(2)}€`) : "—";
-    const plColor = pl > 0 ? "var(--green)" : pl < 0 ? "var(--red)" : "var(--white2)";
+    const plStr   = pl !== null ? (pl > 0 ? `+${pl.toFixed(2)}€` : `${pl.toFixed(2)}€`) : "—";
+    const plColor = pl > 0 ? "var(--green)" : pl < 0 ? "var(--red)" : "var(--text2)";
     return `<div class="mybet-card ${b.result}">
       <div>
         <div class="mybet-match">${b.date} · ${b.book || "—"}</div>
@@ -1352,7 +1298,7 @@ function renderMyBets() {
       </div>
       <div class="mybet-cell">
         <div class="mybet-lbl">EV</div>
-        <div class="mybet-val" style="color:var(--green)">+${b.ev}%</div>
+        <div class="mybet-val">+${b.ev}%</div>
       </div>
       <div class="mybet-cell">
         <div class="mybet-lbl">${fi ? "Tulos €" : "P&L €"}</div>
@@ -1373,26 +1319,20 @@ function renderAnalytics() {
   const fi = lang === "fi";
   const settled = myBets.filter(b => b.result !== "pending");
   const won = settled.filter(b => b.result === "won").length;
-  const totalStake = settled.reduce((a, b) => a + b.stake, 0);
+  const totalStake  = settled.reduce((a, b) => a + b.stake, 0);
   const totalProfit = myBets.reduce((a, b) => {
-    if (b.result === "won") return a + b.stake * (b.odds - 1);
+    if (b.result === "won")  return a + b.stake * (b.odds - 1);
     if (b.result === "lost") return a - b.stake;
     return a;
   }, 0);
-  const roi = totalStake > 0 ? (totalProfit / totalStake * 100).toFixed(1) : "—";
+  const roi     = totalStake > 0 ? (totalProfit / totalStake * 100).toFixed(1) : "—";
   const hitRate = settled.length > 0 ? (won / settled.length * 100).toFixed(1) : "—";
-  const avgEV = myBets.length > 0 ? (myBets.reduce((a, b) => a + b.ev, 0) / myBets.length).toFixed(1) : "—";
+  const avgEV   = myBets.length > 0 ? (myBets.reduce((a, b) => a + b.ev, 0) / myBets.length).toFixed(1) : "—";
 
-  const profEl = document.getElementById("an-profit");
-  profEl.textContent = totalProfit >= 0 ? `+${totalProfit.toFixed(2)}€` : `${totalProfit.toFixed(2)}€`;
-  profEl.className = "stat-val " + (totalProfit > 0 ? "green" : totalProfit < 0 ? "red" : "");
-
-  const roiEl = document.getElementById("an-roi");
-  roiEl.textContent = roi !== "—" ? roi + "%" : "—";
-  roiEl.className = "stat-val " + (parseFloat(roi) > 0 ? "green" : "red");
-
-  document.getElementById("an-hit").textContent = hitRate !== "—" ? hitRate + "%" : "—";
-  document.getElementById("an-avgev").textContent = avgEV !== "—" ? "+" + avgEV + "%" : "—";
+  document.getElementById("an-profit").textContent = totalProfit >= 0 ? `+${totalProfit.toFixed(2)}€` : `${totalProfit.toFixed(2)}€`;
+  document.getElementById("an-roi").textContent    = roi !== "—" ? roi + "%" : "—";
+  document.getElementById("an-hit").textContent    = hitRate !== "—" ? hitRate + "%" : "—";
+  document.getElementById("an-avgev").textContent  = avgEV !== "—" ? "+" + avgEV + "%" : "—";
 
   const br = parseFloat(document.getElementById("bankroll").value) || 1000;
   let running = br;
@@ -1405,12 +1345,14 @@ function renderAnalytics() {
     brData.push(parseFloat(running.toFixed(2)));
   });
 
+  const tickColor = currentTheme === "dark" ? "#3a4f6a" : "#6080a8";
+  const gridColor = currentTheme === "dark" ? "rgba(26,79,196,0.06)" : "rgba(26,79,196,0.08)";
   const chartOpts = {
     responsive: true,
     plugins: { legend: { display: false } },
     scales: {
-      x: { ticks: { color: "#3d5070" }, grid: { color: "rgba(61,127,255,0.06)" } },
-      y: { ticks: { color: "#3d5070" }, grid: { color: "rgba(61,127,255,0.06)" } }
+      x: { ticks: { color: tickColor }, grid: { color: gridColor } },
+      y: { ticks: { color: tickColor }, grid: { color: gridColor } }
     }
   };
 
@@ -1421,8 +1363,8 @@ function renderAnalytics() {
       labels: brLabels,
       datasets: [{
         data: brData,
-        borderColor: "#3d7fff",
-        backgroundColor: "rgba(61,127,255,0.06)",
+        borderColor: "#2d6ae0",
+        backgroundColor: "rgba(26,79,196,0.06)",
         borderWidth: 2,
         pointRadius: 3,
         tension: 0.35,
@@ -1432,12 +1374,8 @@ function renderAnalytics() {
     options: chartOpts
   });
 
-  const plData = [...myBets].reverse().map(b => {
-    if (b.result === "won") return parseFloat((b.stake * (b.odds - 1)).toFixed(2));
-    if (b.result === "lost") return -b.stake;
-    return 0;
-  });
-  const plLabels = [...myBets].reverse().map((_, i) => `B${i + 1}`);
+  const plData   = [...myBets].reverse().map(b => b.result === "won" ? parseFloat((b.stake*(b.odds-1)).toFixed(2)) : b.result === "lost" ? -b.stake : 0);
+  const plLabels = [...myBets].reverse().map((_, i) => `B${i+1}`);
 
   if (plChart) plChart.destroy();
   plChart = new Chart(document.getElementById("chart-pl"), {
@@ -1446,31 +1384,27 @@ function renderAnalytics() {
       labels: plLabels,
       datasets: [{
         data: plData,
-        backgroundColor: plData.map(v => v >= 0 ? "rgba(0,214,143,0.55)" : "rgba(255,69,96,0.55)"),
+        backgroundColor: plData.map(v => v >= 0 ? "rgba(46,204,142,0.55)" : "rgba(224,58,82,0.55)"),
         borderRadius: 4
       }]
     },
     options: chartOpts
   });
 
-  const avgStake = myBets.length > 0 ? myBets.reduce((a, b) => a + b.stake, 0) / myBets.length : 25;
+  const avgStake = myBets.length > 0 ? myBets.reduce((a, b) => a + b.stake, 0) / myBets.length : br * 0.01;
   const avgEvPct = parseFloat(avgEV) || 4;
   const weeklyEV = avgStake * (avgEvPct / 100) * 20;
 
-  const rows = [
-    { label: fi ? "Avg panos" : "Avg stake", value: avgStake.toFixed(0) + "€", cls: "" },
+  document.getElementById("forecast-rows").innerHTML = [
+    { label: fi ? "Avg panos" : "Avg stake", value: avgStake.toFixed(2) + "€", cls: "" },
     { label: fi ? "Avg EV %" : "Avg EV %", value: "+" + avgEvPct.toFixed(1) + "%", cls: "green" },
     { label: fi ? "Betsejä / viikko (arvio)" : "Bets / week (est.)", value: "20", cls: "" },
     { label: fi ? "Odotettu tuotto / viikko" : "Expected profit / week", value: "+" + weeklyEV.toFixed(2) + "€", cls: "green" },
-    { label: fi ? "Odotettu tuotto / kk" : "Expected profit / month", value: "+" + (weeklyEV * 4).toFixed(2) + "€", cls: "green" },
+    { label: fi ? "Odotettu tuotto / kk" : "Expected profit / month", value: "+" + (weeklyEV*4).toFixed(2) + "€", cls: "green" },
     { label: fi ? "Nykyinen kassa" : "Current bankroll", value: br.toLocaleString("fi-FI") + "€", cls: "amber" },
-    { label: fi ? "Ennuste 1kk" : "Forecast 1mo", value: (br + weeklyEV * 4).toFixed(2) + "€", cls: "green" },
-    { label: fi ? "Ennuste 3kk" : "Forecast 3mo", value: (br + weeklyEV * 12).toFixed(2) + "€", cls: "green" },
-  ];
-
-  document.getElementById("forecast-rows").innerHTML = rows.map(r =>
-    `<div class="forecast-row"><span class="label">${r.label}</span><span class="value ${r.cls}">${r.value}</span></div>`
-  ).join("");
+    { label: fi ? "Ennuste 1kk" : "Forecast 1mo", value: (br + weeklyEV*4).toFixed(2) + "€", cls: "green" },
+    { label: fi ? "Ennuste 3kk" : "Forecast 3mo", value: (br + weeklyEV*12).toFixed(2) + "€", cls: "green" },
+  ].map(r => `<div class="forecast-row"><span class="label">${r.label}</span><span class="value ${r.cls}">${r.value}</span></div>`).join("");
 }
 
 // ===== TIMER =====
@@ -1478,10 +1412,7 @@ function startTimer() {
   clearInterval(timer);
   timer = setInterval(() => {
     countdown--;
-    const m = Math.floor(countdown / 60), s = countdown % 60;
-    document.getElementById("countdown-pill").textContent =
-      `${lang === "fi" ? "Päivitys" : "Refresh"}: ${m}:${s.toString().padStart(2, "0")}`;
-    if (countdown <= 0) fetchAll();
+    if (countdown <= 0) { fetchAll(); }
   }, 1000);
 }
 
@@ -1493,3 +1424,4 @@ startTimer();
 renderMyBets();
 </script>
 </body>
+</html>
