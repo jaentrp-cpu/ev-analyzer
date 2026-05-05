@@ -884,23 +884,32 @@ function renderSportLeagueBars() {
   document.getElementById("sl-summary").textContent =
     `${totalBets} ${fi?"bettiä":"bets"} · ${totalStake.toFixed(0)}€ ${fi?"panosta":"staked"}`;
 
-  document.getElementById("sl-sports").innerHTML = sorted.map(([sport, d]) => {
+  document.getElementById("sl-sports").innerHTML = sorted.map(([sport, d], idx) => {
     const stakePct = (d.stake / totalStake * 100).toFixed(1);
+    const betsPct  = (d.bets / totalBets * 100).toFixed(1);
     const roi = d.stake > 0 ? (d.profit / d.stake * 100).toFixed(1) : "0.0";
-    return `<button class="sl-sport-btn ${sport===activeSport?"active":""}" onclick="selectSport(${JSON.stringify(sport)})">
+    return `<button class="sl-sport-btn ${sport===activeSport?"active":""}" data-sport="${idx}" onclick="selectSportByIdx(${idx})">
       <div class="sl-sport-name">${sport}</div>
       <div class="sl-sport-meta">
-        <span>${d.bets} ${fi?"bettiä":"bets"}</span>
-        <span>·</span>
-        <span>${fi?"Kassasta":"Stake"}: <span class="val">${stakePct}%</span></span>
+        <span>${d.bets} ${fi?"bettiä":"bets"} <span style="color:var(--text3)">(${betsPct}%)</span></span>
         <span>·</span>
         <span>ROI: <span class="val">${parseFloat(roi)>=0?"+":""}${roi}%</span></span>
       </div>
-      <div class="sl-bar-mini"><div class="sl-bar-mini-fill" style="width:${stakePct}%"></div></div>
+      <div class="sl-bar-mini"><div class="sl-bar-mini-fill" style="width:${betsPct}%"></div></div>
     </button>`;
   }).join("");
 
+  // Store sorted for index lookup
+  window._slSorted = sorted;
+
   renderLeagueDetail(sports, totalStake, totalBets);
+}
+
+function selectSportByIdx(idx) {
+  if (window._slSorted && window._slSorted[idx]) {
+    activeSport = window._slSorted[idx][0];
+    renderSportLeagueBars();
+  }
 }
 
 function selectSport(sport) {
@@ -913,15 +922,15 @@ function renderLeagueDetail(sports, totalStake, totalBets) {
   const d = sports[activeSport];
   if (!d) return;
 
-  const leagues = Object.entries(d.leagues).sort((a,b) => b[1].stake - a[1].stake);
-  const sportRoi = d.stake > 0 ? (d.profit / d.stake * 100).toFixed(1) : "0.0";
-  const sportStakePct = totalStake > 0 ? (d.stake / totalStake * 100).toFixed(1) : "0.0";
+  const leagues = Object.entries(d.leagues).sort((a,b) => b[1].bets - a[1].bets);
+  const sportRoi     = d.stake > 0 ? (d.profit / d.stake * 100).toFixed(1) : "0.0";
+  const sportBetsPct = (d.bets / totalBets * 100).toFixed(1);
 
   const rows = leagues.map(([league, ld]) => {
-    const ofTotal  = totalStake > 0 ? (ld.stake / totalStake * 100).toFixed(1) : "0.0";
-    const ofSport  = d.stake > 0 ? (ld.stake / d.stake * 100).toFixed(1) : "0.0";
+    const ofTotal  = (ld.bets / totalBets * 100).toFixed(1);
+    const ofSport  = (ld.bets / d.bets * 100).toFixed(1);
     const roi      = ld.stake > 0 ? (ld.profit / ld.stake * 100).toFixed(1) : "0.0";
-    const barW     = d.stake > 0 ? Math.min(ld.stake / d.stake * 100, 100) : 0;
+    const barW     = Math.min(ld.bets / d.bets * 100, 100);
     const roiColor = parseFloat(roi) >= 0 ? "var(--blue-lt)" : "var(--red)";
     return `<div class="sl-league-row">
       <div>
@@ -939,8 +948,7 @@ function renderLeagueDetail(sports, totalStake, totalBets) {
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--text)">${activeSport}</div>
       <div style="display:flex;gap:16px;font-size:0.72rem;flex-wrap:wrap">
-        <span style="color:var(--text3)">${fi?"Betsit":"Bets"}: <span style="color:var(--text2);font-weight:700">${d.bets}</span></span>
-        <span style="color:var(--text3)">${fi?"Kassasta":"Of stake"}: <span style="color:var(--blue-lt);font-weight:700">${sportStakePct}%</span></span>
+        <span style="color:var(--text3)">${fi?"Betsit":"Bets"}: <span style="color:var(--text2);font-weight:700">${d.bets} (${sportBetsPct}%)</span></span>
         <span style="color:var(--text3)">${fi?"Panokset":"Staked"}: <span style="color:var(--text2);font-weight:700">${d.stake.toFixed(0)}€</span></span>
         <span style="color:var(--text3)">ROI: <span style="color:${parseFloat(sportRoi)>=0?"var(--blue-lt)":"var(--red)"};font-weight:700">${parseFloat(sportRoi)>=0?"+":""}${sportRoi}%</span></span>
         <span style="color:var(--text3)">${fi?"Tuotto":"P&L"}: <span style="color:${d.profit>=0?"var(--blue-lt)":"var(--red)"};font-weight:700">${d.profit>=0?"+":""}${d.profit.toFixed(2)}€</span></span>
