@@ -364,49 +364,44 @@ main {
 
 .badge {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.54rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 2px 7px;
+  padding: 3px 9px;
   border-radius: 3px;
 }
-.badge-sport { background: var(--blue-dim2); color: var(--blue-lt); border: 1px solid var(--border2); }
-.badge-mkt   { background: var(--bg3); color: var(--text3); border: 1px solid var(--border); }
+.badge-sport { background: var(--blue-dim2); color: var(--blue-lt); border: 1px solid var(--border2); font-size: 0.7rem; }
+.badge-mkt   { background: var(--bg3); color: var(--text3); border: 1px solid var(--border); font-weight: 500; letter-spacing: 0.04em; }
 
-.match-name { font-size: 0.58rem; color: var(--text3); letter-spacing: 0.03em; margin-bottom: 3px; }
+.match-name  { font-size: 0.75rem; color: var(--text3); letter-spacing: 0.01em; margin-bottom: 5px; font-weight: 400; }
 
 .bet-target {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 600;
   color: var(--blue-lt);
-  letter-spacing: 0.02em;
-  margin-bottom: 4px;
-}
-
-.bet-meta {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+  letter-spacing: 0.01em;
+  margin-bottom: 5px;
 }
 
 .meta-tag {
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   color: var(--text2);
   background: var(--bg3);
-  padding: 2px 7px;
+  padding: 3px 9px;
   border-radius: 3px;
   border: 1px solid var(--border);
+  font-family: 'Barlow', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
-.cell { text-align: center; }
-
 .cell-lbl {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.55rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text3);
   margin-bottom: 4px;
@@ -414,38 +409,40 @@ main {
 
 .cell-val {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.15rem;
-  font-weight: 800;
+  font-size: 1.2rem;
+  font-weight: 700;
   color: var(--blue-lt);
   line-height: 1;
 }
 
-.cell-sub { font-size: 0.58rem; color: var(--text3); margin-top: 3px; }
+.cell-sub { font-size: 0.62rem; color: var(--text3); margin-top: 3px; font-weight: 400; }
 
-/* Stake box — replaces kelly-box */
-.stake-box {
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  padding: 10px 12px;
-  text-align: center;
+.stat-lbl {
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 8px;
 }
 
-.stake-amt {
+.stat-val {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--blue-lt);
+  font-size: 1.9rem;
+  font-weight: 700;
   line-height: 1;
-  margin-bottom: 2px;
+  color: var(--blue-lt);
 }
 
 .stake-lbl {
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   color: var(--text3);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: 6px;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 500;
 }
 
 .stake-input {
@@ -454,16 +451,33 @@ main {
   border: 1px solid var(--border2);
   color: var(--blue-lt);
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   text-align: center;
-  padding: 4px 6px;
+  padding: 5px 6px;
   border-radius: 4px;
   outline: none;
   margin-bottom: 6px;
   transition: border-color 0.15s;
 }
 .stake-input:focus { border-color: var(--blue-lt); }
+
+.bet-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cell { text-align: center; }
+
+/* Stake box */
+.stake-box {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: center;
+}
 
 .stake-btns {
   display: flex;
