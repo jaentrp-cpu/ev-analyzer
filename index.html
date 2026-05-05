@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="fi">
 <head>
 <meta charset="UTF-8">
@@ -846,9 +845,9 @@ main {
         <select id="f-wave" onchange="renderBets()">
           <option value="" data-fi="Kaikki aallot" data-en="All waves">Kaikki aallot</option>
           <option value="Aalto1">Aalto 1</option>
-          <option value="Aalto2">Aalto 2</option>
           <option value="Aalto3">Aalto 3</option>
-          <option value="Aalto4">Aalto 4</option>
+          <option value="AaltoX">Aalto X</option>
+          <option value="AaltoY">Aalto Y</option>
         </select>
       </div>
       <button class="btn-reset" onclick="resetFilters()" data-fi="Nollaa" data-en="Reset">Nollaa</button>
@@ -981,9 +980,9 @@ main {
 const SHEET_ID = "1t8vBG7HNKcR-YZLnQ_BBpI0R8_OtIptY_yomZhwipEo";
 const SHEETS = {
   Aalto1: "1713319366",
-  Aalto2: "451036970",
   Aalto3: "1997257579",
-  Aalto4: "1888072199"
+  AaltoX: "1612126584",  // Vaihda oikeaksi GID:ksi kun luot välilehden Sheetissä
+  AaltoY: "1712699361"   // Vaihda oikeaksi GID:ksi kun luot välilehden Sheetissä
 };
 const REFRESH = 120; // 2 min
 
@@ -1456,4 +1455,3 @@ startTimer();
 renderMyBets();
 </script>
 </body>
-</html>
