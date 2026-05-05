@@ -736,20 +736,32 @@ function renderBankrollChart() {
   const fi = lang === "fi";
   const cutoff = getBrRangeCutoff();
 
-  // All bets with a bankroll value, sorted by original order
-  let settled = allBets.filter(b => b.bankrollJlk > 0);
+  // All settled bets in order
+  const allSettled = allBets.filter(b => b.bankrollJlk > 0);
 
-  if (cutoff) {
-    settled = settled.filter(b => {
+  let settled, startVal;
+
+  if (!cutoff) {
+    // All time — start from START_BANKROLL
+    settled = allSettled;
+    startVal = START_BANKROLL;
+  } else {
+    // Find the index of the first bet within range
+    const firstIdx = allSettled.findIndex(b => {
       const d = parseDate(b.aika);
       return d && d >= cutoff;
     });
-  }
 
-  // Start value: if filtered, use bankrollEnn of first bet in range, else START_BANKROLL
-  const startVal = (cutoff && settled.length > 0 && settled[0].bankrollEnn > 0)
-    ? settled[0].bankrollEnn
-    : START_BANKROLL;
+    if (firstIdx === -1) {
+      // No bets in range
+      settled = [];
+      startVal = allSettled.length > 0 ? allSettled[allSettled.length-1].bankrollJlk : START_BANKROLL;
+    } else {
+      settled = allSettled.slice(firstIdx);
+      // Start value = bankroll just before first bet in range
+      startVal = firstIdx > 0 ? allSettled[firstIdx-1].bankrollJlk : START_BANKROLL;
+    }
+  }
 
   const labels = [fi?"Alku":"Start", ...settled.map((_,i)=>`B${i+1}`)];
   const data   = [startVal, ...settled.map(b=>b.bankrollJlk)];
