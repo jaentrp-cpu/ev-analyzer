@@ -1,4 +1,4 @@
-<html lang="fi">
+<html lang="fi" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-:root {
+:root, [data-theme="dark"] {
   --bg:         #070d1a;
   --bg2:        #0b1425;
   --bg3:        #0f1b30;
@@ -31,6 +31,37 @@
   --radius:     10px;
   --radius-sm:  6px;
   --shadow:     0 8px 32px rgba(0,0,0,0.4);
+  --header-bg:  rgba(7,13,26,0.88);
+  --grid-color: rgba(26,92,232,0.035);
+  --tick-color: #3d5070;
+}
+
+[data-theme="light"] {
+  --bg:         #ffffff;
+  --bg2:        #f4f7fc;
+  --bg3:        #e8edf6;
+  --bg4:        #dce5f4;
+  --blue:       #1a4fc4;
+  --blue-lt:    #2d6ae0;
+  --blue-dim:   rgba(26,79,196,0.08);
+  --blue-dim2:  rgba(26,79,196,0.14);
+  --border:     rgba(26,79,196,0.15);
+  --border2:    rgba(26,79,196,0.25);
+  --white:      #0a0a0a;
+  --white2:     #2a3a52;
+  --white3:     #6080a8;
+  --green:      #1a9962;
+  --green-dim:  rgba(26,153,98,0.1);
+  --red:        #c02030;
+  --red-dim:    rgba(192,32,48,0.1);
+  --amber:      #b07010;
+  --amber-dim:  rgba(176,112,16,0.1);
+  --radius:     10px;
+  --radius-sm:  6px;
+  --shadow:     0 8px 32px rgba(0,0,0,0.1);
+  --header-bg:  rgba(255,255,255,0.96);
+  --grid-color: rgba(26,79,196,0.04);
+  --tick-color: #6080a8;
 }
 
 html { scroll-behavior: smooth; }
@@ -41,6 +72,7 @@ body {
   font-family: 'Barlow', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background 0.2s, color 0.2s;
 }
 
 /* Grid overlay */
@@ -49,8 +81,8 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(26,92,232,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(26,92,232,0.035) 1px, transparent 1px);
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
   background-size: 48px 48px;
   pointer-events: none;
   z-index: 0;
@@ -74,7 +106,7 @@ header {
   position: sticky;
   top: 0;
   z-index: 200;
-  background: rgba(7,13,26,0.88);
+  background: var(--header-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
@@ -193,6 +225,20 @@ nav {
   transition: all 0.18s;
 }
 .lang-btn:hover, .lang-btn.active { color: var(--blue-lt); border-color: var(--blue); }
+
+.theme-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--white2);
+  font-size: 1rem;
+  width: 34px; height: 34px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.18s;
+  flex-shrink: 0;
+}
+.theme-btn:hover { border-color: var(--blue-lt); }
 
 #countdown-pill {
   font-family: 'Barlow Condensed', sans-serif;
@@ -776,6 +822,7 @@ main {
       <span id="live-txt">LIVE</span>
     </div>
     <span id="countdown-pill">—</span>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-icon" title="Toggle theme">☀️</button>
     <button class="lang-btn active" onclick="setLang('fi')" id="btn-fi">FI</button>
     <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
   </div>
@@ -810,15 +857,6 @@ main {
         <input type="number" id="bankroll" value="1000" min="10" step="100" oninput="renderBets()">
       </div>
       <div class="fg">
-        <label data-fi="Kelly-fraktio" data-en="Kelly Fraction">Kelly-fraktio</label>
-        <select id="kelly-frac" onchange="renderBets()">
-          <option value="0.1">10% — Varovainen</option>
-          <option value="0.25" selected>25% — Normaali</option>
-          <option value="0.5">50% — Aggressiivinen</option>
-          <option value="1.0">100% — Täysi Kelly</option>
-        </select>
-      </div>
-      <div class="fg">
         <label data-fi="Min EV %" data-en="Min EV %">Min EV %</label>
         <input type="number" id="f-ev-min" value="3" step="0.5" oninput="renderBets()">
       </div>
@@ -838,16 +876,6 @@ main {
           <option value="basketball" data-fi="Koripallo" data-en="Basketball">Koripallo</option>
           <option value="icehockey" data-fi="Jääkiekko" data-en="Ice Hockey">Jääkiekko</option>
           <option value="tennis" data-fi="Tennis" data-en="Tennis">Tennis</option>
-        </select>
-      </div>
-      <div class="fg">
-        <label data-fi="Aalto" data-en="Wave">Aalto</label>
-        <select id="f-wave" onchange="renderBets()">
-          <option value="" data-fi="Kaikki aallot" data-en="All waves">Kaikki aallot</option>
-          <option value="Aalto1">Aalto 1</option>
-          <option value="Aalto3">Aalto 3</option>
-          <option value="AaltoX">Aalto X</option>
-          <option value="AaltoY">Aalto Y</option>
         </select>
       </div>
       <button class="btn-reset" onclick="resetFilters()" data-fi="Nollaa" data-en="Reset">Nollaa</button>
@@ -992,6 +1020,18 @@ let myBets = JSON.parse(localStorage.getItem("vedox_bets") || "[]");
 let countdown = REFRESH;
 let timer;
 let lang = localStorage.getItem("vedox_lang") || "fi";
+let currentTheme = localStorage.getItem("vedox_theme") || "dark";
+
+function applyTheme(t) {
+  currentTheme = t;
+  document.documentElement.setAttribute("data-theme", t);
+  localStorage.setItem("vedox_theme", t);
+  document.getElementById("theme-icon").textContent = t === "dark" ? "☀️" : "🌙";
+}
+
+function toggleTheme() {
+  applyTheme(currentTheme === "dark" ? "light" : "dark");
+}
 let bankrollChart, plChart;
 
 // ===== LANGUAGE =====
@@ -1086,14 +1126,12 @@ function getFiltered() {
   const oddsMin = parseFloat(document.getElementById("f-odds-min").value) || 0;
   const oddsMax = parseFloat(document.getElementById("f-odds-max").value) || 99;
   const sport   = document.getElementById("f-sport").value;
-  const wave    = document.getElementById("f-wave").value;
 
   return allBets.filter(b =>
     b.ev >= evMin &&
     b.kerroin >= oddsMin &&
     b.kerroin <= oddsMax &&
-    (!sport || b.liiga.includes(sport)) &&
-    (!wave || b.aalto === wave)
+    (!sport || b.liiga.includes(sport))
   );
 }
 
@@ -1102,7 +1140,6 @@ function resetFilters() {
   document.getElementById("f-odds-min").value = "1.4";
   document.getElementById("f-odds-max").value = "2.5";
   document.getElementById("f-sport").value = "";
-  document.getElementById("f-wave").value = "";
   renderBets();
 }
 
@@ -1130,7 +1167,7 @@ function evClass(ev) {
 // ===== RENDER BETS =====
 function renderBets() {
   const br   = parseFloat(document.getElementById("bankroll").value) || 1000;
-  const kf   = parseFloat(document.getElementById("kelly-frac").value) || 0.25;
+  const kf   = 0.25;
   const list = document.getElementById("bets-list");
   const empty = document.getElementById("bets-empty");
   const stats = document.getElementById("bets-stats");
@@ -1449,6 +1486,7 @@ function startTimer() {
 }
 
 // ===== INIT =====
+applyTheme(currentTheme);
 setLang(lang);
 fetchAll();
 startTimer();
