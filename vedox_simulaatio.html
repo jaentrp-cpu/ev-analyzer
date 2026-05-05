@@ -580,10 +580,21 @@ function getBrRangeCutoff() {
 
 function parseDate(str) {
   if (!str) return null;
-  // format: "5.5.2026 klo 0.06.33" or similar
-  const m = str.match(/(\d+)\.(\d+)\.(\d{4})/);
+  // Format: "5.5.2026 klo 0.06.33" or "5.5.2026 klo 21.30" or "5.5.2026"
+  const m = str.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
   if (!m) return null;
-  return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+  return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]), 12, 0, 0);
+}
+
+function getBrRangeCutoff() {
+  if (brRange === "all") return null;
+  const now = new Date();
+  const map = { "1d":1, "3d":3, "1w":7, "1m":30, "3m":90, "6m":180, "1y":365 };
+  if (!map[brRange]) return null;
+  const cutoff = new Date(now);
+  cutoff.setDate(cutoff.getDate() - map[brRange]);
+  cutoff.setHours(0,0,0,0);
+  return cutoff;
 }
 
 // ===== STAR =====
@@ -724,7 +735,10 @@ function renderEVRangeBars() {
 function renderBankrollChart() {
   const fi = lang === "fi";
   const cutoff = getBrRangeCutoff();
+
+  // All bets with a bankroll value, sorted by original order
   let settled = allBets.filter(b => b.bankrollJlk > 0);
+
   if (cutoff) {
     settled = settled.filter(b => {
       const d = parseDate(b.aika);
@@ -732,15 +746,17 @@ function renderBankrollChart() {
     });
   }
 
-  const startVal = settled.length > 0 && cutoff
-    ? (settled[0].bankrollEnn > 0 ? settled[0].bankrollEnn : START_BANKROLL)
+  // Start value: if filtered, use bankrollEnn of first bet in range, else START_BANKROLL
+  const startVal = (cutoff && settled.length > 0 && settled[0].bankrollEnn > 0)
+    ? settled[0].bankrollEnn
     : START_BANKROLL;
 
   const labels = [fi?"Alku":"Start", ...settled.map((_,i)=>`B${i+1}`)];
   const data   = [startVal, ...settled.map(b=>b.bankrollJlk)];
+  const endVal = data[data.length-1] || startVal;
 
   document.getElementById("br-start-end").textContent =
-    `${startVal.toFixed(0)}€ → ${(data[data.length-1]||startVal).toFixed(2)}€`;
+    `${startVal.toFixed(0)}€ → ${endVal.toFixed(2)}€`;
 
   if (charts.bankroll) charts.bankroll.destroy();
   charts.bankroll = new Chart(document.getElementById("chart-bankroll"), {
