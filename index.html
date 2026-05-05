@@ -380,7 +380,7 @@ main {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--text);
+  color: var(--blue-lt);
   letter-spacing: 0.02em;
   margin-bottom: 4px;
 }
@@ -445,8 +445,25 @@ main {
   color: var(--text3);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
+
+.stake-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  color: var(--blue-lt);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 4px 6px;
+  border-radius: 4px;
+  outline: none;
+  margin-bottom: 6px;
+  transition: border-color 0.15s;
+}
+.stake-input:focus { border-color: var(--blue-lt); }
 
 .stake-btns {
   display: flex;
@@ -1095,7 +1112,8 @@ function placeBet(idx) {
   const b = filtered[idx];
   if (!b) return;
   const br = parseFloat(document.getElementById("bankroll").value) || 1000;
-  const stake = parseFloat((br * 0.01).toFixed(2));
+  const inputEl = document.getElementById(`stake-${idx}`);
+  const stake = inputEl ? parseFloat(inputEl.value) || parseFloat((br * 0.01).toFixed(2)) : parseFloat((br * 0.01).toFixed(2));
   const pot = parseFloat((stake * b.kerroin).toFixed(2));
   const mktLabel = b.markkina.replace(/_/g," ");
 
@@ -1192,8 +1210,8 @@ function renderBets() {
           <div class="cell-sub">&nbsp;</div>
         </div>
         <div class="stake-box">
-          <div class="stake-amt">${stake.toFixed(0)}€</div>
           <div class="stake-lbl">${fi ? "Suositeltu panos" : "Recommended stake"}</div>
+          <input class="stake-input" id="stake-${i}" type="number" value="${stake.toFixed(0)}" min="1" step="1">
           <div class="stake-btns">
             <button class="btn-placed" onclick="placeBet(${i})">${fi ? "Laitoin ✓" : "Placed ✓"}</button>
             <button class="btn-skip" onclick="skipBet(${i})">${fi ? "Ohita ✗" : "Skip ✗"}</button>
