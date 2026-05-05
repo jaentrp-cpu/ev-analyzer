@@ -309,12 +309,12 @@ main {
 .fg select option { background: var(--bg2); }
 
 .btn-reset {
-  background: var(--red-dim);
-  border: 1px solid rgba(224,58,82,0.25);
-  color: var(--red);
+  background: var(--blue-dim2);
+  border: 1px solid var(--border2);
+  color: var(--blue-lt);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   padding: 7px 16px;
@@ -323,7 +323,7 @@ main {
   align-self: flex-end;
   transition: all 0.18s;
 }
-.btn-reset:hover { background: rgba(224,58,82,0.18); }
+.btn-reset:hover { background: var(--blue); color: #fff; }
 
 .filter-info {
   align-self: flex-end;
@@ -345,16 +345,7 @@ main {
   transition: border-color 0.18s;
 }
 
-.bet-card::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: var(--blue-lt);
-}
-.bet-card.high::before { background: var(--blue-lt); }
-.bet-card.top::before  { background: var(--blue-lt); }
-.bet-card:hover { border-color: var(--border2); }
+.bet-card::before { display: none; }
 
 .bet-main {
   padding: 0.85rem 1.25rem 0.85rem 1.5rem;
@@ -1187,7 +1178,6 @@ function renderBets() {
           <div class="bet-target">${b.kohde}</div>
           <div class="bet-meta">
             <span class="meta-tag">${b.kirja}</span>
-            <span class="meta-tag">Pinnacle ${b.pinnProb}</span>
             <span class="meta-tag">${fi ? "Voitto" : "Win"}: ${pot}€</span>
           </div>
         </div>
@@ -1199,7 +1189,7 @@ function renderBets() {
         <div class="cell">
           <div class="cell-lbl">EV</div>
           <div class="cell-val">+${b.ev.toFixed(1)}%</div>
-          <div class="cell-sub">vs Pinnacle</div>
+          <div class="cell-sub">&nbsp;</div>
         </div>
         <div class="stake-box">
           <div class="stake-amt">${stake.toFixed(0)}€</div>
