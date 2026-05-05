@@ -155,7 +155,7 @@ nav {
   white-space: nowrap;
 }
 .nav-btn:hover { color: var(--text); background: var(--blue-dim); }
-.nav-btn.active { color: #fff; background: var(--blue); }
+.nav-btn.active { color: #fff; background: var(--blue-lt); }
 
 .header-right {
   display: flex;
@@ -352,8 +352,8 @@ main {
   width: 3px;
   background: var(--blue-lt);
 }
-.bet-card.high::before { background: var(--amber); }
-.bet-card.top::before  { background: var(--green); }
+.bet-card.high::before { background: var(--blue-lt); }
+.bet-card.top::before  { background: var(--blue-lt); }
 .bet-card:hover { border-color: var(--border2); }
 
 .bet-main {
@@ -469,7 +469,7 @@ main {
   color: var(--blue-lt);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.05em;
   padding: 5px 4px;
   border-radius: 4px;
@@ -480,28 +480,28 @@ main {
 
 .btn-skip {
   flex: 1;
-  background: var(--red-dim);
-  border: 1px solid rgba(224,58,82,0.2);
-  color: var(--red);
+  background: var(--blue-dim2);
+  border: 1px solid var(--border2);
+  color: var(--blue-lt);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.05em;
   padding: 5px 4px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s;
 }
-.btn-skip:hover { background: rgba(224,58,82,0.2); }
+.btn-skip:hover { background: var(--blue-dim); color: var(--text2); }
 
 /* ===== MY BETS ===== */
 .add-bet-btn {
-  background: var(--green-dim);
-  border: 1px solid rgba(46,204,142,0.25);
-  color: var(--green);
+  background: var(--blue-dim2);
+  border: 1px solid var(--border2);
+  color: var(--blue-lt);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   padding: 9px 20px;
@@ -510,7 +510,7 @@ main {
   margin-bottom: 1rem;
   transition: all 0.18s;
 }
-.add-bet-btn:hover { background: rgba(46,204,142,0.18); }
+.add-bet-btn:hover { background: var(--blue); color: #fff; }
 
 .add-form {
   display: none;
@@ -685,8 +685,8 @@ main {
 .forecast-row:last-child { border-bottom: none; }
 .forecast-row .label { color: var(--text2); }
 .forecast-row .value { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--blue-lt); }
-.forecast-row .value.green { color: var(--green); }
-.forecast-row .value.amber { color: var(--amber); }
+.forecast-row .value.green { color: var(--blue-lt); }
+.forecast-row .value.amber { color: var(--blue-lt); }
 
 /* ===== EMPTY / LOADING ===== */
 .empty-box, .loading-box {
@@ -1384,7 +1384,7 @@ function renderAnalytics() {
       labels: plLabels,
       datasets: [{
         data: plData,
-        backgroundColor: plData.map(v => v >= 0 ? "rgba(46,204,142,0.55)" : "rgba(224,58,82,0.55)"),
+        backgroundColor: plData.map(v => v >= 0 ? "rgba(45,106,224,0.55)" : "rgba(45,106,224,0.25)"),
         borderRadius: 4
       }]
     },
