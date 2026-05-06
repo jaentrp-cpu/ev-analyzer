@@ -549,7 +549,8 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 const SHEET_ID      = "1t8vBG7HNKcR-YZLnQ_BBpI0R8_OtIptY_yomZhwipEo";
 const SIM_GID       = "1069109120";
 const START_BANKROLL = 1000;
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbfqaRt3NW4MP_Db9LiyLFZdC1uYPwlWel7Hqr19JZet6nUlUGKSDhkazwvMrbT6ki/exec";
+const MERKITSE_URL    = "https://vedox-bot-production.up.railway.app/merkitse";
+const MERKITSE_SECRET = "Vedox2themoon2026";                    // ← sama kuin Railway:n MERKITSE_SECRET
 
 // Markets that can have half win/loss
 const HALF_MARKETS = ['totals','spreads','asian_handicap','draw_no_bet'];
@@ -746,9 +747,10 @@ async function confirmMerkitse() {
   fb.innerHTML = '<span class="modal-spinner"></span>Lähetetään...';
 
   try {
-    const res = await fetch(APPS_SCRIPT_URL, {
+    const res = await fetch(MERKITSE_URL, {
       method: "POST",
-      body: JSON.stringify({ id: modalBet.id, tulos: selectedResult }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: modalBet.id, tulos: selectedResult, secret: MERKITSE_SECRET }),
     });
     const data = await res.json();
     if (data.ok) {
