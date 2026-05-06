@@ -126,12 +126,10 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 .chart-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .chart-title > span:last-child { font-size: 0.63rem; font-weight: 400; }
 
-/* Bankroll time range buttons */
 .br-range-btns { display: flex; gap: 4px; flex-wrap: wrap; }
 .br-range-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text3); font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.05em; padding: 3px 9px; border-radius: 3px; cursor: pointer; transition: all 0.15s; }
 .br-range-btn:hover, .br-range-btn.active { color: var(--text); background: var(--blue-dim2); border-color: var(--blue-lt); }
 
-/* Pie */
 .pie-wrap { display: flex; align-items: center; gap: 2rem; }
 .pie-canvas { max-width: 180px; max-height: 180px; }
 .pie-legend { flex: 1; }
@@ -141,7 +139,6 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 .legend-label { color: var(--text2); flex: 1; }
 .legend-val { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; color: var(--text2); }
 
-/* ROI bars */
 .roi-bar-wrap { margin-bottom: 10px; }
 .roi-bar-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.72rem; }
 .roi-bar-label { color: var(--text2); }
@@ -150,83 +147,38 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 .roi-bar-bg { height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
 .roi-bar-fill { height: 100%; border-radius: 3px; background: var(--blue-lt); transition: width 0.8s ease; }
 
-/* Sport/League breakdown — advanced interactive */
 .sl-wrap { display: flex; gap: 16px; min-height: 320px; }
-
 .sl-sports { width: 220px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; }
-
-.sl-sport-btn {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  cursor: pointer;
-  transition: all 0.15s;
-  text-align: left;
-}
+.sl-sport-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; cursor: pointer; transition: all 0.15s; text-align: left; }
 .sl-sport-btn:hover { border-color: var(--border2); }
 .sl-sport-btn.active { background: var(--blue-dim2); border-color: var(--blue-lt); }
-
 .sl-sport-name { font-family: 'Barlow Condensed', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--text); letter-spacing: 0.04em; margin-bottom: 4px; }
 .sl-sport-meta { display: flex; gap: 8px; font-size: 0.62rem; color: var(--text3); }
 .sl-sport-meta span { display: flex; align-items: center; gap: 3px; }
 .sl-sport-meta .val { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: var(--blue-lt); }
-
 .sl-bar-mini { height: 3px; background: var(--bg4); border-radius: 2px; margin-top: 6px; overflow: hidden; }
 .sl-bar-mini-fill { height: 100%; border-radius: 2px; background: var(--blue-lt); }
-
 .sl-detail { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; overflow: hidden; }
-
-.sl-detail-header {
-  display: grid;
-  grid-template-columns: 1fr 70px 70px 80px 80px;
-  gap: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 8px;
-}
-.sl-detail-header span {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text3);
-  text-align: right;
-}
+.sl-detail-header { display: grid; grid-template-columns: 1fr 70px 70px 80px 80px; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.sl-detail-header span { font-family: 'Barlow Condensed', sans-serif; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); text-align: right; }
 .sl-detail-header span:first-child { text-align: left; }
-
-.sl-league-row {
-  display: grid;
-  grid-template-columns: 1fr 70px 70px 80px 80px;
-  gap: 8px;
-  padding: 7px 0;
-  border-bottom: 1px solid var(--border);
-  align-items: center;
-}
+.sl-league-row { display: grid; grid-template-columns: 1fr 70px 70px 80px 80px; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); align-items: center; }
 .sl-league-row:last-child { border-bottom: none; }
-
 .sl-league-name { font-size: 0.74rem; color: var(--text2); }
 .sl-league-val { font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 700; color: var(--text2); text-align: right; }
 .sl-league-roi { font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 700; color: var(--blue-lt); text-align: right; }
 .sl-league-bar { height: 4px; background: var(--bg4); border-radius: 2px; overflow: hidden; }
 .sl-league-bar-fill { height: 100%; border-radius: 2px; background: var(--blue-lt); transition: width 0.5s ease; }
 
-/* Bets table */
 .table-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem; }
 .table-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 .table-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); }
-
 .table-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
-/* Date picker */
 .date-picker-wrap { display: flex; align-items: center; gap: 6px; }
 .date-picker-wrap label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
 .date-input { background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); font-family: 'Barlow', sans-serif; font-size: 0.72rem; padding: 4px 8px; border-radius: 4px; outline: none; cursor: pointer; }
 .date-input:focus { border-color: var(--blue-lt); }
-
 .table-filters { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-
 .tfilter { background: var(--bg3); border: 1px solid var(--border); color: var(--text3); font-family: 'Barlow Condensed', sans-serif; font-size: 0.73rem; font-weight: 600; letter-spacing: 0.05em; padding: 4px 11px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
 .tfilter:hover, .tfilter.active { color: var(--text); background: var(--blue-dim2); border-color: var(--blue-lt); }
 .tfilter.star-active { color: var(--amber); border-color: var(--amber); background: rgba(212,146,26,0.1); }
@@ -237,7 +189,6 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 .sim-table tr:last-child td { border-bottom: none; }
 .sim-table tr:hover td { background: var(--blue-dim); }
 
-/* Star button */
 .star-btn { background: none; border: none; cursor: pointer; font-size: 1rem; line-height: 1; padding: 0 2px; opacity: 0.35; transition: opacity 0.15s, transform 0.15s; }
 .star-btn:hover { opacity: 0.7; }
 .star-btn.starred { opacity: 1; }
@@ -250,16 +201,108 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 .result-badge.half-loss { background: rgba(224,58,82,0.07); color: var(--red); border: 1px solid rgba(224,58,82,0.18); }
 .result-badge.push      { background: var(--blue-dim); color: var(--blue-lt); border: 1px solid var(--border2); }
 
-.clv-pos { color: var(--blue-lt); font-weight: 700; }
-.clv-neg { color: var(--blue-lt); font-weight: 700; }
-.clv-neu { color: var(--text3); }
-
 .loading-box { text-align: center; padding: 4rem; color: var(--text3); font-size: 0.85rem; }
 .spinner { width: 28px; height: 28px; border: 2px solid var(--border2); border-top-color: var(--blue-lt); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 1rem; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 .content { animation: fadeUp 0.3s ease; }
+
+/* ===== MERKINTÄ-NAPPI ===== */
+.merkitse-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text3);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.06em;
+  padding: 2px 8px; border-radius: 3px; cursor: pointer;
+  transition: all 0.15s; white-space: nowrap;
+}
+.merkitse-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+/* ===== MODAALI ===== */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.78);
+  backdrop-filter: blur(5px);
+  display: flex; align-items: center; justify-content: center;
+  animation: mFadeIn 0.16s ease;
+}
+@keyframes mFadeIn { from{opacity:0} to{opacity:1} }
+
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  width: 440px; max-width: 95vw;
+  animation: mSlideUp 0.18s ease;
+}
+@keyframes mSlideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+
+.modal-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 6px;
+}
+.modal-match {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 3px;
+}
+.modal-sub { font-size: 0.7rem; color: var(--text3); margin-bottom: 1.25rem; }
+.modal-sub span { color: var(--blue-lt); font-weight: 600; }
+
+.result-btns {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px; margin-bottom: 1rem;
+}
+.result-btn {
+  padding: 11px 6px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border2); background: var(--bg3);
+  color: var(--text2); font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em;
+  cursor: pointer; transition: all 0.15s; text-align: center;
+}
+.result-btn:hover { border-color: var(--text3); color: var(--text); }
+.result-btn.sel { outline: 2px solid; outline-offset: 1px; }
+.result-btn.sel-voitto    { background: rgba(46,204,142,0.15); border-color: var(--green); color: var(--green); outline-color: var(--green); }
+.result-btn.sel-tappio    { background: rgba(224,58,82,0.15); border-color: var(--red); color: var(--red); outline-color: var(--red); }
+.result-btn.sel-half-win  { background: rgba(46,204,142,0.08); border-color: var(--green); color: var(--green); outline-color: var(--green); }
+.result-btn.sel-half-loss { background: rgba(224,58,82,0.08); border-color: var(--red); color: var(--red); outline-color: var(--red); }
+.result-btn.sel-push      { background: var(--blue-dim2); border-color: var(--blue-lt); color: var(--blue-lt); outline-color: var(--blue-lt); }
+
+/* Half win/loss only shown for relevant markets */
+.half-only { display: none; }
+.show-half .half-only { display: block; }
+
+.modal-divider { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.modal-cancel {
+  background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--text3); font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.8rem; font-weight: 600; padding: 7px 18px;
+  border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s;
+}
+.modal-cancel:hover { color: var(--text); }
+.modal-confirm {
+  background: var(--blue); border: 1px solid var(--blue-lt);
+  color: #fff; font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em;
+  padding: 7px 24px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: all 0.15s;
+}
+.modal-confirm:hover:not(:disabled) { background: var(--blue-lt); }
+.modal-confirm:disabled { opacity: 0.38; cursor: not-allowed; }
+
+.modal-feedback {
+  font-size: 0.73rem; text-align: center; padding: 6px 0;
+  border-radius: var(--radius-sm); margin-top: 8px; min-height: 24px;
+}
+.modal-feedback.ok  { color: var(--green); }
+.modal-feedback.err { color: var(--red); }
+
+.modal-spinner { width: 16px; height: 16px; border: 2px solid var(--border2); border-top-color: var(--blue-lt); border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; vertical-align: middle; margin-right: 6px; }
 
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
@@ -464,6 +507,7 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
               <th data-fi="Tulos" data-en="Result">Tulos</th>
               <th data-fi="Tuotto €" data-en="P&L €">Tuotto €</th>
               <th data-fi="Bankroll" data-en="Bankroll">Bankroll</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="bets-tbody"></tbody>
@@ -474,10 +518,41 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
   </div>
 </main>
 
+<!-- ===== MERKINTÄ-MODAALI ===== -->
+<div class="modal-overlay" id="modal-overlay" style="display:none" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" data-fi="Merkitse tulos manuaalisesti" data-en="Mark result manually">Merkitse tulos manuaalisesti</div>
+    <div class="modal-match" id="modal-match">—</div>
+    <div class="modal-sub" id="modal-sub">—</div>
+
+    <div class="result-btns" id="result-btns">
+      <button class="result-btn" onclick="selectResult('Voitto')">✅ Voitto</button>
+      <button class="result-btn" onclick="selectResult('Tappio')">❌ Tappio</button>
+      <button class="result-btn" onclick="selectResult('Push')">↔️ Push</button>
+      <button class="result-btn half-only" onclick="selectResult('Half Win')">½ Half Win</button>
+      <button class="result-btn half-only" onclick="selectResult('Half Loss')">½ Half Loss</button>
+    </div>
+
+    <div id="modal-preview" style="font-size:0.72rem;color:var(--text3);min-height:20px;margin-bottom:0.75rem;"></div>
+
+    <hr class="modal-divider">
+
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModalDirect()">Peruuta</button>
+      <button class="modal-confirm" id="modal-confirm-btn" onclick="confirmMerkitse()" disabled>Vahvista</button>
+    </div>
+    <div class="modal-feedback" id="modal-feedback"></div>
+  </div>
+</div>
+
 <script>
-const SHEET_ID = "1t8vBG7HNKcR-YZLnQ_BBpI0R8_OtIptY_yomZhwipEo";
-const SIM_GID  = "1069109120";
+const SHEET_ID      = "1t8vBG7HNKcR-YZLnQ_BBpI0R8_OtIptY_yomZhwipEo";
+const SIM_GID       = "1069109120";
 const START_BANKROLL = 1000;
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbfqaRt3NW4MP_Db9LiyLFZdC1uYPwlWel7Hqr19JZet6nUlUGKSDhkazwvMrbT6ki/exec";
+
+// Markets that can have half win/loss
+const HALF_MARKETS = ['totals','spreads','asian_handicap','draw_no_bet'];
 
 let allBets = [];
 let lang = localStorage.getItem("vedox_lang") || "fi";
@@ -488,6 +563,10 @@ let brRange = "all";
 let charts = {};
 let currentTheme = localStorage.getItem("vedox_theme") || "dark";
 let starredIds = JSON.parse(localStorage.getItem("vedox_starred") || "[]");
+
+// Modal state
+let modalBet = null;
+let selectedResult = null;
 
 function applyTheme(t) {
   currentTheme = t;
@@ -559,31 +638,11 @@ function parseSimCSV(text) {
 function getTickColor() { return currentTheme === "dark" ? "#3a4f6a" : "#6080a8"; }
 function getGridColor() { return currentTheme === "dark" ? "rgba(26,79,196,0.06)" : "rgba(26,79,196,0.08)"; }
 
-// ===== BANKROLL RANGE =====
 function setBrRange(range, btn) {
   brRange = range;
   document.querySelectorAll(".br-range-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   renderBankrollChart();
-}
-
-function getBrRangeCutoff() {
-  const now = new Date();
-  const map = {
-    "1d": 1, "3d": 3, "1w": 7, "1m": 30, "3m": 90, "6m": 180, "1y": 365
-  };
-  if (brRange === "all" || !map[brRange]) return null;
-  const cutoff = new Date(now);
-  cutoff.setDate(cutoff.getDate() - map[brRange]);
-  return cutoff;
-}
-
-function parseDate(str) {
-  if (!str) return null;
-  // Format: "5.5.2026 klo 0.06.33" or "5.5.2026 klo 21.30" or "5.5.2026"
-  const m = str.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-  if (!m) return null;
-  return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]), 12, 0, 0);
 }
 
 function getBrRangeCutoff() {
@@ -597,7 +656,13 @@ function getBrRangeCutoff() {
   return cutoff;
 }
 
-// ===== STAR =====
+function parseDate(str) {
+  if (!str) return null;
+  const m = str.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if (!m) return null;
+  return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]), 12, 0, 0);
+}
+
 function toggleStar(id, btn) {
   const idx = starredIds.indexOf(id);
   if (idx === -1) { starredIds.push(id); btn.classList.add("starred"); }
@@ -612,13 +677,122 @@ function toggleStarFilter(btn) {
   renderTable();
 }
 
-// ===== DATE FILTER =====
 function clearDates() {
   document.getElementById("date-from").value = "";
   document.getElementById("date-to").value = "";
   renderTable();
 }
 
+// ===== MERKINTÄ-MODAALI =====
+function openMerkitse(betId) {
+  const bet = allBets.find(b => b.id === betId);
+  if (!bet) return;
+  modalBet = bet;
+  selectedResult = null;
+
+  document.getElementById("modal-match").textContent = bet.ottelu;
+  document.getElementById("modal-sub").innerHTML =
+    `<span>${bet.kohde}</span> · ${bet.markkina.toUpperCase()} · ${bet.aalto} · kerroin <span>${bet.kerroin.toFixed(2)}</span> · panos ${bet.panos.toFixed(2)}€`;
+
+  // Show/hide half win/loss based on market
+  const canHalf = HALF_MARKETS.some(m => bet.markkina.includes(m)) || bet.markkina.includes('total');
+  const btnsEl = document.getElementById("result-btns");
+  btnsEl.classList.toggle("show-half", canHalf);
+
+  // Reset selections
+  document.querySelectorAll(".result-btn").forEach(b => {
+    b.classList.remove("sel","sel-voitto","sel-tappio","sel-push","sel-half-win","sel-half-loss");
+  });
+  document.getElementById("modal-confirm-btn").disabled = true;
+  document.getElementById("modal-feedback").textContent = "";
+  document.getElementById("modal-feedback").className = "modal-feedback";
+  document.getElementById("modal-preview").textContent = "";
+
+  document.getElementById("modal-overlay").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function selectResult(tulos) {
+  selectedResult = tulos;
+
+  // Update button styles
+  document.querySelectorAll(".result-btn").forEach(b => {
+    b.classList.remove("sel","sel-voitto","sel-tappio","sel-push","sel-half-win","sel-half-loss");
+  });
+  event.currentTarget.classList.add("sel", "sel-" + tulos.toLowerCase().replace(" ","-"));
+
+  // Preview tuotto
+  if (modalBet) {
+    const k = modalBet.kerroin, p = modalBet.panos;
+    let tuotto = 0;
+    if      (tulos === "Voitto")    tuotto = parseFloat((p*(k-1)).toFixed(2));
+    else if (tulos === "Tappio")    tuotto = -p;
+    else if (tulos === "Half Win")  tuotto = parseFloat(((p/2)*(k-1)).toFixed(2));
+    else if (tulos === "Half Loss") tuotto = -parseFloat((p/2).toFixed(2));
+    const sign = tuotto >= 0 ? "+" : "";
+    document.getElementById("modal-preview").innerHTML =
+      `<span style="color:var(--text3)">Tuotto: </span><span style="color:${tuotto>=0?"var(--green)":"var(--red)"};font-weight:700">${sign}${tuotto.toFixed(2)}€</span>`;
+  }
+
+  document.getElementById("modal-confirm-btn").disabled = false;
+}
+
+async function confirmMerkitse() {
+  if (!modalBet || !selectedResult) return;
+  const btn = document.getElementById("modal-confirm-btn");
+  const fb  = document.getElementById("modal-feedback");
+  btn.disabled = true;
+  fb.className = "modal-feedback";
+  fb.innerHTML = '<span class="modal-spinner"></span>Lähetetään...';
+
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ id: modalBet.id, tulos: selectedResult }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      const sign = data.tuotto >= 0 ? "+" : "";
+      fb.className = "modal-feedback ok";
+      fb.textContent = `✅ Merkitty: ${selectedResult} (${sign}${data.tuotto.toFixed(2)}€) — botti päivittää bankrollin hetken päästä.`;
+      // Update local state optimistically
+      const bet = allBets.find(b => b.id === modalBet.id);
+      if (bet) {
+        bet.tulos = selectedResult.toLowerCase();
+        bet.tuotto = data.tuotto;
+      }
+      setTimeout(() => {
+        closeModalDirect();
+        renderAll();
+        fetchSimData(); // Refresh from sheet
+      }, 2200);
+    } else {
+      throw new Error(data.error || "Tuntematon virhe");
+    }
+  } catch(e) {
+    fb.className = "modal-feedback err";
+    fb.textContent = "❌ Virhe: " + e.message;
+    btn.disabled = false;
+  }
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById("modal-overlay")) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById("modal-overlay").style.display = "none";
+  document.body.style.overflow = "";
+  modalBet = null;
+  selectedResult = null;
+}
+
+// Close with Escape
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeModalDirect();
+});
+
+// ===== RENDER =====
 function renderAll() {
   renderStats();
   renderHitPie();
@@ -735,30 +909,22 @@ function renderEVRangeBars() {
 function renderBankrollChart() {
   const fi = lang === "fi";
   const cutoff = getBrRangeCutoff();
-
-  // All settled bets in order
   const allSettled = allBets.filter(b => b.bankrollJlk > 0);
-
   let settled, startVal;
 
   if (!cutoff) {
-    // All time — start from START_BANKROLL
     settled = allSettled;
     startVal = START_BANKROLL;
   } else {
-    // Find the index of the first bet within range
     const firstIdx = allSettled.findIndex(b => {
       const d = parseDate(b.aika);
       return d && d >= cutoff;
     });
-
     if (firstIdx === -1) {
-      // No bets in range
       settled = [];
       startVal = allSettled.length > 0 ? allSettled[allSettled.length-1].bankrollJlk : START_BANKROLL;
     } else {
       settled = allSettled.slice(firstIdx);
-      // Start value = bankroll just before first bet in range
       startVal = firstIdx > 0 ? allSettled[firstIdx-1].bankrollJlk : START_BANKROLL;
     }
   }
@@ -916,7 +1082,7 @@ function renderSportLeagueBars() {
     const stakePct = (d.stake / totalStake * 100).toFixed(1);
     const betsPct  = (d.bets / totalBets * 100).toFixed(1);
     const roi = d.stake > 0 ? (d.profit / d.stake * 100).toFixed(1) : "0.0";
-    return `<button class="sl-sport-btn ${sport===activeSport?"active":""}" data-sport="${idx}" onclick="selectSportByIdx(${idx})">
+    return `<button class="sl-sport-btn ${sport===activeSport?"active":""}" onclick="selectSportByIdx(${idx})">
       <div class="sl-sport-name">${sport}</div>
       <div class="sl-sport-meta">
         <span>${d.bets} ${fi?"bettiä":"bets"} <span style="color:var(--text3)">(${betsPct}%)</span></span>
@@ -927,9 +1093,7 @@ function renderSportLeagueBars() {
     </button>`;
   }).join("");
 
-  // Store sorted for index lookup
   window._slSorted = sorted;
-
   renderLeagueDetail(sports, totalStake, totalBets);
 }
 
@@ -938,11 +1102,6 @@ function selectSportByIdx(idx) {
     activeSport = window._slSorted[idx][0];
     renderSportLeagueBars();
   }
-}
-
-function selectSport(sport) {
-  activeSport = sport;
-  renderSportLeagueBars();
 }
 
 function renderLeagueDetail(sports, totalStake, totalBets) {
@@ -1018,7 +1177,6 @@ function renderTable() {
   if (activeWaveFilter) filtered = filtered.filter(b => b.aalto === activeWaveFilter);
   if (starFilterActive) filtered = filtered.filter(b => starredIds.includes(b.id));
 
-  // Date filter
   if (dateFrom) {
     const from = new Date(dateFrom);
     filtered = filtered.filter(b => { const d = parseDate(b.aika); return d && d >= from; });
@@ -1031,19 +1189,20 @@ function renderTable() {
 
   const tbody = document.getElementById("bets-tbody");
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="14" style="text-align:center;color:var(--text3);padding:2rem">${fi?"Ei bettejä":"No bets"}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;color:var(--text3);padding:2rem">${fi?"Ei bettejä":"No bets"}</td></tr>`;
     return;
   }
 
   tbody.innerHTML = [...filtered].reverse().map(b => {
     const isPos = b.tuotto > 0;
-    const tuottoStr = b.tuotto !== 0 ? (isPos?"+":"")+b.tuotto.toFixed(2)+"€" : "—";
+    const tuottoStr = b.tuotto !== 0 ? (isPos?"+":"")+b.tuotto.toFixed(2)+"€" : (b.tulos==="push"?"0.00€":"—");
     const clvStr    = b.clvKerroin > 0 ? b.clvKerroin.toFixed(3) : "—";
     const clvPctStr = b.clvKerroin > 0 ? (b.clvPct>=0?"+":"")+b.clvPct.toFixed(2)+"%" : "—";
     const tulosLabel = {voitto:fi?"Voitto":"Won",tappio:fi?"Tappio":"Lost","half win":"Half Win","half loss":"Half Loss",push:"Push"}[b.tulos]||(fi?"Kesken":"Pending");
     const tulosClass = {voitto:"voitto",tappio:"tappio","half win":"half-win","half loss":"half-loss",push:"push"}[b.tulos]||"kesken";
     const brStr = b.bankrollJlk > 0 ? b.bankrollJlk.toFixed(2)+"€" : "—";
     const isStarred = starredIds.includes(b.id);
+    const isKesken = b.tulos === "kesken";
 
     return `<tr>
       <td><button class="star-btn ${isStarred?"starred":""}" onclick="toggleStar('${b.id}',this)">⭐</button></td>
@@ -1058,8 +1217,9 @@ function renderTable() {
       <td style="color:var(--blue-lt);font-weight:700">${clvPctStr}</td>
       <td style="color:var(--blue-lt)">${b.panos.toFixed(2)}€</td>
       <td><span class="result-badge ${tulosClass}">${tulosLabel}</span></td>
-      <td style="color:var(--blue-lt);font-family:'Barlow Condensed',sans-serif;font-weight:700">${tuottoStr}</td>
+      <td style="color:${isPos?"var(--green)":b.tuotto<0?"var(--red)":"var(--text3)"};font-family:'Barlow Condensed',sans-serif;font-weight:700">${tuottoStr}</td>
       <td style="color:var(--text2)">${brStr}</td>
+      <td>${isKesken ? `<button class="merkitse-btn" onclick="openMerkitse('${b.id}')">✏️ ${fi?"Merkitse":"Mark"}</button>` : ""}</td>
     </tr>`;
   }).join("");
 }
