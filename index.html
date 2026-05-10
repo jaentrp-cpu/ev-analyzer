@@ -1196,7 +1196,7 @@ main {
 // ===== SUPABASE CONFIG =====
 const SUPABASE_URL  = "https://gyvynucdwikkeblcorfj.supabase.co";
 const SUPABASE_KEY  = "sb_publishable_-nR49pxg_qi0XonOtVKRHQ_xpAIc4aY";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ===== CONFIG =====
 const REFRESH = 120;
@@ -1237,7 +1237,7 @@ async function doLogin() {
   btn.textContent = "Kirjaudutaan...";
   setAuthMsg("", "");
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await sbClient.auth.signInWithPassword({ email, password });
   btn.disabled = false;
   btn.textContent = "Kirjaudu sisään";
 
@@ -1260,7 +1260,7 @@ async function doRegister() {
   btn.textContent = "Luodaan...";
   setAuthMsg("", "");
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await sbClient.auth.signUp({ email, password });
   btn.disabled = false;
   btn.textContent = "Luo tunnus";
 
@@ -1278,7 +1278,7 @@ async function doRegister() {
 }
 
 async function doLogout() {
-  await supabase.auth.signOut();
+  await sbClient.auth.signOut();
 }
 
 function showApp(user) {
@@ -1312,7 +1312,7 @@ function showAuthModal() { /* B-mallissa ei käytetä — overlay on aina pääl
 function hideAuthModal() { /* ei käytössä */ }
 
 // Listen for auth state changes (login, logout, page reload with existing session)
-supabase.auth.onAuthStateChange((_event, session) => {
+sbClient.auth.onAuthStateChange((_event, session) => {
   if (session?.user) {
     showApp(session.user);
   } else {
@@ -1370,7 +1370,7 @@ function showPage(p, btn) {
 // ===== FETCH from Supabase =====
 async function fetchAll() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await sbClient
       .from('ev_bets')
       .select('id, ottelu, alkaa, markkina, kohde, paras_kerroin, kirja, pinnacle_kerroin, pinnacle_prob, ev_pct, liiga, aalto')
       .eq('aktiivinen', true)
