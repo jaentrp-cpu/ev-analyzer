@@ -111,7 +111,7 @@ body {
 
 .auth-box {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   background: var(--bg2);
   border: 1px solid var(--border2);
   border-radius: 12px;
@@ -957,6 +957,12 @@ main {
     </div>
 
     <div class="auth-msg" id="auth-msg"></div>
+
+    <div style="display:flex;justify-content:center;gap:8px;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)">
+      <button onclick="toggleTheme()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-size:0.9rem;width:30px;height:30px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center" id="auth-theme-btn">☀️</button>
+      <button onclick="setLang('fi');syncAuthLangBtns()" id="auth-btn-fi" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:600;letter-spacing:0.08em;padding:5px 10px;border-radius:5px;cursor:pointer">FI</button>
+      <button onclick="setLang('en');syncAuthLangBtns()" id="auth-btn-en" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:600;letter-spacing:0.08em;padding:5px 10px;border-radius:5px;cursor:pointer">EN</button>
+    </div>
   </div>
 </div>
 
@@ -1317,9 +1323,19 @@ function applyTheme(t) {
   currentTheme = t;
   document.documentElement.setAttribute("data-theme", t);
   localStorage.setItem("vedox_theme", t);
-  document.getElementById("theme-icon").textContent = t === "dark" ? "☀️" : "🌙";
+  const icon = t === "dark" ? "☀️" : "🌙";
+  document.getElementById("theme-icon").textContent = icon;
+  const authBtn = document.getElementById("auth-theme-btn");
+  if (authBtn) authBtn.textContent = icon;
 }
 function toggleTheme() { applyTheme(currentTheme === "dark" ? "light" : "dark"); }
+
+function syncAuthLangBtns() {
+  document.getElementById("auth-btn-fi").style.color = lang === "fi" ? "var(--blue-lt)" : "var(--text3)";
+  document.getElementById("auth-btn-fi").style.borderColor = lang === "fi" ? "var(--blue)" : "var(--border2)";
+  document.getElementById("auth-btn-en").style.color = lang === "en" ? "var(--blue-lt)" : "var(--text3)";
+  document.getElementById("auth-btn-en").style.borderColor = lang === "en" ? "var(--blue)" : "var(--border2)";
+}
 
 // ===== LANGUAGE =====
 function setLang(l) {
@@ -1773,6 +1789,7 @@ function startTimer() {
 // ===== INIT =====
 applyTheme(currentTheme);
 setLang(lang);
+syncAuthLangBtns();
 // fetchAll() ja startTimer() käynnistyvät vasta showApp():ssa kirjautumisen jälkeen
 </script>
 </body>
