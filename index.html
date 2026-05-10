@@ -221,9 +221,13 @@ body {
   border-radius: 5px;
   padding: 0 4px;
 }
-.auth-msg.error { color: var(--red); }
-.auth-msg.success { color: var(--green); }
-.auth-msg.info { color: var(--text3); }
+.auth-box, .auth-box * {
+  pointer-events: auto;
+}
+
+#auth-overlay::before, body::before {
+  pointer-events: none !important;
+}
 
 /* ===== HEADER ===== */
 header {
@@ -926,8 +930,8 @@ main {
     </div>
 
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Kirjaudu</button>
-      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Luo tunnus</button>
+      <button class="auth-tab active" id="tab-login">Kirjaudu</button>
+      <button class="auth-tab" id="tab-register">Luo tunnus</button>
     </div>
 
     <div id="auth-login-form">
@@ -937,10 +941,9 @@ main {
       </div>
       <div class="auth-field">
         <label>Salasana</label>
-        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"
-          onkeydown="if(event.key==='Enter') doLogin()">
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
       </div>
-      <button class="auth-btn" id="login-btn" onclick="doLogin()">Kirjaudu sisään</button>
+      <button class="auth-btn" id="login-btn">Kirjaudu sisään</button>
     </div>
 
     <div id="auth-register-form" style="display:none">
@@ -950,18 +953,17 @@ main {
       </div>
       <div class="auth-field">
         <label>Salasana</label>
-        <input type="password" id="reg-password" placeholder="min. 6 merkkiä" autocomplete="new-password"
-          onkeydown="if(event.key==='Enter') doRegister()">
+        <input type="password" id="reg-password" placeholder="min. 6 merkkiä" autocomplete="new-password">
       </div>
-      <button class="auth-btn" id="register-btn" onclick="doRegister()">Luo tunnus</button>
+      <button class="auth-btn" id="register-btn">Luo tunnus</button>
     </div>
 
     <div class="auth-msg" id="auth-msg"></div>
 
     <div style="display:flex;justify-content:center;gap:8px;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)">
-      <button onclick="toggleTheme()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-size:0.9rem;width:30px;height:30px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center" id="auth-theme-btn">☀️</button>
-      <button onclick="setLang('fi');syncAuthLangBtns()" id="auth-btn-fi" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:600;letter-spacing:0.08em;padding:5px 10px;border-radius:5px;cursor:pointer">FI</button>
-      <button onclick="setLang('en');syncAuthLangBtns()" id="auth-btn-en" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:600;letter-spacing:0.08em;padding:5px 10px;border-radius:5px;cursor:pointer">EN</button>
+      <button style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-size:0.9rem;width:30px;height:30px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center" id="auth-theme-btn">☀️</button>
+      <button id="auth-btn-fi" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:600;letter-spacing:0.08em;padding:5px 10px;border-radius:5px;cursor:pointer">FI</button>
+      <button id="auth-btn-en" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:600;letter-spacing:0.08em;padding:5px 10px;border-radius:5px;cursor:pointer">EN</button>
     </div>
   </div>
 </div>
@@ -1786,10 +1788,26 @@ function startTimer() {
   }, 1000);
 }
 
+function initAuthControls() {
+  document.getElementById("tab-login")?.addEventListener("click", () => switchAuthTab("login"));
+  document.getElementById("tab-register")?.addEventListener("click", () => switchAuthTab("register"));
+
+  document.getElementById("auth-theme-btn")?.addEventListener("click", toggleTheme);
+  document.getElementById("auth-btn-fi")?.addEventListener("click", () => { setLang("fi"); syncAuthLangBtns(); });
+  document.getElementById("auth-btn-en")?.addEventListener("click", () => { setLang("en"); syncAuthLangBtns(); });
+
+  document.getElementById("login-btn")?.addEventListener("click", doLogin);
+  document.getElementById("register-btn")?.addEventListener("click", doRegister);
+
+  document.getElementById("login-password")?.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+  document.getElementById("reg-password")?.addEventListener("keydown", e => { if (e.key === "Enter") doRegister(); });
+}
+
 // ===== INIT =====
 applyTheme(currentTheme);
 setLang(lang);
 syncAuthLangBtns();
+initAuthControls();
 // fetchAll() ja startTimer() käynnistyvät vasta showApp():ssa kirjautumisen jälkeen
 </script>
 </body>
