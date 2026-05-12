@@ -978,8 +978,8 @@ function deleteBet(id) {
     }
   }
   myBets=myBets.filter(x=>String(x.id)!==String(id));
-  if (bet) deleteBetFromDb(bet).then(()=>saveBets());
-  else saveBets();
+  saveBets();
+  if (bet) deleteBetFromDb(bet);
   renderMyBets();
 }
 
