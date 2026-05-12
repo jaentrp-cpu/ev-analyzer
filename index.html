@@ -649,16 +649,12 @@ function showApp(user) {
     updateHeaderProfile(user.email.split("@")[0], null);
   });
 
-  // Lataa betsit Supabasesta, korvaa localStorage-cache
+  // Lataa betsit Supabasesta, korvaa aina localStorage-cache
   loadUserBets(user).then(sbBets => {
     if (sbBets !== null) {
-      if (sbBets.length > 0 || myBets.length === 0) {
-        myBets = sbBets;
-        saveBets();
-        renderMyBets();
-      } else {
-        console.warn("[Vedox] user_bets empty, keeping localStorage bets for migration.");
-      }
+      myBets = sbBets;
+      saveBets();
+      renderMyBets();
     }
   }).catch(err => {
     console.warn("[Vedox] user_bets load error:", err.message || err);
@@ -813,7 +809,18 @@ function placeBet(idx) {
 
   const newBet = {id:Date.now(),date:new Date().toLocaleDateString("fi-FI"),match:b.ottelu,target:b.kohde,book:b.kirja,odds:b.kerroin,stake,ev:b.ev,pinn:parseFloat((b.pinnProb||"0").replace(",",".").replace("%",""))||0,result:"pending",settled:false,returnedAmount:0,market:b.markkina.replace(/_/g," "),potential:pot,sourceBetId:sid};
   myBets.unshift(newBet);
-  upsertBetToDb(newBet).then(()=>saveBets());
+  upsertBetToDb(newBet).then(ok => {
+    if (ok) { saveBets(); renderMyBets(); }
+    else {
+      myBets = myBets.filter(x => x !== newBet);
+      document.getElementById("bankroll").value = currentBr;
+      if (currentUser) localStorage.setItem(`vedox_bankroll_${currentUser.id}`, String(currentBr));
+      skippedIds = skippedIds.filter(x => x !== sid);
+      if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`, JSON.stringify(skippedIds));
+      saveBets(); renderBets(); renderMyBets();
+      alert(lang==="fi" ? "Betsin tallennus epäonnistui. Yritä uudelleen." : "Saving bet failed. Please try again.");
+    }
+  });
   skippedIds.push(sid);
   if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`,JSON.stringify(skippedIds));
   renderBets(); renderMyBets();
@@ -853,18 +860,27 @@ function renderBets() {
 
 // ===== MY BETS — Supabase kirjoituspolut =====
 async function upsertBetToDb(bet) {
-  if (!currentUser) return;
+  if (!currentUser) return false;
   const payload = localBetToDb(bet, currentUser.id);
+
   if (bet._dbId) {
-    // päivitä olemassa oleva rivi
-    const { error } = await sbClient.from("user_bets").update(payload).eq("id", bet._dbId).eq("user_id", currentUser.id);
-    if (error) console.warn("[Vedox] bet update failed:", error.message);
-  } else {
-    // lisää uusi rivi, tallenna palautettu id
-    const { data, error } = await sbClient.from("user_bets").insert(payload).select("id").single();
-    if (error) console.warn("[Vedox] bet insert failed:", error.message);
-    else if (data?.id) bet._dbId = data.id;
+    const { error } = await sbClient
+      .from("user_bets")
+      .update(payload)
+      .eq("id", bet._dbId)
+      .eq("user_id", currentUser.id);
+    if (error) { console.warn("[Vedox] bet update failed:", error.message); return false; }
+    return true;
   }
+
+  const { data, error } = await sbClient
+    .from("user_bets")
+    .insert(payload)
+    .select("id")
+    .single();
+  if (error) { console.warn("[Vedox] bet insert failed:", error.message); return false; }
+  if (data?.id) { bet._dbId = data.id; bet.id = data.id; }
+  return true;
 }
 
 async function deleteBetFromDb(bet) {
@@ -876,6 +892,11 @@ async function deleteBetFromDb(bet) {
 function saveBets() {
   // localStorage fallback-cache
   if (currentUser) localStorage.setItem(`vedox_bets_${currentUser.id}`, JSON.stringify(myBets));
+}
+
+function clearLocalBetCacheForCurrentUser() {
+  if (!currentUser) return;
+  localStorage.removeItem(`vedox_bets_${currentUser.id}`);
 }
 
 function toggleAddForm() {
@@ -898,7 +919,15 @@ function saveBet() {
   const newBr=parseFloat((br+getBetCashImpact(bet)).toFixed(2));
   if (newBr < 0) { alert(lang==="fi"?"Betsi veisi kassan miinukselle.":"Bet would make bankroll negative."); return; }
   myBets.unshift(bet);
-  upsertBetToDb(bet).then(()=>saveBets());
+  upsertBetToDb(bet).then(ok => {
+    if (ok) { saveBets(); renderMyBets(); }
+    else {
+      myBets = myBets.filter(x => x !== bet);
+      setCurrentBankroll(br);
+      saveBets(); renderMyBets();
+      alert(lang==="fi" ? "Betsin tallennus epäonnistui. Yritä uudelleen." : "Saving bet failed. Please try again.");
+    }
+  });
   setCurrentBankroll(newBr);
   renderMyBets(); toggleAddForm();
   ["f-match","f-target","f-book","f-odds","f-stake","f-ev","f-pinn"].forEach(id=>document.getElementById(id).value="");
@@ -931,12 +960,14 @@ function updateResult(id, val) {
   const b=myBets.find(x=>String(x.id)===String(id)); if(!b) return;
   const oldResult=b.result;
   if (oldResult===val) return;
-  let br=parseFloat(document.getElementById("bankroll").value)||0;
+  const originalBr=parseFloat(document.getElementById("bankroll").value)||0;
+  const oldReturnedAmount=b.returnedAmount;
+  const oldSettled=b.settled;
+  let br=originalBr;
   const ret=getReturnAmount(b);
 
   // Peruuta edellinen settlement
   if (oldResult==="won") br=parseFloat((br-ret).toFixed(2));
-  // lost: ei palautusta, ei peruutettavaa
 
   // Tee uusi settlement
   if (val==="won") {
@@ -947,14 +978,23 @@ function updateResult(id, val) {
     b.returnedAmount=0;
     b.settled=true;
   } else {
-    // pending: peruuta vain settlement, stake pysyy vähennettynä koska betsi on edelleen auki
     b.returnedAmount=0;
     b.settled=false;
   }
 
   b.result=val;
   setCurrentBankroll(br);
-  upsertBetToDb(b).then(()=>saveBets());
+  upsertBetToDb(b).then(ok => {
+    if (ok) { saveBets(); }
+    else {
+      b.result=oldResult;
+      b.returnedAmount=oldReturnedAmount;
+      b.settled=oldSettled;
+      setCurrentBankroll(originalBr);
+      renderMyBets();
+      alert(lang==="fi" ? "Tuloksen tallennus epäonnistui. Yritä uudelleen." : "Saving result failed. Please try again.");
+    }
+  });
   renderMyBets();
 }
 
