@@ -176,6 +176,9 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
 .btn-profile-logout:hover { background:var(--red-dim); }
 .btn-profile-close { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text3); font-size:1.2rem; cursor:pointer; line-height:1; }
 .btn-profile-close:hover { color:var(--text); }
+.profile-msg { min-height:1.1em; margin-top:0.75rem; font-size:0.76rem; text-align:center; color:var(--text3); }
+.profile-msg.success { color:var(--green); }
+.profile-msg.error { color:var(--red); }
 .info-modal-overlay { position:fixed; inset:0; z-index:1200; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; padding:1rem; }
 .info-modal-overlay.open { display:flex; }
 .info-modal { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:2rem; width:100%; max-width:560px; max-height:85vh; overflow-y:auto; animation:fadeUp 0.2s ease; position:relative; }
@@ -300,6 +303,7 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
       <button class="btn-profile-save" onclick="saveProfile()">Tallenna</button>
       <button class="btn-profile-logout" onclick="doLogout()">Kirjaudu ulos</button>
     </div>
+    <div class="profile-msg" id="profile-msg"></div>
     <div class="legal-links" style="margin-top:1rem">
       <button class="legal-link" onclick="openInfoModal('terms')">Käyttöehdot</button>
       <button class="legal-link" onclick="openInfoModal('privacy')">Tietosuoja</button>
@@ -945,6 +949,13 @@ function closeInfoModalOutside(e, id) {
   if (e.target === document.getElementById(id)) closeInfoModal(id);
 }
 
+function setProfileMsg(msg, type) {
+  const el = document.getElementById("profile-msg");
+  if (!el) return;
+  el.textContent = msg || "";
+  el.className = "profile-msg" + (type ? " " + type : "");
+}
+
 function updateHeaderProfile(name, avatarDataUrl) {
   const initial = (name||"?")[0].toUpperCase();
   document.getElementById("header-profile-name").textContent = name || "";
@@ -1007,6 +1018,7 @@ async function openProfileModal() {
   if (!currentUser) return;
   selectedAvatarFile = null;
   document.getElementById("profile-avatar-input").value = "";
+  setProfileMsg("", "");
   let profile;
   try {
     profile = await loadProfile(currentUser);
@@ -1065,11 +1077,16 @@ async function saveProfile() {
     if (avatarUrl) localStorage.setItem(`vedox_profile_avatar_${currentUser.id}`, avatarUrl);
     updateHeaderProfile(name, avatarUrl);
     selectedAvatarFile = null;
-    closeProfileModal();
+    setProfileMsg(lang==="fi" ? "Profiili tallennettu." : "Profile saved.", "success");
+    setTimeout(closeProfileModal, 500);
   } catch (e) {
-    const message = e?.message || e?.error_description || JSON.stringify(e) || "Tuntematon virhe";
     console.error("[Vedox] profile save failed:", e);
-    alert((lang==="fi" ? "Profiilin tallennus epäonnistui: " : "Profile save failed: ") + message);
+    setProfileMsg(
+      lang==="fi"
+        ? "Profiilin tallennus epäonnistui. Yritä hetken päästä uudelleen."
+        : "Profile save failed. Please try again in a moment.",
+      "error"
+    );
   }
 }
 
