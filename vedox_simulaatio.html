@@ -5,6 +5,7 @@
 <title>Vedox — Simulaatio</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -75,6 +76,121 @@ body {
   z-index: 0;
 }
 
+/* ===== AUTH OVERLAY ===== */
+#auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+[data-theme="dark"] #auth-overlay::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(26,79,196,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26,79,196,0.025) 1px, transparent 1px);
+  background-size: 52px 52px;
+  pointer-events: none;
+  z-index: 0;
+}
+.auth-box {
+  position: relative;
+  z-index: 2;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 360px;
+  animation: fadeUp 0.3s ease;
+}
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.75rem;
+  justify-content: center;
+}
+.auth-logo-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 1.8rem;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+.auth-logo-name span { color: var(--blue-lt); }
+.auth-sim-badge {
+  display: block;
+  text-align: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 1.5rem;
+  margin-top: -0.5rem;
+}
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 1rem;
+}
+.auth-field label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.auth-field input {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.9rem;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.18s;
+  width: 100%;
+}
+.auth-field input:focus { border-color: var(--blue-lt); }
+.auth-btn {
+  width: 100%;
+  background: var(--blue);
+  border: none;
+  color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 11px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.18s;
+  margin-top: 0.5rem;
+}
+.auth-btn:hover { background: var(--blue-lt); }
+.auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.auth-msg {
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  text-align: center;
+  min-height: 1.2em;
+  border-radius: 5px;
+  padding: 0 4px;
+}
+.auth-msg.error { color: var(--red); }
+.auth-msg.success { color: var(--green); }
+
 header {
   position: sticky;
   top: 0;
@@ -98,6 +214,40 @@ header {
 .header-right { display: flex; align-items: center; gap: 8px; }
 
 .sim-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); background: var(--bg3); border: 1px solid var(--border2); padding: 5px 14px; border-radius: 20px; }
+
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text2);
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  padding: 5px 10px;
+  border-radius: 20px;
+  max-width: 200px;
+  overflow: hidden;
+}
+.user-email { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.btn-logout {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text3);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-logout:hover { color: var(--red); border-color: var(--red); }
 
 .back-btn { background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.06em; padding: 6px 16px; border-radius: var(--radius-sm); cursor: pointer; text-decoration: none; transition: all 0.18s; }
 .back-btn:hover { color: var(--text); border-color: var(--blue-lt); }
@@ -208,7 +358,6 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 .content { animation: fadeUp 0.3s ease; }
 
-/* ===== MERKINTÄ-NAPPI ===== */
 .merkitse-btn {
   background: none;
   border: 1px solid var(--border);
@@ -220,7 +369,6 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 }
 .merkitse-btn:hover { border-color: var(--amber); color: var(--amber); }
 
-/* ===== MODAALI ===== */
 .modal-overlay {
   position: fixed; inset: 0; z-index: 1000;
   background: rgba(0,0,0,0.78);
@@ -271,7 +419,6 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 .result-btn.sel-half-loss { background: rgba(224,58,82,0.08); border-color: var(--red); color: var(--red); outline-color: var(--red); }
 .result-btn.sel-push      { background: var(--blue-dim2); border-color: var(--blue-lt); color: var(--blue-lt); outline-color: var(--blue-lt); }
 
-/* Half win/loss only shown for relevant markets */
 .half-only { display: none; }
 .show-half .half-only { display: block; }
 
@@ -318,6 +465,39 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 </head>
 <body>
 
+<!-- ===== AUTH OVERLAY ===== -->
+<div id="auth-overlay">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 8 L20 32 L36 8" stroke="url(#ag1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M14 8 L20 20 L26 8" stroke="url(#ag2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <defs>
+          <linearGradient id="ag1" x1="4" y1="8" x2="36" y2="32" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a0b4d0"/>
+          </linearGradient>
+          <linearGradient id="ag2" x1="14" y1="8" x2="26" y2="20" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#1a4fc4"/><stop offset="100%" stop-color="#2d6ae0"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="auth-logo-name">VEDO<span>X</span></div>
+    </div>
+    <span class="auth-sim-badge">Simulaatio — kirjaudu sisään</span>
+
+    <div class="auth-field">
+      <label>Sähköposti</label>
+      <input type="email" id="login-email" placeholder="sinä@email.com" autocomplete="email">
+    </div>
+    <div class="auth-field">
+      <label>Salasana</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="auth-btn" id="login-btn">Kirjaudu sisään</button>
+    <div class="auth-msg" id="auth-msg"></div>
+  </div>
+</div>
+
 <header>
   <a class="logo" href="index.html">
     <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -337,6 +517,11 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
   </a>
   <div class="header-right">
     <div class="sim-badge">SIMULAATIO</div>
+    <div class="user-pill" id="user-pill" style="display:none">
+      <span>👤</span>
+      <span class="user-email" id="user-email-display"></span>
+    </div>
+    <button class="btn-logout" id="logout-btn" style="display:none" onclick="doLogout()">Kirjaudu ulos</button>
     <a href="index.html" class="back-btn">← Takaisin</a>
     <button class="theme-btn" onclick="toggleTheme()" id="theme-icon" title="Toggle theme">☀️</button>
     <button class="lang-btn active" onclick="setLang('fi')" id="btn-fi">FI</button>
@@ -376,17 +561,13 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
     </div>
 
     <div class="charts-grid">
-
       <div class="chart-card">
-        <div class="chart-title">
-          <span data-fi="Osumisprosentti" data-en="Hit Rate">Osumisprosentti</span>
-        </div>
+        <div class="chart-title"><span data-fi="Osumisprosentti" data-en="Hit Rate">Osumisprosentti</span></div>
         <div class="pie-wrap">
           <canvas class="pie-canvas" id="chart-hit"></canvas>
           <div class="pie-legend" id="legend-hit"></div>
         </div>
       </div>
-
       <div class="chart-card">
         <div class="chart-title">
           <span data-fi="ROI per EV-range" data-en="ROI per EV range">ROI per EV-range</span>
@@ -394,7 +575,6 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
         </div>
         <div id="ev-range-bars"></div>
       </div>
-
       <div class="chart-card full">
         <div class="chart-title">
           <span data-fi="Bankrollin kehitys" data-en="Bankroll Growth">Bankrollin kehitys</span>
@@ -414,35 +594,22 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
         </div>
         <canvas id="chart-bankroll" height="120"></canvas>
       </div>
-
       <div class="chart-card">
-        <div class="chart-title">
-          <span data-fi="ROI per markkina" data-en="ROI per market">ROI per markkina</span>
-        </div>
+        <div class="chart-title"><span data-fi="ROI per markkina" data-en="ROI per market">ROI per markkina</span></div>
         <div id="market-bars"></div>
       </div>
-
       <div class="chart-card">
-        <div class="chart-title">
-          <span data-fi="ROI per aalto" data-en="ROI per wave">ROI per aalto</span>
-        </div>
+        <div class="chart-title"><span data-fi="ROI per aalto" data-en="ROI per wave">ROI per aalto</span></div>
         <div id="wave-bars"></div>
       </div>
-
       <div class="chart-card">
-        <div class="chart-title">
-          <span data-fi="ROI per kerroinväli" data-en="ROI per odds range">ROI per kerroinväli</span>
-        </div>
+        <div class="chart-title"><span data-fi="ROI per kerroinväli" data-en="ROI per odds range">ROI per kerroinväli</span></div>
         <div id="odds-range-bars"></div>
       </div>
-
       <div class="chart-card">
-        <div class="chart-title">
-          <span data-fi="CLV-jakauma" data-en="CLV Distribution">CLV-jakauma</span>
-        </div>
+        <div class="chart-title"><span data-fi="CLV-jakauma" data-en="CLV Distribution">CLV-jakauma</span></div>
         <canvas id="chart-clv" height="180"></canvas>
       </div>
-
       <div class="chart-card full">
         <div class="chart-title">
           <span data-fi="Laji &amp; liiga -analyysi" data-en="Sport &amp; league analysis">Laji &amp; liiga -analyysi</span>
@@ -455,7 +622,6 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
           </div>
         </div>
       </div>
-
     </div>
 
     <div class="table-card">
@@ -524,7 +690,6 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
     <div class="modal-title" data-fi="Merkitse tulos manuaalisesti" data-en="Mark result manually">Merkitse tulos manuaalisesti</div>
     <div class="modal-match" id="modal-match">—</div>
     <div class="modal-sub" id="modal-sub">—</div>
-
     <div class="result-btns" id="result-btns">
       <button class="result-btn" onclick="selectResult('Voitto')">✅ Voitto</button>
       <button class="result-btn" onclick="selectResult('Tappio')">❌ Tappio</button>
@@ -532,11 +697,8 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
       <button class="result-btn half-only" onclick="selectResult('Half Win')">½ Half Win</button>
       <button class="result-btn half-only" onclick="selectResult('Half Loss')">½ Half Loss</button>
     </div>
-
     <div id="modal-preview" style="font-size:0.72rem;color:var(--text3);min-height:20px;margin-bottom:0.75rem;"></div>
-
     <hr class="modal-divider">
-
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeModalDirect()">Peruuta</button>
       <button class="modal-confirm" id="modal-confirm-btn" onclick="confirmMerkitse()" disabled>Vahvista</button>
@@ -546,14 +708,17 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 </div>
 
 <script>
-const SHEET_ID      = "1t8vBG7HNKcR-YZLnQ_BBpI0R8_OtIptY_yomZhwipEo";
-const SIM_GID       = "1069109120";
-const START_BANKROLL = 1000;
-const MERKITSE_URL    = "https://vedox-bot-production.up.railway.app/merkitse";
-const MERKITSE_SECRET = "";
+// ===== SUPABASE CONFIG — sama kuin index.html (vain publishable key) =====
+const SUPABASE_URL_FE = "https://gvywnucdwikkeblcorfj.supabase.co";
+const SUPABASE_KEY_FE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eXdudWNkd2lra2VibGNvcmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MzMyMTIsImV4cCI6MjA5NDAwOTIxMn0.PPFn6lutvI4mlZ8gBZT1bKA50h_96GZSPHDf6-Wl_Tc";
+const sbClient = window.supabase.createClient(SUPABASE_URL_FE, SUPABASE_KEY_FE);
 
-// Markets that can have half win/loss
-const HALF_MARKETS = ['totals','spreads','asian_handicap','draw_no_bet'];
+// ===== CONFIG =====
+const SHEET_ID       = "1t8vBG7HNKcR-YZLnQ_BBpI0R8_OtIptY_yomZhwipEo";
+const SIM_GID        = "1069109120";
+const START_BANKROLL = 1000;
+const MERKITSE_URL   = "https://vedox-bot-production.up.railway.app/merkitse";
+const HALF_MARKETS   = ['totals','spreads','asian_handicap','draw_no_bet'];
 
 let allBets = [];
 let lang = localStorage.getItem("vedox_lang") || "fi";
@@ -564,11 +729,71 @@ let brRange = "all";
 let charts = {};
 let currentTheme = localStorage.getItem("vedox_theme") || "dark";
 let starredIds = JSON.parse(localStorage.getItem("vedox_starred") || "[]");
+let currentUser = null;
+let simTimer = null;
 
 // Modal state
 let modalBet = null;
 let selectedResult = null;
 
+// ===== AUTH =====
+function setAuthMsg(msg, type) {
+  const el = document.getElementById("auth-msg");
+  el.textContent = msg;
+  el.className = "auth-msg" + (type ? " " + type : "");
+}
+
+async function doLogin() {
+  const email    = document.getElementById("login-email").value.trim();
+  const password = document.getElementById("login-password").value;
+  if (!email || !password) { setAuthMsg("Täytä sähköposti ja salasana.", "error"); return; }
+  const btn = document.getElementById("login-btn");
+  btn.disabled = true; btn.textContent = "Kirjaudutaan...";
+  setAuthMsg("", "");
+  const { error } = await sbClient.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = "Kirjaudu sisään";
+  if (error) {
+    setAuthMsg(error.message === "Invalid login credentials"
+      ? "Väärä sähköposti tai salasana." : error.message, "error");
+  }
+}
+
+async function doLogout() {
+  await sbClient.auth.signOut();
+}
+
+function showApp(user) {
+  currentUser = user;
+  document.getElementById("auth-overlay").style.display = "none";
+  document.getElementById("user-pill").style.display    = "flex";
+  document.getElementById("logout-btn").style.display   = "block";
+  document.getElementById("user-email-display").textContent = user.email;
+  fetchSimData();
+  clearInterval(simTimer);
+  simTimer = setInterval(fetchSimData, 5 * 60 * 1000);
+}
+
+function hideApp() {
+  currentUser = null;
+  allBets = [];
+  clearInterval(simTimer);
+  simTimer = null;
+  document.getElementById("auth-overlay").style.display = "flex";
+  document.getElementById("user-pill").style.display    = "none";
+  document.getElementById("logout-btn").style.display   = "none";
+  document.getElementById("content").style.display      = "none";
+  document.getElementById("loading").style.display      = "none";
+}
+
+sbClient.auth.onAuthStateChange((_event, session) => {
+  if (session?.user) {
+    showApp(session.user);
+  } else {
+    hideApp();
+  }
+});
+
+// ===== THEME =====
 function applyTheme(t) {
   currentTheme = t;
   document.documentElement.setAttribute("data-theme", t);
@@ -578,6 +803,7 @@ function applyTheme(t) {
 }
 function toggleTheme() { applyTheme(currentTheme === "dark" ? "light" : "dark"); }
 
+// ===== LANGUAGE =====
 function setLang(l) {
   lang = l;
   localStorage.setItem("vedox_lang", l);
@@ -590,7 +816,10 @@ function setLang(l) {
   renderAll();
 }
 
+// ===== FETCH DATA =====
 async function fetchSimData() {
+  document.getElementById("loading").style.display = "block";
+  document.getElementById("content").style.display = "none";
   try {
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=tsv&gid=${SIM_GID}&t=${Date.now()}`;
     const res = await fetch(url);
@@ -695,12 +924,10 @@ function openMerkitse(betId) {
   document.getElementById("modal-sub").innerHTML =
     `<span>${bet.kohde}</span> · ${bet.markkina.toUpperCase()} · ${bet.aalto} · kerroin <span>${bet.kerroin.toFixed(2)}</span> · panos ${bet.panos.toFixed(2)}€`;
 
-  // Show/hide half win/loss based on market
   const canHalf = HALF_MARKETS.some(m => bet.markkina.includes(m)) || bet.markkina.includes('total');
   const btnsEl = document.getElementById("result-btns");
   btnsEl.classList.toggle("show-half", canHalf);
 
-  // Reset selections
   document.querySelectorAll(".result-btn").forEach(b => {
     b.classList.remove("sel","sel-voitto","sel-tappio","sel-push","sel-half-win","sel-half-loss");
   });
@@ -715,14 +942,11 @@ function openMerkitse(betId) {
 
 function selectResult(tulos) {
   selectedResult = tulos;
-
-  // Update button styles
   document.querySelectorAll(".result-btn").forEach(b => {
     b.classList.remove("sel","sel-voitto","sel-tappio","sel-push","sel-half-win","sel-half-loss");
   });
   event.currentTarget.classList.add("sel", "sel-" + tulos.toLowerCase().replace(" ","-"));
 
-  // Preview tuotto
   if (modalBet) {
     const k = modalBet.kerroin, p = modalBet.panos;
     let tuotto = 0;
@@ -738,6 +962,7 @@ function selectResult(tulos) {
   document.getElementById("modal-confirm-btn").disabled = false;
 }
 
+// ===== MERKITSE — JWT Authorization header =====
 async function confirmMerkitse() {
   if (!modalBet || !selectedResult) return;
   const btn = document.getElementById("modal-confirm-btn");
@@ -747,26 +972,33 @@ async function confirmMerkitse() {
   fb.innerHTML = '<span class="modal-spinner"></span>Lähetetään...';
 
   try {
+    // Hae tuore session token
+    const { data: { session } } = await sbClient.auth.getSession();
+    if (!session?.access_token) {
+      throw new Error("Ei aktiivista sessiota — kirjaudu uudelleen sisään.");
+    }
+
     const res = await fetch(MERKITSE_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: modalBet.id, tulos: selectedResult, secret: MERKITSE_SECRET }),
+      headers: {
+        "Content-Type":  "application/json",
+        "Authorization": `Bearer ${session.access_token}`,
+      },
+      // Ei secret-kenttää enää
+      body: JSON.stringify({ id: modalBet.id, tulos: selectedResult }),
     });
+
     const data = await res.json();
     if (data.ok) {
       const sign = data.tuotto >= 0 ? "+" : "";
       fb.className = "modal-feedback ok";
       fb.textContent = `✅ Merkitty: ${selectedResult} (${sign}${data.tuotto.toFixed(2)}€) — botti päivittää bankrollin hetken päästä.`;
-      // Update local state optimistically
       const bet = allBets.find(b => b.id === modalBet.id);
-      if (bet) {
-        bet.tulos = selectedResult.toLowerCase();
-        bet.tuotto = data.tuotto;
-      }
+      if (bet) { bet.tulos = selectedResult.toLowerCase(); bet.tuotto = data.tuotto; }
       setTimeout(() => {
         closeModalDirect();
         renderAll();
-        fetchSimData(); // Refresh from sheet
+        fetchSimData();
       }, 2200);
     } else {
       throw new Error(data.error || "Tuntematon virhe");
@@ -781,7 +1013,6 @@ async function confirmMerkitse() {
 function closeModal(e) {
   if (e.target === document.getElementById("modal-overlay")) closeModalDirect();
 }
-
 function closeModalDirect() {
   document.getElementById("modal-overlay").style.display = "none";
   document.body.style.overflow = "";
@@ -789,9 +1020,12 @@ function closeModalDirect() {
   selectedResult = null;
 }
 
-// Close with Escape
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape") closeModalDirect();
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModalDirect(); });
+
+// ===== AUTH CONTROLS =====
+document.getElementById("login-btn")?.addEventListener("click", doLogin);
+document.getElementById("login-password")?.addEventListener("keydown", e => {
+  if (e.key === "Enter") doLogin();
 });
 
 // ===== RENDER =====
@@ -820,11 +1054,9 @@ function renderStats() {
   const negativeCount = settled.filter(b => b.tulos === "tappio").length + halfLost;
   const decidedCount  = positiveCount + negativeCount;
   const hitRate = decidedCount > 0 ? (positiveCount / decidedCount * 100).toFixed(1) : 0;
-
   const settledWithBr = allBets.filter(b => b.bankrollJlk > 0);
   const lastBr = settledWithBr.length > 0 ? settledWithBr[settledWithBr.length-1].bankrollJlk : START_BANKROLL;
   const brChange = lastBr - START_BANKROLL;
-
   const clvBets = allBets.filter(b => b.clvKerroin > 0);
   const avgCLV = clvBets.length > 0 ? (clvBets.reduce((a,b) => a+b.clvPct,0) / clvBets.length).toFixed(2) : 0;
 
@@ -915,16 +1147,11 @@ function renderBankrollChart() {
   let settled, startVal;
 
   if (!cutoff) {
-    settled = allSettled;
-    startVal = START_BANKROLL;
+    settled = allSettled; startVal = START_BANKROLL;
   } else {
-    const firstIdx = allSettled.findIndex(b => {
-      const d = parseDate(b.aika);
-      return d && d >= cutoff;
-    });
+    const firstIdx = allSettled.findIndex(b => { const d = parseDate(b.aika); return d && d >= cutoff; });
     if (firstIdx === -1) {
-      settled = [];
-      startVal = allSettled.length > 0 ? allSettled[allSettled.length-1].bankrollJlk : START_BANKROLL;
+      settled = []; startVal = allSettled.length > 0 ? allSettled[allSettled.length-1].bankrollJlk : START_BANKROLL;
     } else {
       settled = allSettled.slice(firstIdx);
       startVal = firstIdx > 0 ? allSettled[firstIdx-1].bankrollJlk : START_BANKROLL;
@@ -934,31 +1161,21 @@ function renderBankrollChart() {
   const labels = [fi?"Alku":"Start", ...settled.map((_,i)=>`B${i+1}`)];
   const data   = [startVal, ...settled.map(b=>b.bankrollJlk)];
   const endVal = data[data.length-1] || startVal;
-
-  document.getElementById("br-start-end").textContent =
-    `${startVal.toFixed(0)}€ → ${endVal.toFixed(2)}€`;
+  document.getElementById("br-start-end").textContent = `${startVal.toFixed(0)}€ → ${endVal.toFixed(2)}€`;
 
   if (charts.bankroll) charts.bankroll.destroy();
   charts.bankroll = new Chart(document.getElementById("chart-bankroll"), {
     type: "line",
     data: {
       labels,
-      datasets: [{
-        data,
-        borderColor: "#2d6ae0",
-        backgroundColor: "rgba(26,79,196,0.06)",
-        borderWidth: 1.8,
-        pointRadius: data.length < 50 ? 2 : 0,
-        tension: 0.3,
-        fill: true,
-      }]
+      datasets: [{ data, borderColor:"#2d6ae0", backgroundColor:"rgba(26,79,196,0.06)", borderWidth:1.8, pointRadius:data.length<50?2:0, tension:0.3, fill:true }]
     },
     options: {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks:{ color: getTickColor(), maxTicksLimit:10 }, grid:{ color: getGridColor() } },
-        y: { ticks:{ color: getTickColor() }, grid:{ color: getGridColor() } }
+        x: { ticks:{ color:getTickColor(), maxTicksLimit:10 }, grid:{ color:getGridColor() } },
+        y: { ticks:{ color:getTickColor() }, grid:{ color:getGridColor() } }
       }
     }
   });
@@ -967,28 +1184,18 @@ function renderBankrollChart() {
 function renderMarketBars() {
   const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
   const map = {};
-  settled.forEach(b => {
-    const m = b.markkina || "other";
-    if (!map[m]) map[m] = {stake:0,profit:0,count:0};
-    map[m].stake+=b.panos; map[m].profit+=b.tuotto; map[m].count++;
-  });
+  settled.forEach(b => { const m=b.markkina||"other"; if (!map[m]) map[m]={stake:0,profit:0,count:0}; map[m].stake+=b.panos; map[m].profit+=b.tuotto; map[m].count++; });
   roiBars(Object.entries(map).sort((a,b)=>b[1].count-a[1].count).map(([mkt,d]) => ({
-    label: mkt.replace(/_/g," ").toUpperCase(), count: d.count,
-    roi: d.stake>0?(d.profit/d.stake*100).toFixed(1):"0.0",
+    label:mkt.replace(/_/g," ").toUpperCase(), count:d.count, roi:d.stake>0?(d.profit/d.stake*100).toFixed(1):"0.0",
   })), "market-bars");
 }
 
 function renderWaveBars() {
   const settled = allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
   const map = {};
-  settled.forEach(b => {
-    const w = b.aalto || "?";
-    if (!map[w]) map[w] = {stake:0,profit:0,count:0};
-    map[w].stake+=b.panos; map[w].profit+=b.tuotto; map[w].count++;
-  });
+  settled.forEach(b => { const w=b.aalto||"?"; if (!map[w]) map[w]={stake:0,profit:0,count:0}; map[w].stake+=b.panos; map[w].profit+=b.tuotto; map[w].count++; });
   roiBars(Object.entries(map).sort().map(([wave,d]) => ({
-    label: wave, count: d.count,
-    roi: d.stake>0?(d.profit/d.stake*100).toFixed(1):"0.0",
+    label:wave, count:d.count, roi:d.stake>0?(d.profit/d.stake*100).toFixed(1):"0.0",
   })), "wave-bars");
 }
 
@@ -1014,7 +1221,6 @@ function renderCLVChart() {
   ];
   const counts = buckets.map(b => clvBets.filter(bet=>bet.clvPct>=b.min&&bet.clvPct<b.max).length);
   const colors = counts.map((_,i) => i<2?"rgba(224,58,82,0.65)":i<3?"rgba(212,146,26,0.65)":"rgba(46,204,142,0.65)");
-
   if (charts.clv) charts.clv.destroy();
   charts.clv = new Chart(document.getElementById("chart-clv"), {
     type: "bar",
@@ -1065,20 +1271,15 @@ function renderSportLeagueBars() {
     const sport  = getSportName(b.liiga);
     const league = getLeagueName(b.liiga);
     if (!sports[sport]) sports[sport] = { bets:0, stake:0, profit:0, leagues:{} };
-    sports[sport].bets++;
-    sports[sport].stake  += b.panos;
-    sports[sport].profit += b.tuotto;
-    if (!sports[sport].leagues[league]) sports[sport].leagues[league] = {bets:0, stake:0, profit:0};
-    sports[sport].leagues[league].bets++;
-    sports[sport].leagues[league].stake  += b.panos;
-    sports[sport].leagues[league].profit += b.tuotto;
+    sports[sport].bets++; sports[sport].stake+=b.panos; sports[sport].profit+=b.tuotto;
+    if (!sports[sport].leagues[league]) sports[sport].leagues[league]={bets:0,stake:0,profit:0};
+    sports[sport].leagues[league].bets++; sports[sport].leagues[league].stake+=b.panos; sports[sport].leagues[league].profit+=b.tuotto;
   });
 
   const sorted = Object.entries(sports).sort((a,b) => b[1].stake - a[1].stake);
   if (!activeSport || !sports[activeSport]) activeSport = sorted[0][0];
 
-  document.getElementById("sl-summary").textContent =
-    `${totalBets} ${fi?"bettiä":"bets"} · ${totalStake.toFixed(0)}€ ${fi?"panosta":"staked"}`;
+  document.getElementById("sl-summary").textContent = `${totalBets} ${fi?"bettiä":"bets"} · ${totalStake.toFixed(0)}€ ${fi?"panosta":"staked"}`;
 
   document.getElementById("sl-sports").innerHTML = sorted.map(([sport, d], idx) => {
     const stakePct = (d.stake / totalStake * 100).toFixed(1);
@@ -1110,7 +1311,6 @@ function renderLeagueDetail(sports, totalStake, totalBets) {
   const fi = lang === "fi";
   const d = sports[activeSport];
   if (!d) return;
-
   const leagues = Object.entries(d.leagues).sort((a,b) => b[1].bets - a[1].bets);
   const sportRoi     = d.stake > 0 ? (d.profit / d.stake * 100).toFixed(1) : "0.0";
   const sportBetsPct = (d.bets / totalBets * 100).toFixed(1);
@@ -1178,16 +1378,8 @@ function renderTable() {
   let filtered = activeFilter === "all" ? allBets : allBets.filter(b => b.tulos === activeFilter);
   if (activeWaveFilter) filtered = filtered.filter(b => b.aalto === activeWaveFilter);
   if (starFilterActive) filtered = filtered.filter(b => starredIds.includes(b.id));
-
-  if (dateFrom) {
-    const from = new Date(dateFrom);
-    filtered = filtered.filter(b => { const d = parseDate(b.aika); return d && d >= from; });
-  }
-  if (dateTo) {
-    const to = new Date(dateTo);
-    to.setHours(23,59,59);
-    filtered = filtered.filter(b => { const d = parseDate(b.aika); return d && d <= to; });
-  }
+  if (dateFrom) { const from = new Date(dateFrom); filtered = filtered.filter(b => { const d=parseDate(b.aika); return d&&d>=from; }); }
+  if (dateTo)   { const to = new Date(dateTo); to.setHours(23,59,59); filtered = filtered.filter(b => { const d=parseDate(b.aika); return d&&d<=to; }); }
 
   const tbody = document.getElementById("bets-tbody");
   if (!filtered.length) {
@@ -1228,8 +1420,7 @@ function renderTable() {
 
 applyTheme(currentTheme);
 setLang(lang);
-fetchSimData();
-setInterval(fetchSimData, 5 * 60 * 1000);
+// fetchSimData ja simTimer käynnistyvät vasta showApp():ssa kirjautumisen jälkeen
 </script>
 </body>
 </html>
