@@ -653,8 +653,16 @@ function saveBet() {
   const odds=parseFloat(document.getElementById("f-odds").value)||0;
   const stake=parseFloat(document.getElementById("f-stake").value)||0;
   const result=document.getElementById("f-result").value;
+  if (!stake || stake <= 0) { alert(lang==="fi"?"Panos pitää olla yli 0.":"Stake must be greater than 0."); return; }
+  if (result==="won" && (!odds || odds <= 1)) { alert(lang==="fi"?"Voitetulle betsille tarvitaan kerroin yli 1.":"Won bets need odds greater than 1."); return; }
+  let br=getCurrentBankroll();
+  if (stake > br && result==="pending") { alert(lang==="fi"?"Panos ei voi olla suurempi kuin kassa.":"Stake cannot exceed bankroll."); return; }
   const returnedAmount=result==="won"?parseFloat((stake*odds).toFixed(2)):0;
-  myBets.unshift({id:Date.now(),date:new Date().toLocaleDateString("fi-FI"),match,target,book:document.getElementById("f-book").value,odds,stake,ev:parseFloat(document.getElementById("f-ev").value)||0,pinn:parseFloat(document.getElementById("f-pinn").value)||0,result,settled:result!=="pending",returnedAmount});
+  const bet={id:Date.now(),date:new Date().toLocaleDateString("fi-FI"),match,target,book:document.getElementById("f-book").value,odds,stake,ev:parseFloat(document.getElementById("f-ev").value)||0,pinn:parseFloat(document.getElementById("f-pinn").value)||0,result,settled:result!=="pending",returnedAmount};
+  const newBr=parseFloat((br+getBetCashImpact(bet)).toFixed(2));
+  if (newBr < 0) { alert(lang==="fi"?"Betsi veisi kassan miinukselle.":"Bet would make bankroll negative."); return; }
+  myBets.unshift(bet);
+  setCurrentBankroll(newBr);
   saveBets(); renderMyBets(); toggleAddForm();
   ["f-match","f-target","f-book","f-odds","f-stake","f-ev","f-pinn"].forEach(id=>document.getElementById(id).value="");
 }
@@ -663,6 +671,23 @@ function getReturnAmount(b) {
   const saved=parseFloat(b.returnedAmount);
   if (!isNaN(saved) && saved > 0) return saved;
   return parseFloat((b.stake*b.odds).toFixed(2));
+}
+
+function getCurrentBankroll() {
+  return parseFloat(document.getElementById("bankroll").value) || 0;
+}
+function setCurrentBankroll(value) {
+  const br=parseFloat(value.toFixed(2));
+  document.getElementById("bankroll").value=br;
+  if (currentUser) localStorage.setItem(`vedox_bankroll_${currentUser.id}`,String(br));
+  renderBets();
+}
+function getBetCashImpact(b) {
+  const stake=parseFloat(b.stake)||0;
+  if (b.result==="pending") return -stake;
+  if (b.result==="lost")    return -stake;
+  if (b.result==="won")     return getReturnAmount(b)-stake;
+  return 0;
 }
 
 function updateResult(id, val) {
@@ -691,8 +716,7 @@ function updateResult(id, val) {
   }
 
   b.result=val;
-  document.getElementById("bankroll").value=br;
-  if (currentUser) localStorage.setItem(`vedox_bankroll_${currentUser.id}`,String(br));
+  setCurrentBankroll(br);
   saveBets(); renderMyBets();
 }
 
@@ -708,8 +732,7 @@ function deleteBet(id) {
     } else if (bet.result==="lost") {
       br=parseFloat((br+bet.stake).toFixed(2));
     }
-    document.getElementById("bankroll").value=br;
-    if (currentUser) localStorage.setItem(`vedox_bankroll_${currentUser.id}`,String(br));
+    setCurrentBankroll(br);
     if (bet.sourceBetId) {
       skippedIds=skippedIds.filter(sid=>sid!==bet.sourceBetId);
       if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`,JSON.stringify(skippedIds));
@@ -753,9 +776,16 @@ function renderAnalytics() {
   document.getElementById("an-roi").textContent=roi!=="—"?roi+"%":"—";
   document.getElementById("an-hit").textContent=hitRate!=="—"?hitRate+"%":"—";
   document.getElementById("an-avgev").textContent=avgEV!=="—"?"+"+avgEV+"%":"—";
-  const br=parseFloat(document.getElementById("bankroll").value)||1000;
-  let running=br; const brLabels=[fi?"Alku":"Start"], brData=[br];
-  [...myBets].reverse().forEach((b,i)=>{if(b.result==="won")running+=b.stake*(b.odds-1);else if(b.result==="lost")running-=b.stake;brLabels.push(`B${i+1}`);brData.push(parseFloat(running.toFixed(2)));});
+  const currentBr=getCurrentBankroll();
+  const chronological=[...myBets].reverse();
+  const totalImpact=chronological.reduce((sum,b)=>sum+getBetCashImpact(b),0);
+  let running=parseFloat((currentBr-totalImpact).toFixed(2));
+  const brLabels=[fi?"Alku":"Start"], brData=[running];
+  chronological.forEach((b,i)=>{
+    running=parseFloat((running+getBetCashImpact(b)).toFixed(2));
+    brLabels.push(`B${i+1}`);
+    brData.push(running);
+  });
   const tickColor=currentTheme==="dark"?"#3a4f6a":"#6080a8", gridColor=currentTheme==="dark"?"rgba(26,79,196,0.06)":"rgba(26,79,196,0.08)";
   const chartOpts={responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tickColor},grid:{color:gridColor}},y:{ticks:{color:tickColor},grid:{color:gridColor}}}};
   if(bankrollChart)bankrollChart.destroy();
