@@ -615,7 +615,8 @@ function skipBet(idx) {
 }
 
 function renderBets() {
-  const br=parseFloat(document.getElementById("bankroll").value)||1000;
+  const brVal=parseFloat(document.getElementById("bankroll").value);
+  const br=Number.isFinite(brVal)?brVal:1000;
  
   const stake=parseFloat((br*stakePct).toFixed(2));
   const list=document.getElementById("bets-list"), empty=document.getElementById("bets-empty"), stats=document.getElementById("bets-stats");
