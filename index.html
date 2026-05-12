@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="fi" data-theme="dark">
 <head>
 <meta charset="UTF-8">
@@ -8,958 +9,187 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
 :root, [data-theme="dark"] {
-  --bg:        #000000;
-  --bg2:       #080f1e;
-  --bg3:       #0c1628;
-  --bg4:       #111f35;
-  --blue:      #1a4fc4;
-  --blue-lt:   #2d6ae0;
-  --blue-dim:  rgba(26,79,196,0.14);
-  --blue-dim2: rgba(26,79,196,0.22);
-  --border:    rgba(30,70,160,0.22);
-  --border2:   rgba(30,70,160,0.35);
-  --text:      #ffffff;
-  --text2:     #b0c4de;
-  --text3:     #5a7090;
-  --green:     #2ecc8e;
-  --green-dim: rgba(46,204,142,0.1);
-  --red:       #e03a52;
-  --red-dim:   rgba(224,58,82,0.1);
-  --amber:     #d4921a;
-  --amber-dim: rgba(212,146,26,0.1);
-  --radius:    8px;
-  --radius-sm: 5px;
-  --header-bg: rgba(0,0,0,0.94);
-  --grid-color: rgba(26,79,196,0.025);
-  --tick-color: #3a4f6a;
+  --bg:#000000; --bg2:#080f1e; --bg3:#0c1628; --bg4:#111f35;
+  --blue:#1a4fc4; --blue-lt:#2d6ae0; --blue-dim:rgba(26,79,196,0.14); --blue-dim2:rgba(26,79,196,0.22);
+  --border:rgba(30,70,160,0.22); --border2:rgba(30,70,160,0.35);
+  --text:#ffffff; --text2:#b0c4de; --text3:#5a7090;
+  --green:#2ecc8e; --green-dim:rgba(46,204,142,0.1);
+  --red:#e03a52; --red-dim:rgba(224,58,82,0.1);
+  --amber:#d4921a; --amber-dim:rgba(212,146,26,0.1);
+  --radius:8px; --radius-sm:5px; --header-bg:rgba(0,0,0,0.94);
+  --grid-color:rgba(26,79,196,0.025); --tick-color:#3a4f6a;
 }
-
 [data-theme="light"] {
-  --bg:        #ffffff;
-  --bg2:       #f4f7fc;
-  --bg3:       #e8edf6;
-  --bg4:       #dce5f4;
-  --blue:      #1a4fc4;
-  --blue-lt:   #2d6ae0;
-  --blue-dim:  rgba(26,79,196,0.08);
-  --blue-dim2: rgba(26,79,196,0.14);
-  --border:    rgba(26,79,196,0.15);
-  --border2:   rgba(26,79,196,0.25);
-  --text:      #000000;
-  --text2:     #2a3a52;
-  --text3:     #6080a8;
-  --green:     #1a9962;
-  --green-dim: rgba(26,153,98,0.1);
-  --red:       #c02030;
-  --red-dim:   rgba(192,32,48,0.1);
-  --amber:     #b07010;
-  --amber-dim: rgba(176,112,16,0.1);
-  --radius:    8px;
-  --radius-sm: 5px;
-  --header-bg: rgba(255,255,255,0.96);
-  --grid-color: rgba(26,79,196,0.04);
-  --tick-color: #6080a8;
+  --bg:#ffffff; --bg2:#f4f7fc; --bg3:#e8edf6; --bg4:#dce5f4;
+  --blue:#1a4fc4; --blue-lt:#2d6ae0; --blue-dim:rgba(26,79,196,0.08); --blue-dim2:rgba(26,79,196,0.14);
+  --border:rgba(26,79,196,0.15); --border2:rgba(26,79,196,0.25);
+  --text:#000000; --text2:#2a3a52; --text3:#6080a8;
+  --green:#1a9962; --green-dim:rgba(26,153,98,0.1);
+  --red:#c02030; --red-dim:rgba(192,32,48,0.1);
+  --amber:#b07010; --amber-dim:rgba(176,112,16,0.1);
+  --radius:8px; --radius-sm:5px; --header-bg:rgba(255,255,255,0.96);
+  --grid-color:rgba(26,79,196,0.04); --tick-color:#6080a8;
 }
-
 html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Barlow', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
-  transition: background 0.2s, color 0.2s;
-}
-
-[data-theme="dark"] body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--grid-color) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-  background-size: 52px 52px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ===== AUTH OVERLAY ===== */
-#auth-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  background: var(--bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-[data-theme="dark"] #auth-overlay::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--grid-color) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-  background-size: 52px 52px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.auth-box {
-  position: relative;
-  z-index: 2;
-  background: var(--bg2);
-  border: 1px solid var(--border2);
-  border-radius: 12px;
-  padding: 2.5rem 2rem;
-  width: 100%;
-  max-width: 380px;
-  animation: fadeUp 0.3s ease;
-}
-
-.auth-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 2rem;
-  justify-content: center;
-}
-
-.auth-logo-name {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
-  font-size: 1.8rem;
-  letter-spacing: 0.06em;
-  color: var(--text);
-}
-.auth-logo-name span { color: var(--blue-lt); }
-
-.auth-tabs {
-  display: flex;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 3px;
-  margin-bottom: 1.5rem;
-}
-
-.auth-tab {
-  flex: 1;
-  background: none;
-  border: none;
-  color: var(--text3);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding: 7px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.18s;
-}
-.auth-tab.active { background: var(--blue-lt); color: #fff; }
-
-.auth-field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-bottom: 1rem;
-}
-
-.auth-field label {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text3);
-}
-
-.auth-field input {
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: 'Barlow', sans-serif;
-  font-size: 0.9rem;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  outline: none;
-  transition: border-color 0.18s;
-  width: 100%;
-}
-.auth-field input:focus { border-color: var(--blue-lt); }
-
-.auth-btn {
-  width: 100%;
-  background: var(--blue);
-  border: none;
-  color: #fff;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding: 11px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background 0.18s;
-  margin-top: 0.5rem;
-}
-.auth-btn:hover { background: var(--blue-lt); }
-.auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.auth-msg {
-  margin-top: 0.75rem;
-  font-size: 0.78rem;
-  text-align: center;
-  min-height: 1.2em;
-  border-radius: 5px;
-  padding: 0 4px;
-}
-.auth-box, .auth-box * {
-  pointer-events: auto;
-}
-
-#auth-overlay::before, body::before {
-  pointer-events: none !important;
-}
-
-/* ===== HEADER ===== */
-header {
-  position: sticky;
-  top: 0;
-  z-index: 200;
-  background: var(--header-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 2rem;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-}
-
-.logo-icon { width: 36px; height: 36px; }
-.logo-text-wrap { line-height: 1; }
-
-.logo-name {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
-  font-size: 1.5rem;
-  letter-spacing: 0.06em;
-  color: var(--text);
-}
-.logo-name span { color: var(--blue-lt); }
-
-.logo-tagline {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.5rem;
-  letter-spacing: 0.22em;
-  color: var(--text3);
-  text-transform: uppercase;
-  margin-top: 1px;
-  display: block;
-}
-
-nav {
-  display: flex;
-  gap: 2px;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 3px;
-}
-
-.nav-btn {
-  background: none;
-  border: none;
-  color: var(--text3);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding: 7px 18px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.18s;
-  white-space: nowrap;
-}
-.nav-btn:hover { color: var(--text); background: var(--blue-dim); }
-.nav-btn.active { color: #fff; background: var(--blue-lt); }
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.live-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--green);
-  background: var(--green-dim);
-  border: 1px solid rgba(46,204,142,0.2);
-  padding: 5px 12px;
-  border-radius: 20px;
-}
-
-.live-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px var(--green);
-  animation: pulse 1.8s infinite;
-}
-
+body { background:var(--bg); color:var(--text); font-family:'Barlow',sans-serif; min-height:100vh; overflow-x:hidden; transition:background 0.2s,color 0.2s; }
+[data-theme="dark"] body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(var(--grid-color) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color) 1px,transparent 1px); background-size:52px 52px; pointer-events:none; z-index:0; }
+#auth-overlay { position:fixed; inset:0; z-index:999; background:var(--bg); display:flex; align-items:center; justify-content:center; }
+[data-theme="dark"] #auth-overlay::before { content:''; position:fixed; inset:0; background-image:linear-gradient(var(--grid-color) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color) 1px,transparent 1px); background-size:52px 52px; pointer-events:none; z-index:0; }
+.auth-box { position:relative; z-index:2; background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:2.5rem 2rem; width:100%; max-width:380px; animation:fadeUp 0.3s ease; }
+.auth-logo { display:flex; align-items:center; gap:12px; margin-bottom:2rem; justify-content:center; }
+.auth-logo-name { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:1.8rem; letter-spacing:0.06em; color:var(--text); }
+.auth-logo-name span { color:var(--blue-lt); }
+.auth-tabs { display:flex; background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:3px; margin-bottom:1.5rem; }
+.auth-tab { flex:1; background:none; border:none; color:var(--text3); font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:7px; border-radius:4px; cursor:pointer; transition:all 0.18s; }
+.auth-tab.active { background:var(--blue-lt); color:#fff; }
+.auth-field { display:flex; flex-direction:column; gap:5px; margin-bottom:1rem; }
+.auth-field label { font-family:'Barlow Condensed',sans-serif; font-size:0.6rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); }
+.auth-field input { background:var(--bg); border:1px solid var(--border2); color:var(--text); font-family:'Barlow',sans-serif; font-size:0.9rem; padding:10px 12px; border-radius:var(--radius-sm); outline:none; transition:border-color 0.18s; width:100%; }
+.auth-field input:focus { border-color:var(--blue-lt); }
+.auth-btn { width:100%; background:var(--blue); border:none; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:0.9rem; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:11px; border-radius:var(--radius-sm); cursor:pointer; transition:background 0.18s; margin-top:0.5rem; }
+.auth-btn:hover { background:var(--blue-lt); }
+.auth-btn:disabled { opacity:0.5; cursor:not-allowed; }
+.auth-msg { margin-top:0.75rem; font-size:0.78rem; text-align:center; min-height:1.2em; border-radius:5px; padding:0 4px; }
+.auth-box,.auth-box * { pointer-events:auto; }
+#auth-overlay::before,body::before { pointer-events:none !important; }
+header { position:sticky; top:0; z-index:200; background:var(--header-bg); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:0 2rem; height:64px; display:flex; align-items:center; justify-content:space-between; }
+.logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
+.logo-icon { width:36px; height:36px; }
+.logo-text-wrap { line-height:1; }
+.logo-name { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:1.5rem; letter-spacing:0.06em; color:var(--text); }
+.logo-name span { color:var(--blue-lt); }
+.logo-tagline { font-family:'Barlow Condensed',sans-serif; font-size:0.5rem; letter-spacing:0.22em; color:var(--text3); text-transform:uppercase; margin-top:1px; display:block; }
+nav { display:flex; gap:2px; background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:3px; }
+.nav-btn { background:none; border:none; color:var(--text3); font-family:'Barlow Condensed',sans-serif; font-size:0.88rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:7px 18px; border-radius:5px; cursor:pointer; transition:all 0.18s; white-space:nowrap; }
+.nav-btn:hover { color:var(--text); background:var(--blue-dim); }
+.nav-btn.active { color:#fff; background:var(--blue-lt); }
+.header-right { display:flex; align-items:center; gap:8px; }
+.live-pill { display:flex; align-items:center; gap:6px; font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--green); background:var(--green-dim); border:1px solid rgba(46,204,142,0.2); padding:5px 12px; border-radius:20px; }
+.live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 1.8s infinite; }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
-
-.user-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: var(--text2);
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  padding: 5px 10px;
-  border-radius: 20px;
-  max-width: 160px;
-  overflow: hidden;
-}
-.user-email {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.btn-logout {
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  color: var(--text3);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.18s;
-}
-.btn-logout:hover { color: var(--red); border-color: var(--red); }
-
-.lang-btn {
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  color: var(--text3);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  padding: 5px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.18s;
-}
-.lang-btn:hover, .lang-btn.active { color: var(--blue-lt); border-color: var(--blue); }
-
-.theme-btn {
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  color: var(--text3);
-  font-size: 1rem;
-  width: 34px; height: 34px;
-  border-radius: 5px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.18s;
-  flex-shrink: 0;
-}
-.theme-btn:hover { border-color: var(--blue-lt); }
-
-/* ===== MAIN ===== */
-main {
-  position: relative;
-  z-index: 1;
-  padding: 1.5rem 2rem;
-  max-width: 1300px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.page { display: none; }
-.page.active { display: block; animation: fadeUp 0.3s ease; }
+.user-pill { display:flex; align-items:center; gap:6px; font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:600; letter-spacing:0.06em; color:var(--text2); background:var(--bg3); border:1px solid var(--border2); padding:5px 10px; border-radius:20px; max-width:160px; overflow:hidden; }
+.user-email { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.btn-logout { background:var(--bg3); border:1px solid var(--border2); color:var(--text3); font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:5px 10px; border-radius:5px; cursor:pointer; transition:all 0.18s; }
+.btn-logout:hover { color:var(--red); border-color:var(--red); }
+.lang-btn { background:var(--bg3); border:1px solid var(--border2); color:var(--text3); font-family:'Barlow Condensed',sans-serif; font-size:0.78rem; font-weight:600; letter-spacing:0.08em; padding:5px 12px; border-radius:5px; cursor:pointer; transition:all 0.18s; }
+.lang-btn:hover,.lang-btn.active { color:var(--blue-lt); border-color:var(--blue); }
+.theme-btn { background:var(--bg3); border:1px solid var(--border2); color:var(--text3); font-size:1rem; width:34px; height:34px; border-radius:5px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.18s; flex-shrink:0; }
+.theme-btn:hover { border-color:var(--blue-lt); }
+main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; margin:0 auto; width:100%; }
+.page { display:none; }
+.page.active { display:block; animation:fadeUp 0.3s ease; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
-
-/* ===== STAT GRID ===== */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 1.25rem;
-}
-
-.stat-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem 1.25rem;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.2s, transform 0.2s;
-}
-.stat-card:hover { border-color: var(--border2); transform: translateY(-1px); }
-
-.stat-lbl {
-  font-family: 'Barlow', sans-serif;
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 8px;
-}
-
-.stat-val {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.9rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--blue-lt);
-}
-
-/* ===== TOOLBAR ===== */
-.toolbar {
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-  padding: 1rem 1.25rem;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-.fg { display: flex; flex-direction: column; gap: 4px; }
-
-.fg label {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text3);
-}
-
-.fg input, .fg select {
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: 'Barlow', sans-serif;
-  font-size: 0.82rem;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  width: 130px;
-  outline: none;
-  transition: border-color 0.18s;
-}
-.fg input:focus, .fg select:focus { border-color: var(--blue-lt); }
-.fg select option { background: var(--bg2); }
-
-.btn-reset {
-  background: var(--blue-dim2);
-  border: 1px solid var(--border2);
-  color: var(--blue-lt);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding: 7px 16px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  align-self: flex-end;
-  transition: all 0.18s;
-}
-.btn-reset:hover { background: var(--blue); color: #fff; }
-
-.filter-info {
-  align-self: flex-end;
-  padding-bottom: 7px;
-  font-size: 0.7rem;
-  color: var(--text3);
-  margin-left: auto;
-}
-.filter-info strong { color: var(--blue-lt); }
-.filter-info .skipped-note {
-  color: var(--amber);
-  margin-left: 6px;
-  font-size: 0.65rem;
-}
-
-/* ===== BET CARDS ===== */
-.bet-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 8px;
-  overflow: hidden;
-  position: relative;
-  transition: border-color 0.18s;
-}
-
-.bet-main {
-  padding: 0.85rem 1.25rem 0.85rem 1.5rem;
-  display: grid;
-  grid-template-columns: 1fr 90px 110px 180px;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.match-top {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
-}
-
-.badge {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 3px 9px;
-  border-radius: 3px;
-}
-.badge-sport { background: var(--blue-dim2); color: var(--blue-lt); border: 1px solid var(--border2); font-size: 0.7rem; }
-.badge-mkt   { background: var(--bg3); color: var(--text3); border: 1px solid var(--border); font-weight: 500; letter-spacing: 0.04em; }
-
-.match-name  { font-size: 0.75rem; color: var(--text3); letter-spacing: 0.01em; margin-bottom: 5px; font-weight: 400; }
-
-.bet-target {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--blue-lt);
-  letter-spacing: 0.01em;
-  margin-bottom: 5px;
-}
-
-.meta-tag {
-  font-size: 0.72rem;
-  color: var(--text2);
-  background: var(--bg3);
-  padding: 3px 9px;
-  border-radius: 3px;
-  border: 1px solid var(--border);
-  font-family: 'Barlow', sans-serif;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-}
-
-.cell-lbl {
-  font-family: 'Barlow', sans-serif;
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 4px;
-}
-
-.cell-val {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--blue-lt);
-  line-height: 1;
-}
-
-.cell-sub { font-size: 0.62rem; color: var(--text3); margin-top: 3px; font-weight: 400; }
-
-.stake-lbl {
-  font-size: 0.6rem;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 6px;
-  font-family: 'Barlow', sans-serif;
-  font-weight: 500;
-}
-
-.stake-input {
-  width: 100%;
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  color: var(--blue-lt);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  text-align: center;
-  padding: 5px 6px;
-  border-radius: 4px;
-  outline: none;
-  margin-bottom: 6px;
-  transition: border-color 0.15s;
-}
-.stake-input:focus { border-color: var(--blue-lt); }
-
-.bet-meta {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.cell { text-align: center; }
-
-.stake-box {
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  padding: 10px 12px;
-  text-align: center;
-}
-
-.stake-btns {
-  display: flex;
-  gap: 5px;
-}
-
-.btn-placed {
-  flex: 1;
-  background: var(--blue-dim2);
-  border: 1px solid var(--border2);
-  color: var(--blue-lt);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  padding: 5px 4px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.btn-placed:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
-
-.btn-skip {
-  flex: 1;
-  background: var(--blue-dim2);
-  border: 1px solid var(--border2);
-  color: var(--blue-lt);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  padding: 5px 4px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.btn-skip:hover { background: var(--blue-dim); color: var(--text2); }
-
-/* ===== MY BETS ===== */
-.add-bet-btn {
-  background: var(--blue-dim2);
-  border: 1px solid var(--border2);
-  color: var(--blue-lt);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding: 9px 20px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  margin-bottom: 1rem;
-  transition: all 0.18s;
-}
-.add-bet-btn:hover { background: var(--blue); color: #fff; }
-
-.add-form {
-  display: none;
-  background: var(--bg2);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  animation: fadeUp 0.2s ease;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 1rem;
-}
-
-.form-group { display: flex; flex-direction: column; gap: 5px; }
-
-.form-group label {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text3);
-}
-
-.form-group input, .form-group select {
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: 'Barlow', sans-serif;
-  font-size: 0.85rem;
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  outline: none;
-  transition: border-color 0.18s;
-}
-.form-group input:focus, .form-group select:focus { border-color: var(--blue-lt); }
-
-.form-actions { display: flex; gap: 10px; }
-
-.btn-primary {
-  background: var(--blue);
-  border: none;
-  color: #fff;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 9px 22px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background 0.18s;
-}
-.btn-primary:hover { background: var(--blue-lt); }
-
-.btn-secondary {
-  background: none;
-  border: 1px solid var(--border2);
-  color: var(--text2);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 9px 22px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all 0.18s;
-}
-.btn-secondary:hover { color: var(--text); border-color: var(--text2); }
-
-.mybet-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.9rem 1.25rem;
-  margin-bottom: 8px;
-  display: grid;
-  grid-template-columns: 1fr 80px 80px 90px 110px 100px 90px;
-  gap: 1rem;
-  align-items: center;
-  transition: border-color 0.18s;
-}
-.mybet-card:hover { border-color: var(--border2); }
-.mybet-card.won  { border-left: 3px solid var(--green); }
-.mybet-card.lost { border-left: 3px solid var(--red); }
-.mybet-card.pending { border-left: 3px solid var(--amber); }
-
-.mybet-match  { font-size: 0.6rem; color: var(--text3); margin-bottom: 2px; }
-.mybet-target { font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text); }
-.mybet-book   { font-size: 0.6rem; color: var(--text3); margin-top: 2px; }
-
-.mybet-cell { text-align: center; }
-.mybet-lbl  { font-size: 0.55rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
-.mybet-val  { font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text2); }
-
-.result-select {
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: 'Barlow', sans-serif;
-  font-size: 0.75rem;
-  padding: 5px 8px;
-  border-radius: var(--radius-sm);
-  outline: none;
-  cursor: pointer;
-  width: 100%;
-}
-
-.btn-delete {
-  background: var(--red-dim);
-  border: 1px solid rgba(224,58,82,0.2);
-  color: var(--red);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  padding: 5px 12px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all 0.18s;
-  width: 100%;
-}
-.btn-delete:hover { background: rgba(224,58,82,0.2); }
-
-/* ===== ANALYTICS ===== */
-.analytics-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 1.25rem;
-}
-
-.chart-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-}
-
-.chart-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 1rem;
-}
-
-.forecast-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-  margin-bottom: 1rem;
-}
-
-.forecast-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.82rem;
-}
-.forecast-row:last-child { border-bottom: none; }
-.forecast-row .label { color: var(--text2); }
-.forecast-row .value { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--blue-lt); }
-
-/* ===== EMPTY / LOADING ===== */
-.empty-box, .loading-box {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: var(--text3);
-  font-size: 0.85rem;
-}
-
-.spinner {
-  width: 32px; height: 32px;
-  border: 2px solid var(--border2);
-  border-top-color: var(--blue-lt);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  margin: 0 auto 1rem;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-@media (max-width: 900px) {
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
-  .bet-main { grid-template-columns: 1fr 1fr; }
-  .stake-box { grid-column: span 2; }
-  .analytics-grid { grid-template-columns: 1fr; }
-  .mybet-card { grid-template-columns: 1fr 1fr 1fr; }
-  main { padding: 1rem; }
-  header { padding: 0 1rem; }
-  nav { display: none; }
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:1.25rem; }
+.stat-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1rem 1.25rem; position:relative; overflow:hidden; transition:border-color 0.2s,transform 0.2s; }
+.stat-card:hover { border-color:var(--border2); transform:translateY(-1px); }
+.stat-lbl { font-family:'Barlow',sans-serif; font-size:0.6rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); margin-bottom:8px; }
+.stat-val { font-family:'Barlow Condensed',sans-serif; font-size:1.9rem; font-weight:700; line-height:1; color:var(--blue-lt); }
+.toolbar { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-bottom:1rem; padding:1rem 1.25rem; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); }
+.fg { display:flex; flex-direction:column; gap:4px; }
+.fg label { font-family:'Barlow Condensed',sans-serif; font-size:0.58rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); }
+.fg input,.fg select { background:var(--bg); border:1px solid var(--border2); color:var(--text); font-family:'Barlow',sans-serif; font-size:0.82rem; padding:7px 10px; border-radius:var(--radius-sm); width:130px; outline:none; transition:border-color 0.18s; }
+.fg input:focus,.fg select:focus { border-color:var(--blue-lt); }
+.fg select option { background:var(--bg2); }
+.btn-reset { background:var(--blue-dim2); border:1px solid var(--border2); color:var(--blue-lt); font-family:'Barlow Condensed',sans-serif; font-size:0.75rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:7px 16px; border-radius:var(--radius-sm); cursor:pointer; align-self:flex-end; transition:all 0.18s; }
+.btn-reset:hover { background:var(--blue); color:#fff; }
+.filter-info { align-self:flex-end; padding-bottom:7px; font-size:0.7rem; color:var(--text3); margin-left:auto; }
+.filter-info strong { color:var(--blue-lt); }
+.filter-info .skipped-note { color:var(--amber); margin-left:6px; font-size:0.65rem; }
+.bet-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:8px; overflow:hidden; position:relative; transition:border-color 0.18s; }
+.bet-main { padding:0.85rem 1.25rem 0.85rem 1.5rem; display:grid; grid-template-columns:1fr 90px 110px 180px; gap:1.5rem; align-items:center; }
+.match-top { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+.badge { font-family:'Barlow Condensed',sans-serif; font-size:0.65rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:3px 9px; border-radius:3px; }
+.badge-sport { background:var(--blue-dim2); color:var(--blue-lt); border:1px solid var(--border2); font-size:0.7rem; }
+.badge-mkt { background:var(--bg3); color:var(--text3); border:1px solid var(--border); font-weight:500; letter-spacing:0.04em; }
+.match-name { font-size:0.75rem; color:var(--text3); letter-spacing:0.01em; margin-bottom:5px; font-weight:400; }
+.bet-target { font-family:'Barlow Condensed',sans-serif; font-size:1.05rem; font-weight:600; color:var(--blue-lt); letter-spacing:0.01em; margin-bottom:5px; }
+.meta-tag { font-size:0.72rem; color:var(--text2); background:var(--bg3); padding:3px 9px; border-radius:3px; border:1px solid var(--border); font-family:'Barlow',sans-serif; font-weight:400; letter-spacing:0.01em; }
+.cell-lbl { font-family:'Barlow',sans-serif; font-size:0.6rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--text3); margin-bottom:4px; }
+.cell-val { font-family:'Barlow Condensed',sans-serif; font-size:1.2rem; font-weight:700; color:var(--blue-lt); line-height:1; }
+.cell-sub { font-size:0.62rem; color:var(--text3); margin-top:3px; font-weight:400; }
+.stake-lbl { font-size:0.6rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-family:'Barlow',sans-serif; font-weight:500; }
+.stake-input { width:100%; background:var(--bg); border:1px solid var(--border2); color:var(--blue-lt); font-family:'Barlow Condensed',sans-serif; font-size:1.1rem; font-weight:700; text-align:center; padding:5px 6px; border-radius:4px; outline:none; margin-bottom:6px; transition:border-color 0.15s; }
+.stake-input:focus { border-color:var(--blue-lt); }
+.bet-meta { display:flex; gap:6px; flex-wrap:wrap; }
+.cell { text-align:center; }
+.stake-box { background:var(--bg3); border:1px solid var(--border2); border-radius:8px; padding:10px 12px; text-align:center; }
+.stake-btns { display:flex; gap:5px; }
+.btn-placed { flex:1; background:var(--blue-dim2); border:1px solid var(--border2); color:var(--blue-lt); font-family:'Barlow Condensed',sans-serif; font-size:0.65rem; font-weight:500; letter-spacing:0.05em; padding:5px 4px; border-radius:4px; cursor:pointer; transition:all 0.15s; }
+.btn-placed:hover { background:var(--blue); color:#fff; border-color:var(--blue); }
+.btn-skip { flex:1; background:var(--blue-dim2); border:1px solid var(--border2); color:var(--blue-lt); font-family:'Barlow Condensed',sans-serif; font-size:0.65rem; font-weight:500; letter-spacing:0.05em; padding:5px 4px; border-radius:4px; cursor:pointer; transition:all 0.15s; }
+.btn-skip:hover { background:var(--blue-dim); color:var(--text2); }
+.add-bet-btn { background:var(--blue-dim2); border:1px solid var(--border2); color:var(--blue-lt); font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:9px 20px; border-radius:var(--radius-sm); cursor:pointer; margin-bottom:1rem; transition:all 0.18s; }
+.add-bet-btn:hover { background:var(--blue); color:#fff; }
+.add-form { display:none; background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius); padding:1.5rem; margin-bottom:1rem; animation:fadeUp 0.2s ease; }
+.form-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:1rem; }
+.form-group { display:flex; flex-direction:column; gap:5px; }
+.form-group label { font-family:'Barlow Condensed',sans-serif; font-size:0.6rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); }
+.form-group input,.form-group select { background:var(--bg); border:1px solid var(--border2); color:var(--text); font-family:'Barlow',sans-serif; font-size:0.85rem; padding:8px 12px; border-radius:var(--radius-sm); outline:none; transition:border-color 0.18s; }
+.form-group input:focus,.form-group select:focus { border-color:var(--blue-lt); }
+.form-actions { display:flex; gap:10px; }
+.btn-primary { background:var(--blue); border:none; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:0.82rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; padding:9px 22px; border-radius:var(--radius-sm); cursor:pointer; transition:background 0.18s; }
+.btn-primary:hover { background:var(--blue-lt); }
+.btn-secondary { background:none; border:1px solid var(--border2); color:var(--text2); font-family:'Barlow Condensed',sans-serif; font-size:0.82rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:9px 22px; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.18s; }
+.btn-secondary:hover { color:var(--text); border-color:var(--text2); }
+.mybet-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:0.9rem 1.25rem; margin-bottom:8px; display:grid; grid-template-columns:1fr 80px 80px 90px 110px 100px 90px; gap:1rem; align-items:center; transition:border-color 0.18s; }
+.mybet-card:hover { border-color:var(--border2); }
+.mybet-card.won { border-left:3px solid var(--green); }
+.mybet-card.lost { border-left:3px solid var(--red); }
+.mybet-card.pending { border-left:3px solid var(--amber); }
+.mybet-match { font-size:0.6rem; color:var(--text3); margin-bottom:2px; }
+.mybet-target { font-family:'Barlow Condensed',sans-serif; font-size:0.95rem; font-weight:700; color:var(--text); }
+.mybet-book { font-size:0.6rem; color:var(--text3); margin-top:2px; }
+.mybet-cell { text-align:center; }
+.mybet-lbl { font-size:0.55rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:3px; }
+.mybet-val { font-family:'Barlow Condensed',sans-serif; font-size:0.95rem; font-weight:700; color:var(--text2); }
+.result-select { background:var(--bg); border:1px solid var(--border2); color:var(--text); font-family:'Barlow',sans-serif; font-size:0.75rem; padding:5px 8px; border-radius:var(--radius-sm); outline:none; cursor:pointer; width:100%; }
+.btn-delete { background:var(--red-dim); border:1px solid rgba(224,58,82,0.2); color:var(--red); font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:600; letter-spacing:0.05em; padding:5px 12px; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.18s; width:100%; }
+.btn-delete:hover { background:rgba(224,58,82,0.2); }
+.analytics-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:1.25rem; }
+.chart-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; }
+.chart-title { font-family:'Barlow Condensed',sans-serif; font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); margin-bottom:1rem; }
+.empty-box,.loading-box { text-align:center; padding:4rem 2rem; color:var(--text3); font-size:0.85rem; }
+.spinner { width:32px; height:32px; border:2px solid var(--border2); border-top-color:var(--blue-lt); border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto 1rem; }
+@keyframes spin { to{transform:rotate(360deg)} }
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+@media (max-width:900px) {
+  .stats-row { grid-template-columns:repeat(2,1fr); }
+  .bet-main { grid-template-columns:1fr 1fr; }
+  .stake-box { grid-column:span 2; }
+  .analytics-grid { grid-template-columns:1fr; }
+  .mybet-card { grid-template-columns:1fr 1fr 1fr; }
+  main { padding:1rem; }
+  header { padding:0 1rem; }
+  nav { display:none; }
 }
 </style>
 </head>
 <body>
 
-<!-- ===== AUTH OVERLAY ===== -->
 <div id="auth-overlay">
   <div class="auth-box">
     <div class="auth-logo">
-      <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4 8 L20 32 L36 8" stroke="url(#ag1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <path d="M14 8 L20 20 L26 8" stroke="url(#ag2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <defs>
-          <linearGradient id="ag1" x1="4" y1="8" x2="36" y2="32" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a0b4d0"/>
-          </linearGradient>
-          <linearGradient id="ag2" x1="14" y1="8" x2="26" y2="20" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#1a4fc4"/><stop offset="100%" stop-color="#2d6ae0"/>
-          </linearGradient>
-        </defs>
-      </svg>
+      <svg width="36" height="36" viewBox="0 0 40 40" fill="none"><path d="M4 8 L20 32 L36 8" stroke="url(#ag1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M14 8 L20 20 L26 8" stroke="url(#ag2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><defs><linearGradient id="ag1" x1="4" y1="8" x2="36" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a0b4d0"/></linearGradient><linearGradient id="ag2" x1="14" y1="8" x2="26" y2="20" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1a4fc4"/><stop offset="100%" stop-color="#2d6ae0"/></linearGradient></defs></svg>
       <div class="auth-logo-name">VEDO<span>X</span></div>
     </div>
-
     <div class="auth-tabs">
       <button class="auth-tab active" id="tab-login">Kirjaudu</button>
       <button class="auth-tab" id="tab-register">Luo tunnus</button>
     </div>
-
     <div id="auth-login-form">
-      <div class="auth-field">
-        <label>Sähköposti</label>
-        <input type="email" id="login-email" placeholder="sinä@email.com" autocomplete="email">
-      </div>
-      <div class="auth-field">
-        <label>Salasana</label>
-        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
-      </div>
+      <div class="auth-field"><label>Sähköposti</label><input type="email" id="login-email" placeholder="sinä@email.com" autocomplete="email"></div>
+      <div class="auth-field"><label>Salasana</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"></div>
       <button class="auth-btn" id="login-btn">Kirjaudu sisään</button>
     </div>
-
     <div id="auth-register-form" style="display:none">
-      <div class="auth-field">
-        <label>Sähköposti</label>
-        <input type="email" id="reg-email" placeholder="sinä@email.com" autocomplete="email">
-      </div>
-      <div class="auth-field">
-        <label>Salasana</label>
-        <input type="password" id="reg-password" placeholder="min. 6 merkkiä" autocomplete="new-password">
-      </div>
+      <div class="auth-field"><label>Sähköposti</label><input type="email" id="reg-email" placeholder="sinä@email.com" autocomplete="email"></div>
+      <div class="auth-field"><label>Salasana</label><input type="password" id="reg-password" placeholder="min. 6 merkkiä" autocomplete="new-password"></div>
       <button class="auth-btn" id="register-btn">Luo tunnus</button>
     </div>
-
     <div class="auth-msg" id="auth-msg"></div>
-
     <div style="display:flex;justify-content:center;gap:8px;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)">
       <button style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-size:0.9rem;width:30px;height:30px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center" id="auth-theme-btn">☀️</button>
       <button id="auth-btn-fi" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:600;letter-spacing:0.08em;padding:5px 10px;border-radius:5px;cursor:pointer">FI</button>
@@ -970,43 +200,20 @@ main {
 
 <header>
   <a class="logo" href="#">
-    <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M4 8 L20 32 L36 8" stroke="url(#grad1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <path d="M14 8 L20 20 L26 8" stroke="url(#grad2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <path d="M26 8 L34 2" stroke="url(#grad3)" stroke-width="3" stroke-linecap="round"/>
-      <defs>
-        <linearGradient id="grad1" x1="4" y1="8" x2="36" y2="32" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a0b4d0"/>
-        </linearGradient>
-        <linearGradient id="grad2" x1="14" y1="8" x2="26" y2="20" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#1a4fc4"/><stop offset="100%" stop-color="#2d6ae0"/>
-        </linearGradient>
-        <linearGradient id="grad3" x1="26" y1="8" x2="34" y2="2" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#2d6ae0"/><stop offset="100%" stop-color="#4a88ff"/>
-        </linearGradient>
-      </defs>
-    </svg>
+    <svg class="logo-icon" viewBox="0 0 40 40" fill="none"><path d="M4 8 L20 32 L36 8" stroke="url(#grad1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M14 8 L20 20 L26 8" stroke="url(#grad2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M26 8 L34 2" stroke="url(#grad3)" stroke-width="3" stroke-linecap="round"/><defs><linearGradient id="grad1" x1="4" y1="8" x2="36" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a0b4d0"/></linearGradient><linearGradient id="grad2" x1="14" y1="8" x2="26" y2="20" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1a4fc4"/><stop offset="100%" stop-color="#2d6ae0"/></linearGradient><linearGradient id="grad3" x1="26" y1="8" x2="34" y2="2" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#2d6ae0"/><stop offset="100%" stop-color="#4a88ff"/></linearGradient></defs></svg>
     <div class="logo-text-wrap">
       <div class="logo-name">VEDO<span>X</span></div>
       <span class="logo-tagline">Logic Over Luck</span>
     </div>
   </a>
-
   <nav>
     <button class="nav-btn active" onclick="showPage('bets',this)" data-fi="Vedot" data-en="Bets">Vedot</button>
     <button class="nav-btn" onclick="showPage('mybets',this)" data-fi="Omat Betsit" data-en="My Bets">Omat Betsit</button>
     <button class="nav-btn" onclick="showPage('analytics',this)" data-fi="Analytiikka" data-en="Analytics">Analytiikka</button>
   </nav>
-
   <div class="header-right">
-    <div class="live-pill">
-      <span class="live-dot"></span>
-      <span id="live-txt">LIVE</span>
-    </div>
-    <div class="user-pill" id="user-pill" style="display:none">
-      <span>👤</span>
-      <span class="user-email" id="user-email-display"></span>
-    </div>
+    <div class="live-pill"><span class="live-dot"></span><span id="live-txt">LIVE</span></div>
+    <div class="user-pill" id="user-pill" style="display:none"><span>👤</span><span class="user-email" id="user-email-display"></span></div>
     <button class="btn-logout" id="logout-btn" style="display:none" onclick="doLogout()">Kirjaudu ulos</button>
     <button class="btn-logout" id="btn-login-header" onclick="showAuthModal()" style="color:var(--blue-lt);border-color:var(--blue)">Kirjaudu</button>
     <button class="theme-btn" onclick="toggleTheme()" id="theme-icon" title="Toggle theme">☀️</button>
@@ -1016,47 +223,19 @@ main {
 </header>
 
 <main>
-
-  <!-- ===== BETS PAGE ===== -->
   <div class="page active" id="page-bets">
     <div class="stats-row" id="bets-stats" style="display:none">
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Kohteet" data-en="Opportunities">Kohteet</div>
-        <div class="stat-val" id="s-count">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Paras EV" data-en="Best EV">Paras EV</div>
-        <div class="stat-val" id="s-bestev">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Keskiarvo EV" data-en="Avg EV">Keskiarvo EV</div>
-        <div class="stat-val" id="s-avgev">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Bankroll" data-en="Bankroll">Bankroll</div>
-        <div class="stat-val" id="s-bankroll">—</div>
-      </div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Kohteet" data-en="Opportunities">Kohteet</div><div class="stat-val" id="s-count">—</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Paras EV" data-en="Best EV">Paras EV</div><div class="stat-val" id="s-bestev">—</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Keskiarvo EV" data-en="Avg EV">Keskiarvo EV</div><div class="stat-val" id="s-avgev">—</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Bankroll" data-en="Bankroll">Bankroll</div><div class="stat-val" id="s-bankroll">—</div></div>
     </div>
-
     <div class="toolbar">
-      <div class="fg">
-        <label data-fi="Bankroll (€)" data-en="Bankroll (€)">Bankroll (€)</label>
-        <input type="number" id="bankroll" value="1000" min="10" step="100" oninput="renderBets()">
-      </div>
-      <div class="fg">
-        <label data-fi="Min EV %" data-en="Min EV %">Min EV %</label>
-        <input type="number" id="f-ev-min" value="3" step="0.5" oninput="renderBets()">
-      </div>
-      <div class="fg">
-        <label data-fi="Min kerroin" data-en="Min odds">Min kerroin</label>
-        <input type="number" id="f-odds-min" value="1.4" step="0.05" oninput="renderBets()">
-      </div>
-      <div class="fg">
-        <label data-fi="Max kerroin" data-en="Max odds">Max kerroin</label>
-        <input type="number" id="f-odds-max" value="2.5" step="0.05" oninput="renderBets()">
-      </div>
-      <div class="fg">
-        <label data-fi="Laji" data-en="Sport">Laji</label>
+      <div class="fg"><label data-fi="Bankroll (€)" data-en="Bankroll (€)">Bankroll (€)</label><input type="number" id="bankroll" value="1000" min="10" step="100" oninput="onBankrollChange(this)"></div>
+      <div class="fg"><label data-fi="Min EV %" data-en="Min EV %">Min EV %</label><input type="number" id="f-ev-min" value="3" step="0.5" oninput="renderBets()"></div>
+      <div class="fg"><label data-fi="Min kerroin" data-en="Min odds">Min kerroin</label><input type="number" id="f-odds-min" value="1.4" step="0.05" oninput="renderBets()"></div>
+      <div class="fg"><label data-fi="Max kerroin" data-en="Max odds">Max kerroin</label><input type="number" id="f-odds-max" value="2.5" step="0.05" oninput="renderBets()"></div>
+      <div class="fg"><label data-fi="Laji" data-en="Sport">Laji</label>
         <select id="f-sport" onchange="renderBets()">
           <option value="" data-fi="Kaikki" data-en="All">Kaikki</option>
           <option value="soccer" data-fi="Jalkapallo" data-en="Soccer">Jalkapallo</option>
@@ -1070,70 +249,29 @@ main {
       <button class="btn-reset" onclick="resetFilters()" data-fi="Nollaa" data-en="Reset">Nollaa</button>
       <div class="filter-info" id="filter-info"></div>
     </div>
-
-    <div class="loading-box" id="bets-loading">
-      <div class="spinner"></div>
-      <span data-fi="Haetaan EV-kohteita..." data-en="Fetching EV opportunities...">Haetaan EV-kohteita...</span>
-    </div>
+    <div class="loading-box" id="bets-loading"><div class="spinner"></div><span data-fi="Haetaan EV-kohteita..." data-en="Fetching EV opportunities...">Haetaan EV-kohteita...</span></div>
     <div class="empty-box" id="bets-empty" style="display:none" data-fi="Ei plus-EV kohteita juuri nyt." data-en="No plus-EV opportunities right now.">Ei plus-EV kohteita juuri nyt.</div>
     <div id="bets-list"></div>
   </div>
 
-  <!-- ===== MY BETS PAGE ===== -->
   <div class="page" id="page-mybets">
     <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Betsit yhteensä" data-en="Total Bets">Betsit yhteensä</div>
-        <div class="stat-val" id="mb-total">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Voitettu" data-en="Won">Voitettu</div>
-        <div class="stat-val" id="mb-won">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Hävitty" data-en="Lost">Hävitty</div>
-        <div class="stat-val" id="mb-lost">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="ROI" data-en="ROI">ROI</div>
-        <div class="stat-val" id="mb-roi">—</div>
-      </div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Betsit yhteensä" data-en="Total Bets">Betsit yhteensä</div><div class="stat-val" id="mb-total">0</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Voitettu" data-en="Won">Voitettu</div><div class="stat-val" id="mb-won">0</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Hävitty" data-en="Lost">Hävitty</div><div class="stat-val" id="mb-lost">0</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="ROI" data-en="ROI">ROI</div><div class="stat-val" id="mb-roi">—</div></div>
     </div>
-
     <button class="add-bet-btn" onclick="toggleAddForm()" id="add-btn" data-fi="+ Lisää betsi" data-en="+ Add bet">+ Lisää betsi</button>
-
     <div class="add-form" id="add-form">
       <div class="form-grid">
-        <div class="form-group">
-          <label data-fi="Ottelu" data-en="Match">Ottelu</label>
-          <input type="text" id="f-match" placeholder="esim. PSG vs Bayern">
-        </div>
-        <div class="form-group">
-          <label data-fi="Kohde" data-en="Selection">Kohde</label>
-          <input type="text" id="f-target" placeholder="esim. Bayern voittaa">
-        </div>
-        <div class="form-group">
-          <label data-fi="Kirja" data-en="Bookmaker">Kirja</label>
-          <input type="text" id="f-book" placeholder="esim. Unibet">
-        </div>
-        <div class="form-group">
-          <label data-fi="Kerroin" data-en="Odds">Kerroin</label>
-          <input type="number" id="f-odds" step="0.01" placeholder="esim. 1.85">
-        </div>
-        <div class="form-group">
-          <label data-fi="Panos (€)" data-en="Stake (€)">Panos (€)</label>
-          <input type="number" id="f-stake" placeholder="esim. 10">
-        </div>
-        <div class="form-group">
-          <label data-fi="EV %" data-en="EV %">EV %</label>
-          <input type="number" id="f-ev" step="0.1" placeholder="esim. 4.2">
-        </div>
-        <div class="form-group">
-          <label data-fi="Pinnacle %" data-en="Pinnacle %">Pinnacle %</label>
-          <input type="number" id="f-pinn" step="0.1" placeholder="esim. 55.4">
-        </div>
-        <div class="form-group">
-          <label data-fi="Tulos" data-en="Result">Tulos</label>
+        <div class="form-group"><label data-fi="Ottelu" data-en="Match">Ottelu</label><input type="text" id="f-match" placeholder="esim. PSG vs Bayern"></div>
+        <div class="form-group"><label data-fi="Kohde" data-en="Selection">Kohde</label><input type="text" id="f-target" placeholder="esim. Bayern voittaa"></div>
+        <div class="form-group"><label data-fi="Kirja" data-en="Bookmaker">Kirja</label><input type="text" id="f-book" placeholder="esim. Unibet"></div>
+        <div class="form-group"><label data-fi="Kerroin" data-en="Odds">Kerroin</label><input type="number" id="f-odds" step="0.01" placeholder="esim. 1.85"></div>
+        <div class="form-group"><label data-fi="Panos (€)" data-en="Stake (€)">Panos (€)</label><input type="number" id="f-stake" placeholder="esim. 10"></div>
+        <div class="form-group"><label data-fi="EV %" data-en="EV %">EV %</label><input type="number" id="f-ev" step="0.1" placeholder="esim. 4.2"></div>
+        <div class="form-group"><label data-fi="Pinnacle %" data-en="Pinnacle %">Pinnacle %</label><input type="number" id="f-pinn" step="0.1" placeholder="esim. 55.4"></div>
+        <div class="form-group"><label data-fi="Tulos" data-en="Result">Tulos</label>
           <select id="f-result">
             <option value="pending" data-fi="Odottaa" data-en="Pending">Odottaa</option>
             <option value="won" data-fi="Voitto" data-en="Won">Voitto</option>
@@ -1146,148 +284,90 @@ main {
         <button class="btn-secondary" onclick="toggleAddForm()" data-fi="Peruuta" data-en="Cancel">Peruuta</button>
       </div>
     </div>
-
-    <div id="mybets-list">
-      <div class="empty-box" data-fi="Ei betsejä vielä." data-en="No bets yet.">Ei betsejä vielä.</div>
-    </div>
+    <div id="mybets-list"><div class="empty-box" data-fi="Ei betsejä vielä." data-en="No bets yet.">Ei betsejä vielä.</div></div>
   </div>
 
-  <!-- ===== ANALYTICS PAGE ===== -->
   <div class="page" id="page-analytics">
     <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Kokonaistuotto" data-en="Total Profit">Kokonaistuotto</div>
-        <div class="stat-val" id="an-profit">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="ROI" data-en="ROI">ROI</div>
-        <div class="stat-val" id="an-roi">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Osumisprosentti" data-en="Hit Rate">Osumisprosentti</div>
-        <div class="stat-val" id="an-hit">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl" data-fi="Avg EV" data-en="Avg EV">Avg EV</div>
-        <div class="stat-val" id="an-avgev">—</div>
-      </div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Kokonaistuotto" data-en="Total Profit">Kokonaistuotto</div><div class="stat-val" id="an-profit">—</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="ROI" data-en="ROI">ROI</div><div class="stat-val" id="an-roi">—</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Osumisprosentti" data-en="Hit Rate">Osumisprosentti</div><div class="stat-val" id="an-hit">—</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Avg EV" data-en="Avg EV">Avg EV</div><div class="stat-val" id="an-avgev">—</div></div>
     </div>
-
     <div class="analytics-grid">
-      <div class="chart-card">
-        <div class="chart-title" data-fi="Kassan kehitys" data-en="Bankroll Growth">Kassan kehitys</div>
-        <canvas id="chart-bankroll" height="200"></canvas>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title" data-fi="Voitto / Tappio per betsi" data-en="Profit / Loss per bet">Voitto / Tappio per betsi</div>
-        <canvas id="chart-pl" height="200"></canvas>
-      </div>
-    </div>
-
-    <div class="forecast-card">
-      <div class="chart-title" data-fi="Ennuste" data-en="Forecast">Ennuste</div>
-      <div id="forecast-rows"></div>
+      <div class="chart-card"><div class="chart-title" data-fi="Kassan kehitys" data-en="Bankroll Growth">Kassan kehitys</div><canvas id="chart-bankroll" height="200"></canvas></div>
+      <div class="chart-card"><div class="chart-title" data-fi="Voitto / Tappio per betsi" data-en="Profit / Loss per bet">Voitto / Tappio per betsi</div><canvas id="chart-pl" height="200"></canvas></div>
     </div>
   </div>
-
 </main>
 
 <script>
-// ===== SUPABASE CONFIG =====
 const SUPABASE_URL  = "https://gvywnucdwikkeblcorfj.supabase.co";
 const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eXdudWNkd2lra2VibGNvcmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MzMyMTIsImV4cCI6MjA5NDAwOTIxMn0.PPFn6lutvI4mlZ8gBZT1bKA50h_96GZSPHDf6-Wl_Tc";
 const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// ===== CONFIG =====
 const REFRESH = 120;
 
-// ===== STATE =====
-let allBets    = [];
-let myBets     = JSON.parse(localStorage.getItem("vedox_bets") || "[]");
-let skippedIds = JSON.parse(localStorage.getItem("vedox_skipped") || "[]");
-let countdown  = REFRESH;
+let allBets = [];
+let myBets  = [];
+let skippedIds = []; // ladataan käyttäjäkohtaisesti showApp():ssa
+let countdown = REFRESH;
 let timer;
 let lang         = localStorage.getItem("vedox_lang") || "fi";
 let currentTheme = localStorage.getItem("vedox_theme") || "dark";
 let bankrollChart, plChart;
-let currentUser  = null;
+let currentUser = null;
 
-// ===== AUTH UI =====
+// ===== AUTH =====
 function switchAuthTab(tab) {
-  document.getElementById("tab-login").classList.toggle("active", tab === "login");
-  document.getElementById("tab-register").classList.toggle("active", tab === "register");
-  document.getElementById("auth-login-form").style.display    = tab === "login"    ? "block" : "none";
-  document.getElementById("auth-register-form").style.display = tab === "register" ? "block" : "none";
-  setAuthMsg("", "");
+  document.getElementById("tab-login").classList.toggle("active", tab==="login");
+  document.getElementById("tab-register").classList.toggle("active", tab==="register");
+  document.getElementById("auth-login-form").style.display    = tab==="login"    ? "block" : "none";
+  document.getElementById("auth-register-form").style.display = tab==="register" ? "block" : "none";
+  setAuthMsg("","");
 }
 
 function setAuthMsg(msg, type) {
   const el = document.getElementById("auth-msg");
   el.textContent = msg;
-  el.className   = "auth-msg" + (type ? " " + type : "");
+  el.className = "auth-msg" + (type ? " "+type : "");
 }
 
 async function doLogin() {
-  const email    = document.getElementById("login-email").value.trim();
-  const password = document.getElementById("login-password").value;
-  if (!email || !password) { setAuthMsg("Täytä sähköposti ja salasana.", "error"); return; }
-
-  const btn = document.getElementById("login-btn");
-  btn.disabled = true;
-  btn.textContent = "Kirjaudutaan...";
-  setAuthMsg("", "");
-
-  const { error } = await sbClient.auth.signInWithPassword({ email, password });
-  btn.disabled = false;
-  btn.textContent = "Kirjaudu sisään";
-
-  if (error) {
-    setAuthMsg(error.message === "Invalid login credentials"
-      ? "Väärä sähköposti tai salasana."
-      : error.message, "error");
-  }
-  // onAuthStateChange handles the rest
+  const email=document.getElementById("login-email").value.trim(), password=document.getElementById("login-password").value;
+  if (!email||!password) { setAuthMsg("Täytä sähköposti ja salasana.","error"); return; }
+  const btn=document.getElementById("login-btn"); btn.disabled=true; btn.textContent="Kirjaudutaan..."; setAuthMsg("","");
+  const {error}=await sbClient.auth.signInWithPassword({email,password});
+  btn.disabled=false; btn.textContent="Kirjaudu sisään";
+  if (error) setAuthMsg(error.message==="Invalid login credentials"?"Väärä sähköposti tai salasana.":error.message,"error");
 }
 
 async function doRegister() {
-  const email    = document.getElementById("reg-email").value.trim();
-  const password = document.getElementById("reg-password").value;
-  if (!email || !password) { setAuthMsg("Täytä sähköposti ja salasana.", "error"); return; }
-  if (password.length < 6)  { setAuthMsg("Salasana on liian lyhyt (min. 6 merkkiä).", "error"); return; }
-
-  const btn = document.getElementById("register-btn");
-  btn.disabled = true;
-  btn.textContent = "Luodaan...";
-  setAuthMsg("", "");
-
-  const { data, error } = await sbClient.auth.signUp({ email, password });
-  btn.disabled = false;
-  btn.textContent = "Luo tunnus";
-
-  if (error) {
-    setAuthMsg(error.message, "error");
-    return;
-  }
-
-  // If email confirmation is required, session will be null
-  if (data.session) {
-    // Logged in immediately (email confirm off)
-  } else {
-    setAuthMsg("Tunnus luotu! Tarkista sähköpostisi ja vahvista osoite ennen kirjautumista.", "success");
-  }
+  const email=document.getElementById("reg-email").value.trim(), password=document.getElementById("reg-password").value;
+  if (!email||!password) { setAuthMsg("Täytä sähköposti ja salasana.","error"); return; }
+  if (password.length<6) { setAuthMsg("Salasana on liian lyhyt (min. 6 merkkiä).","error"); return; }
+  const btn=document.getElementById("register-btn"); btn.disabled=true; btn.textContent="Luodaan..."; setAuthMsg("","");
+  const {data,error}=await sbClient.auth.signUp({email,password});
+  btn.disabled=false; btn.textContent="Luo tunnus";
+  if (error) { setAuthMsg(error.message,"error"); return; }
+  if (!data.session) setAuthMsg("Tunnus luotu! Tarkista sähköpostisi ja vahvista osoite ennen kirjautumista.","success");
 }
 
-async function doLogout() {
-  await sbClient.auth.signOut();
-}
+async function doLogout() { await sbClient.auth.signOut(); }
 
 function showApp(user) {
   currentUser = user;
+  // Lataa käyttäjäkohtaiset tiedot
+  skippedIds = JSON.parse(localStorage.getItem(`vedox_skipped_${user.id}`) || "[]");
+  myBets     = JSON.parse(localStorage.getItem(`vedox_bets_${user.id}`)    || "[]");
+  const savedBankroll = localStorage.getItem(`vedox_bankroll_${user.id}`);
+  if (savedBankroll) document.getElementById("bankroll").value = savedBankroll;
+
   document.getElementById("auth-overlay").style.display = "none";
   document.getElementById("user-pill").style.display    = "flex";
   document.getElementById("logout-btn").style.display   = "block";
   document.getElementById("btn-login-header").style.display = "none";
   document.getElementById("user-email-display").textContent = user.email;
+  document.getElementById("bets-loading").style.display = "block";
   fetchAll();
   startTimer();
   renderMyBets();
@@ -1296,7 +376,9 @@ function showApp(user) {
 function hideApp() {
   currentUser = null;
   clearInterval(timer);
-  allBets = [];
+  allBets    = [];
+  myBets     = [];
+  skippedIds = [];
   document.getElementById("auth-overlay").style.display = "flex";
   document.getElementById("user-pill").style.display    = "none";
   document.getElementById("logout-btn").style.display   = "none";
@@ -1308,507 +390,242 @@ function hideApp() {
   renderMyBets();
 }
 
-function showAuthModal() { /* B-mallissa ei käytetä — overlay on aina päällä kirjautumattomille */ }
-function hideAuthModal() { /* ei käytössä */ }
+function showAuthModal() {}
 
-// Listen for auth state changes (login, logout, page reload with existing session)
 sbClient.auth.onAuthStateChange((_event, session) => {
-  if (session?.user) {
-    showApp(session.user);
-  } else {
-    hideApp();
-  }
+  if (session?.user) showApp(session.user);
+  else hideApp();
 });
 
 // ===== THEME =====
 function applyTheme(t) {
-  currentTheme = t;
-  document.documentElement.setAttribute("data-theme", t);
-  localStorage.setItem("vedox_theme", t);
-  const icon = t === "dark" ? "☀️" : "🌙";
-  document.getElementById("theme-icon").textContent = icon;
-  const authBtn = document.getElementById("auth-theme-btn");
-  if (authBtn) authBtn.textContent = icon;
+  currentTheme=t; document.documentElement.setAttribute("data-theme",t); localStorage.setItem("vedox_theme",t);
+  const icon=t==="dark"?"☀️":"🌙"; document.getElementById("theme-icon").textContent=icon;
+  const authBtn=document.getElementById("auth-theme-btn"); if(authBtn) authBtn.textContent=icon;
 }
-function toggleTheme() { applyTheme(currentTheme === "dark" ? "light" : "dark"); }
+function toggleTheme() { applyTheme(currentTheme==="dark"?"light":"dark"); }
 
 function syncAuthLangBtns() {
-  document.getElementById("auth-btn-fi").style.color = lang === "fi" ? "var(--blue-lt)" : "var(--text3)";
-  document.getElementById("auth-btn-fi").style.borderColor = lang === "fi" ? "var(--blue)" : "var(--border2)";
-  document.getElementById("auth-btn-en").style.color = lang === "en" ? "var(--blue-lt)" : "var(--text3)";
-  document.getElementById("auth-btn-en").style.borderColor = lang === "en" ? "var(--blue)" : "var(--border2)";
+  document.getElementById("auth-btn-fi").style.color=lang==="fi"?"var(--blue-lt)":"var(--text3)";
+  document.getElementById("auth-btn-fi").style.borderColor=lang==="fi"?"var(--blue)":"var(--border2)";
+  document.getElementById("auth-btn-en").style.color=lang==="en"?"var(--blue-lt)":"var(--text3)";
+  document.getElementById("auth-btn-en").style.borderColor=lang==="en"?"var(--blue)":"var(--border2)";
 }
 
-// ===== LANGUAGE =====
 function setLang(l) {
-  lang = l;
-  localStorage.setItem("vedox_lang", l);
-  document.getElementById("btn-fi").classList.toggle("active", l === "fi");
-  document.getElementById("btn-en").classList.toggle("active", l === "en");
-  document.querySelectorAll("[data-fi]").forEach(el => {
-    const txt = el.getAttribute(`data-${l}`);
-    if (txt && !["INPUT","SELECT","OPTION"].includes(el.tagName)) el.textContent = txt;
-  });
-  document.querySelectorAll("option[data-fi]").forEach(el => {
-    el.textContent = el.getAttribute(`data-${l}`) || el.textContent;
-  });
-  document.documentElement.lang = l;
-  renderBets();
-  renderMyBets();
+  lang=l; localStorage.setItem("vedox_lang",l);
+  document.getElementById("btn-fi").classList.toggle("active",l==="fi");
+  document.getElementById("btn-en").classList.toggle("active",l==="en");
+  document.querySelectorAll("[data-fi]").forEach(el=>{const txt=el.getAttribute(`data-${l}`);if(txt&&!["INPUT","SELECT","OPTION"].includes(el.tagName))el.textContent=txt;});
+  document.querySelectorAll("option[data-fi]").forEach(el=>{el.textContent=el.getAttribute(`data-${l}`)||el.textContent;});
+  document.documentElement.lang=l;
+  renderBets(); renderMyBets();
 }
 
-// ===== PAGES =====
 function showPage(p, btn) {
-  document.querySelectorAll(".page").forEach(el => el.classList.remove("active"));
-  document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
-  document.getElementById("page-" + p).classList.add("active");
+  document.querySelectorAll(".page").forEach(el=>el.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(el=>el.classList.remove("active"));
+  document.getElementById("page-"+p).classList.add("active");
   if (btn) btn.classList.add("active");
-  if (p === "analytics") { renderMyBets(); setTimeout(renderAnalytics, 50); }
-  if (p === "mybets") renderMyBets();
+  if (p==="analytics") { renderMyBets(); setTimeout(renderAnalytics,50); }
+  if (p==="mybets") renderMyBets();
 }
 
-// ===== FETCH from Supabase =====
+// ===== FETCH =====
 async function fetchAll() {
   try {
-    const { data, error } = await sbClient
-      .from('ev_bets')
-      .select('id, ottelu, alkaa, markkina, kohde, paras_kerroin, kirja, pinnacle_kerroin, pinnacle_prob, ev_pct, liiga, aalto')
-      .eq('aktiivinen', true)
-      .order('ev_pct', { ascending: false });
-
-    if (error) {
-      console.error('[Vedox] Supabase fetch error:', error.message, '| code:', error.code, '| details:', error.details);
-      document.getElementById("bets-loading").style.display = "none";
-      return;
-    }
-
-    // Map Supabase columns → internal field names used by renderBets
-    allBets = (data || []).map(r => ({
-      id:        r.id,
-      ottelu:    r.ottelu,
-      alkaa:     r.alkaa ? new Date(r.alkaa).toLocaleString("fi-FI", { day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit" }) : "—",
-      markkina:  r.markkina || "",
-      kohde:     r.kohde,
-      kerroin:   parseFloat(r.paras_kerroin) || 0,
-      kirja:     r.kirja || "",
-      pinnacle:  parseFloat(r.pinnacle_kerroin) || 0,
-      pinnProb:  r.pinnacle_prob || "",
-      ev:        parseFloat(r.ev_pct) || 0,
-      liiga:     r.liiga || "",
-      aalto:     r.aalto || "",
-    }));
-
-    console.log(`[Vedox] Supabasesta haettu: ${allBets.length} aktiivista kohdetta`);
-    console.log(`[Vedox] Skippattuja: ${skippedIds.length} kpl`);
-
-  } catch (e) {
-    console.error('[Vedox] fetchAll poikkeus:', e.message || e);
-  }
-
+    const {data,error}=await sbClient.from('ev_bets').select('id,ottelu,alkaa,markkina,kohde,paras_kerroin,kirja,pinnacle_kerroin,pinnacle_prob,ev_pct,liiga,aalto').eq('aktiivinen',true).order('ev_pct',{ascending:false});
+    if (error) { console.error('[Vedox] Supabase fetch error:',error.message); document.getElementById("bets-loading").style.display="none"; return; }
+    allBets=(data||[]).map(r=>({id:r.id,ottelu:r.ottelu,alkaa:r.alkaa?new Date(r.alkaa).toLocaleString("fi-FI",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"—",markkina:r.markkina||"",kohde:r.kohde,kerroin:parseFloat(r.paras_kerroin)||0,kirja:r.kirja||"",pinnacle:parseFloat(r.pinnacle_kerroin)||0,pinnProb:r.pinnacle_prob||"",ev:parseFloat(r.ev_pct)||0,liiga:r.liiga||"",aalto:r.aalto||""}));
+  } catch(e) { console.error('[Vedox] fetchAll poikkeus:',e.message||e); }
   renderBets();
-  document.getElementById("bets-loading").style.display = "none";
-  countdown = REFRESH;
+  document.getElementById("bets-loading").style.display="none";
+  countdown=REFRESH;
 }
 
-// ===== BET ID =====
-function betId(b) {
-  return b.id || `${b.ottelu}|${b.kohde}|${b.aalto}`;
-}
+function betId(b) { return b.id || `${b.ottelu}|${b.kohde}|${b.aalto}`; }
 
 // ===== FILTERS =====
 function getFiltered() {
-  const evMin   = parseFloat(document.getElementById("f-ev-min").value) || 0;
-  const oddsMin = parseFloat(document.getElementById("f-odds-min").value) || 0;
-  const oddsMax = parseFloat(document.getElementById("f-odds-max").value) || 99;
-  const sport   = document.getElementById("f-sport").value;
+  const evMin=parseFloat(document.getElementById("f-ev-min").value)||0;
+  const oddsMin=parseFloat(document.getElementById("f-odds-min").value)||0;
+  const oddsMax=parseFloat(document.getElementById("f-odds-max").value)||99;
+  const sport=document.getElementById("f-sport").value;
+  const afterSkip=allBets.filter(b=>!skippedIds.includes(betId(b)));
+  return afterSkip.filter(b=>b.ev>=evMin&&b.kerroin>=oddsMin&&b.kerroin<=oddsMax&&(!sport||b.liiga.includes(sport)));
+}
 
-  const afterSkip = allBets.filter(b => !skippedIds.includes(betId(b)));
-  const filtered  = afterSkip.filter(b =>
-    b.ev >= evMin &&
-    b.kerroin >= oddsMin &&
-    b.kerroin <= oddsMax &&
-    (!sport || b.liiga.includes(sport))
-  );
-
-  // DEBUG LOG
-  console.log(`[Vedox] Kaikki: ${allBets.length} | Skipattuja pois: ${allBets.length - afterSkip.length} | Filtterin jälkeen: ${filtered.length}`);
-
-  return filtered;
+// Bankroll change — tallenna käyttäjäkohtaisesti
+function onBankrollChange(el) {
+  renderBets();
+  if (currentUser) localStorage.setItem(`vedox_bankroll_${currentUser.id}`, el.value);
 }
 
 function resetFilters() {
-  // Reset filter inputs
-  document.getElementById("f-ev-min").value   = "3";
-  document.getElementById("f-odds-min").value = "1.4";
-  document.getElementById("f-odds-max").value = "2.5";
-  document.getElementById("f-sport").value    = "";
-  // Also clear skipped list so all hidden bets come back
-  skippedIds = [];
-  localStorage.setItem("vedox_skipped", JSON.stringify(skippedIds));
-  console.log("[Vedox] Filtterit ja skippatut nollattu.");
+  document.getElementById("f-ev-min").value="3";
+  document.getElementById("f-odds-min").value="1.4";
+  document.getElementById("f-odds-max").value="2.5";
+  document.getElementById("f-sport").value="";
+  skippedIds=[];
+  if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`, JSON.stringify(skippedIds));
   renderBets();
 }
 
-// ===== SPORT LABEL =====
 function sportLabel(liiga) {
-  if (liiga.includes("soccer"))     return "⚽";
-  if (liiga.includes("basketball")) return "🏀";
-  if (liiga.includes("icehockey"))  return "🏒";
-  if (liiga.includes("tennis"))     return "🎾";
-  if (liiga.includes("baseball"))   return "⚾";
-  if (liiga.includes("rugby"))      return "🏉";
+  if(liiga.includes("soccer"))return "⚽"; if(liiga.includes("basketball"))return "🏀";
+  if(liiga.includes("icehockey"))return "🏒"; if(liiga.includes("tennis"))return "🎾";
+  if(liiga.includes("baseball"))return "⚾"; if(liiga.includes("rugby"))return "🏉";
   return "🏆";
 }
+function evClass(ev) { if(ev>=7)return "top"; if(ev>=5)return "high"; return ""; }
 
-function evClass(ev) {
-  if (ev >= 7) return "top";
-  if (ev >= 5) return "high";
-  return "";
-}
-
-// ===== PLACE BET =====
+// ===== PLACE BET — tallentaa sourceBetId =====
 function placeBet(idx) {
-  const filtered = getFiltered();
-  const b = filtered[idx];
-  if (!b) return;
-  const br = parseFloat(document.getElementById("bankroll").value) || 1000;
-  const inputEl = document.getElementById(`stake-${idx}`);
-  const stake = inputEl ? parseFloat(inputEl.value) || parseFloat((br * 0.01).toFixed(2)) : parseFloat((br * 0.01).toFixed(2));
-  const pot = parseFloat((stake * b.kerroin).toFixed(2));
-  const mktLabel = b.markkina.replace(/_/g," ");
+  const filtered=getFiltered(), b=filtered[idx]; if(!b) return;
+  const br=parseFloat(document.getElementById("bankroll").value)||1000;
+  const inputEl=document.getElementById(`stake-${idx}`);
+  const stake=inputEl?parseFloat(inputEl.value)||parseFloat((br*0.01).toFixed(2)):parseFloat((br*0.01).toFixed(2));
+  const pot=parseFloat((stake*b.kerroin).toFixed(2));
+  const sid=betId(b);
 
-  myBets.unshift({
-    id: Date.now(),
-    date: new Date().toLocaleDateString("fi-FI"),
-    match: b.ottelu,
-    target: b.kohde,
-    book: b.kirja,
-    odds: b.kerroin,
-    stake,
-    ev: b.ev,
-    pinn: parseFloat((b.pinnProb||"0").replace(",",".").replace("%","")) || 0,
-    result: "pending",
-    market: mktLabel,
-    potential: pot,
-  });
+  myBets.unshift({id:Date.now(),date:new Date().toLocaleDateString("fi-FI"),match:b.ottelu,target:b.kohde,book:b.kirja,odds:b.kerroin,stake,ev:b.ev,pinn:parseFloat((b.pinnProb||"0").replace(",",".").replace("%",""))||0,result:"pending",market:b.markkina.replace(/_/g," "),potential:pot,sourceBetId:sid});
   saveBets();
-
-  skippedIds.push(betId(b));
-  localStorage.setItem("vedox_skipped", JSON.stringify(skippedIds));
-  renderBets();
-  renderMyBets();
+  skippedIds.push(sid);
+  if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`, JSON.stringify(skippedIds));
+  renderBets(); renderMyBets();
 }
 
 // ===== SKIP BET =====
 function skipBet(idx) {
-  const filtered = getFiltered();
-  const b = filtered[idx];
-  if (!b) return;
+  const filtered=getFiltered(), b=filtered[idx]; if(!b) return;
   skippedIds.push(betId(b));
-  localStorage.setItem("vedox_skipped", JSON.stringify(skippedIds));
+  if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`, JSON.stringify(skippedIds));
   renderBets();
 }
 
-// ===== RENDER BETS =====
 function renderBets() {
-  const br = parseFloat(document.getElementById("bankroll").value) || 1000;
-  const stake  = parseFloat((br * 0.01).toFixed(2));
-  const list   = document.getElementById("bets-list");
-  const empty  = document.getElementById("bets-empty");
-  const stats  = document.getElementById("bets-stats");
-  const filtered = getFiltered();
-  const fi = lang === "fi";
-
-  // Filter info: show counts and skipped note
-  const skippedCount = skippedIds.length;
-  let infoHtml = `<strong>${filtered.length}</strong> / ${allBets.length} ${fi ? "kohdetta filttereillä" : "opportunities (filtered)"}`;
-  if (skippedCount > 0) {
-    infoHtml += `<span class="skipped-note">(+${skippedCount} ${fi ? "ohitettu" : "skipped"})</span>`;
-  }
-  document.getElementById("filter-info").innerHTML = infoHtml;
-
-  if (filtered.length === 0) {
-    empty.style.display = "block";
-    list.innerHTML = "";
-    stats.style.display = "none";
-    return;
-  }
-
-  empty.style.display = "none";
-  stats.style.display = "grid";
-
-  const avg = (filtered.reduce((a, b) => a + b.ev, 0) / filtered.length).toFixed(1);
-  document.getElementById("s-count").textContent   = filtered.length;
-  document.getElementById("s-bestev").textContent  = "+" + filtered[0].ev.toFixed(1) + "%";
-  document.getElementById("s-avgev").textContent   = "+" + avg + "%";
-  document.getElementById("s-bankroll").textContent = br.toLocaleString("fi-FI") + "€";
-
-  list.innerHTML = filtered.map((b, i) => {
-    const ec = evClass(b.ev);
-    const icon = sportLabel(b.liiga);
-    const mktLabel = b.markkina.replace(/_/g, " ").toUpperCase();
-    const pot = (stake * b.kerroin).toFixed(0);
-
-    return `<div class="bet-card ${ec}" id="betcard-${i}">
-      <div class="bet-main">
-        <div>
-          <div class="match-top">
-            <span class="badge badge-sport">${icon} ${b.liiga.split("_")[1]?.toUpperCase() || "SPT"}</span>
-            <span class="badge badge-mkt">${mktLabel}</span>
-          </div>
-          <div class="match-name">${b.ottelu} · ${b.alkaa}</div>
-          <div class="bet-target">${b.kohde}</div>
-          <div class="bet-meta">
-            <span class="meta-tag">${b.kirja}</span>
-            <span class="meta-tag">${fi ? "Voitto" : "Win"}: ${pot}€</span>
-          </div>
-        </div>
-        <div class="cell">
-          <div class="cell-lbl">${fi ? "Kerroin" : "Odds"}</div>
-          <div class="cell-val">${b.kerroin.toFixed(2)}</div>
-          <div class="cell-sub">${b.kirja}</div>
-        </div>
-        <div class="cell">
-          <div class="cell-lbl">EV</div>
-          <div class="cell-val">+${b.ev.toFixed(1)}%</div>
-          <div class="cell-sub">&nbsp;</div>
-        </div>
-        <div class="stake-box">
-          <div class="stake-lbl">${fi ? "Suositeltu panos" : "Recommended stake"}</div>
-          <input class="stake-input" id="stake-${i}" type="number" value="${stake.toFixed(0)}" min="1" step="1">
-          <div class="stake-btns">
-            <button class="btn-placed" onclick="placeBet(${i})">${fi ? "Laitoin ✓" : "Placed ✓"}</button>
-            <button class="btn-skip" onclick="skipBet(${i})">${fi ? "Ohita ✗" : "Skip ✗"}</button>
-          </div>
-        </div>
-      </div>
-    </div>`;
+  const br=parseFloat(document.getElementById("bankroll").value)||1000;
+  const stake=parseFloat((br*0.01).toFixed(2));
+  const list=document.getElementById("bets-list"), empty=document.getElementById("bets-empty"), stats=document.getElementById("bets-stats");
+  const filtered=getFiltered(), fi=lang==="fi";
+  const skippedCount=skippedIds.length;
+  let infoHtml=`<strong>${filtered.length}</strong> / ${allBets.length} ${fi?"kohdetta filttereillä":"opportunities (filtered)"}`;
+  if (skippedCount>0) infoHtml+=`<span class="skipped-note">(+${skippedCount} ${fi?"ohitettu":"skipped"})</span>`;
+  document.getElementById("filter-info").innerHTML=infoHtml;
+  if (filtered.length===0) { empty.style.display="block"; list.innerHTML=""; stats.style.display="none"; return; }
+  empty.style.display="none"; stats.style.display="grid";
+  const avg=(filtered.reduce((a,b)=>a+b.ev,0)/filtered.length).toFixed(1);
+  document.getElementById("s-count").textContent=filtered.length;
+  document.getElementById("s-bestev").textContent="+"+filtered[0].ev.toFixed(1)+"%";
+  document.getElementById("s-avgev").textContent="+"+avg+"%";
+  document.getElementById("s-bankroll").textContent=br.toLocaleString("fi-FI")+"€";
+  list.innerHTML=filtered.map((b,i)=>{
+    const ec=evClass(b.ev), icon=sportLabel(b.liiga), mktLabel=b.markkina.replace(/_/g," ").toUpperCase(), pot=(stake*b.kerroin).toFixed(0);
+    return `<div class="bet-card ${ec}"><div class="bet-main"><div><div class="match-top"><span class="badge badge-sport">${icon} ${b.liiga.split("_")[1]?.toUpperCase()||"SPT"}</span><span class="badge badge-mkt">${mktLabel}</span></div><div class="match-name">${b.ottelu} · ${b.alkaa}</div><div class="bet-target">${b.kohde}</div><div class="bet-meta"><span class="meta-tag">${b.kirja}</span><span class="meta-tag">${fi?"Voitto":"Win"}: ${pot}€</span></div></div><div class="cell"><div class="cell-lbl">${fi?"Kerroin":"Odds"}</div><div class="cell-val">${b.kerroin.toFixed(2)}</div><div class="cell-sub">${b.kirja}</div></div><div class="cell"><div class="cell-lbl">EV</div><div class="cell-val">+${b.ev.toFixed(1)}%</div><div class="cell-sub">&nbsp;</div></div><div class="stake-box"><div class="stake-lbl">${fi?"Suositeltu panos":"Recommended stake"}</div><input class="stake-input" id="stake-${i}" type="number" value="${stake.toFixed(0)}" min="1" step="1"><div class="stake-btns"><button class="btn-placed" onclick="placeBet(${i})">${fi?"Laitoin ✓":"Placed ✓"}</button><button class="btn-skip" onclick="skipBet(${i})">${fi?"Ohita ✗":"Skip ✗"}</button></div></div></div></div>`;
   }).join("");
 }
 
 // ===== MY BETS =====
-function saveBets() { localStorage.setItem("vedox_bets", JSON.stringify(myBets)); }
+function saveBets() {
+  if (currentUser) localStorage.setItem(`vedox_bets_${currentUser.id}`, JSON.stringify(myBets));
+}
 
 function toggleAddForm() {
-  const f = document.getElementById("add-form");
-  f.style.display = f.style.display === "block" ? "none" : "block";
+  const f=document.getElementById("add-form");
+  f.style.display=f.style.display==="block"?"none":"block";
 }
 
 function saveBet() {
-  const match  = document.getElementById("f-match").value.trim();
-  const target = document.getElementById("f-target").value.trim();
-  if (!match || !target) {
-    alert(lang === "fi" ? "Täytä ainakin ottelu ja kohde." : "Fill in at least match and selection.");
-    return;
-  }
-  myBets.unshift({
-    id: Date.now(),
-    date: new Date().toLocaleDateString("fi-FI"),
-    match, target,
-    book: document.getElementById("f-book").value,
-    odds: parseFloat(document.getElementById("f-odds").value) || 0,
-    stake: parseFloat(document.getElementById("f-stake").value) || 0,
-    ev: parseFloat(document.getElementById("f-ev").value) || 0,
-    pinn: parseFloat(document.getElementById("f-pinn").value) || 0,
-    result: document.getElementById("f-result").value,
-  });
+  const match=document.getElementById("f-match").value.trim(), target=document.getElementById("f-target").value.trim();
+  if (!match||!target) { alert(lang==="fi"?"Täytä ainakin ottelu ja kohde.":"Fill in at least match and selection."); return; }
+  myBets.unshift({id:Date.now(),date:new Date().toLocaleDateString("fi-FI"),match,target,book:document.getElementById("f-book").value,odds:parseFloat(document.getElementById("f-odds").value)||0,stake:parseFloat(document.getElementById("f-stake").value)||0,ev:parseFloat(document.getElementById("f-ev").value)||0,pinn:parseFloat(document.getElementById("f-pinn").value)||0,result:document.getElementById("f-result").value});
   saveBets(); renderMyBets(); toggleAddForm();
-  ["f-match","f-target","f-book","f-odds","f-stake","f-ev","f-pinn"].forEach(id => document.getElementById(id).value = "");
+  ["f-match","f-target","f-book","f-odds","f-stake","f-ev","f-pinn"].forEach(id=>document.getElementById(id).value="");
 }
 
 function updateResult(id, val) {
-  const b = myBets.find(x => x.id === id);
-  if (b) { b.result = val; saveBets(); renderMyBets(); }
+  const b=myBets.find(x=>x.id===id); if(b){b.result=val;saveBets();renderMyBets();}
 }
 
+// ===== DELETE BET — palauttaa sourceBetId:n Vedot-listalle =====
 function deleteBet(id) {
-  myBets = myBets.filter(x => x.id !== id);
+  const bet=myBets.find(x=>x.id===id);
+  if (bet?.sourceBetId) {
+    skippedIds=skippedIds.filter(sid=>sid!==bet.sourceBetId);
+    if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`, JSON.stringify(skippedIds));
+    renderBets();
+  }
+  myBets=myBets.filter(x=>x.id!==id);
   saveBets(); renderMyBets();
 }
 
 function renderMyBets() {
-  const fi = lang === "fi";
-  const won  = myBets.filter(b => b.result === "won").length;
-  const lost = myBets.filter(b => b.result === "lost").length;
-  const settled = myBets.filter(b => b.result !== "pending");
-  const totalStake  = settled.reduce((a, b) => a + b.stake, 0);
-  const totalProfit = myBets.reduce((a, b) => {
-    if (b.result === "won")  return a + b.stake * (b.odds - 1);
-    if (b.result === "lost") return a - b.stake;
-    return a;
-  }, 0);
-  const roi = totalStake > 0 ? (totalProfit / totalStake * 100).toFixed(1) : "—";
-
-  document.getElementById("mb-total").textContent = myBets.length;
-  document.getElementById("mb-won").textContent   = won;
-  document.getElementById("mb-lost").textContent  = lost;
-  document.getElementById("mb-roi").textContent   = roi !== "—" ? roi + "%" : "—";
-
-  const list = document.getElementById("mybets-list");
-  if (myBets.length === 0) {
-    list.innerHTML = `<div class="empty-box">${fi ? "Ei betsejä vielä." : "No bets yet."}</div>`;
-    return;
-  }
-
-  list.innerHTML = myBets.map(b => {
-    const pl = b.result === "won" ? b.stake * (b.odds - 1) : b.result === "lost" ? -b.stake : null;
-    const plStr   = pl !== null ? (pl > 0 ? `+${pl.toFixed(2)}€` : `${pl.toFixed(2)}€`) : "—";
-    const plColor = pl > 0 ? "var(--green)" : pl < 0 ? "var(--red)" : "var(--text2)";
-    return `<div class="mybet-card ${b.result}">
-      <div>
-        <div class="mybet-match">${b.date} · ${b.book || "—"}</div>
-        <div class="mybet-target">${b.target}</div>
-        <div class="mybet-book">${b.match}</div>
-      </div>
-      <div class="mybet-cell">
-        <div class="mybet-lbl">${fi ? "Kerroin" : "Odds"}</div>
-        <div class="mybet-val">${b.odds.toFixed(2)}</div>
-      </div>
-      <div class="mybet-cell">
-        <div class="mybet-lbl">${fi ? "Panos" : "Stake"}</div>
-        <div class="mybet-val">${b.stake}€</div>
-      </div>
-      <div class="mybet-cell">
-        <div class="mybet-lbl">EV</div>
-        <div class="mybet-val">+${b.ev}%</div>
-      </div>
-      <div class="mybet-cell">
-        <div class="mybet-lbl">${fi ? "Tulos €" : "P&L €"}</div>
-        <div class="mybet-val" style="color:${plColor}">${plStr}</div>
-      </div>
-      <select class="result-select" onchange="updateResult(${b.id}, this.value)">
-        <option value="pending" ${b.result==="pending"?"selected":""}>${fi?"Odottaa":"Pending"}</option>
-        <option value="won" ${b.result==="won"?"selected":""}>${fi?"Voitto":"Won"}</option>
-        <option value="lost" ${b.result==="lost"?"selected":""}>${fi?"Tappio":"Lost"}</option>
-      </select>
-      <button class="btn-delete" onclick="deleteBet(${b.id})">${fi?"Poista":"Delete"}</button>
-    </div>`;
+  const fi=lang==="fi";
+  const won=myBets.filter(b=>b.result==="won").length, lost=myBets.filter(b=>b.result==="lost").length;
+  const settled=myBets.filter(b=>b.result!=="pending");
+  const totalStake=settled.reduce((a,b)=>a+b.stake,0);
+  const totalProfit=myBets.reduce((a,b)=>{if(b.result==="won")return a+b.stake*(b.odds-1);if(b.result==="lost")return a-b.stake;return a;},0);
+  const roi=totalStake>0?(totalProfit/totalStake*100).toFixed(1):"—";
+  document.getElementById("mb-total").textContent=myBets.length;
+  document.getElementById("mb-won").textContent=won;
+  document.getElementById("mb-lost").textContent=lost;
+  document.getElementById("mb-roi").textContent=roi!=="—"?roi+"%":"—";
+  const list=document.getElementById("mybets-list");
+  if (myBets.length===0) { list.innerHTML=`<div class="empty-box">${fi?"Ei betsejä vielä.":"No bets yet."}</div>`; return; }
+  list.innerHTML=myBets.map(b=>{
+    const pl=b.result==="won"?b.stake*(b.odds-1):b.result==="lost"?-b.stake:null;
+    const plStr=pl!==null?(pl>0?`+${pl.toFixed(2)}€`:`${pl.toFixed(2)}€`):"—";
+    const plColor=pl>0?"var(--green)":pl<0?"var(--red)":"var(--text2)";
+    return `<div class="mybet-card ${b.result}"><div><div class="mybet-match">${b.date} · ${b.book||"—"}</div><div class="mybet-target">${b.target}</div><div class="mybet-book">${b.match}</div></div><div class="mybet-cell"><div class="mybet-lbl">${fi?"Kerroin":"Odds"}</div><div class="mybet-val">${b.odds.toFixed(2)}</div></div><div class="mybet-cell"><div class="mybet-lbl">${fi?"Panos":"Stake"}</div><div class="mybet-val">${b.stake}€</div></div><div class="mybet-cell"><div class="mybet-lbl">EV</div><div class="mybet-val">+${b.ev}%</div></div><div class="mybet-cell"><div class="mybet-lbl">${fi?"Tulos €":"P&L €"}</div><div class="mybet-val" style="color:${plColor}">${plStr}</div></div><select class="result-select" onchange="updateResult(${b.id},this.value)"><option value="pending" ${b.result==="pending"?"selected":""}>${fi?"Odottaa":"Pending"}</option><option value="won" ${b.result==="won"?"selected":""}>${fi?"Voitto":"Won"}</option><option value="lost" ${b.result==="lost"?"selected":""}>${fi?"Tappio":"Lost"}</option></select><button class="btn-delete" onclick="deleteBet(${b.id})">${fi?"Poista":"Delete"}</button></div>`;
   }).join("");
 }
 
-// ===== ANALYTICS =====
 function renderAnalytics() {
-  const fi = lang === "fi";
-  const settled = myBets.filter(b => b.result !== "pending");
-  const won = settled.filter(b => b.result === "won").length;
-  const totalStake  = settled.reduce((a, b) => a + b.stake, 0);
-  const totalProfit = myBets.reduce((a, b) => {
-    if (b.result === "won")  return a + b.stake * (b.odds - 1);
-    if (b.result === "lost") return a - b.stake;
-    return a;
-  }, 0);
-  const roi     = totalStake > 0 ? (totalProfit / totalStake * 100).toFixed(1) : "—";
-  const hitRate = settled.length > 0 ? (won / settled.length * 100).toFixed(1) : "—";
-  const avgEV   = myBets.length > 0 ? (myBets.reduce((a, b) => a + b.ev, 0) / myBets.length).toFixed(1) : "—";
-
-  document.getElementById("an-profit").textContent = totalProfit >= 0 ? `+${totalProfit.toFixed(2)}€` : `${totalProfit.toFixed(2)}€`;
-  document.getElementById("an-roi").textContent    = roi !== "—" ? roi + "%" : "—";
-  document.getElementById("an-hit").textContent    = hitRate !== "—" ? hitRate + "%" : "—";
-  document.getElementById("an-avgev").textContent  = avgEV !== "—" ? "+" + avgEV + "%" : "—";
-
-  const br = parseFloat(document.getElementById("bankroll").value) || 1000;
-  let running = br;
-  const brLabels = [fi ? "Alku" : "Start"];
-  const brData = [br];
-  [...myBets].reverse().forEach((b, i) => {
-    if (b.result === "won") running += b.stake * (b.odds - 1);
-    else if (b.result === "lost") running -= b.stake;
-    brLabels.push(`B${i + 1}`);
-    brData.push(parseFloat(running.toFixed(2)));
-  });
-
-  const tickColor = currentTheme === "dark" ? "#3a4f6a" : "#6080a8";
-  const gridColor = currentTheme === "dark" ? "rgba(26,79,196,0.06)" : "rgba(26,79,196,0.08)";
-  const chartOpts = {
-    responsive: true,
-    plugins: { legend: { display: false } },
-    scales: {
-      x: { ticks: { color: tickColor }, grid: { color: gridColor } },
-      y: { ticks: { color: tickColor }, grid: { color: gridColor } }
-    }
-  };
-
-  if (bankrollChart) bankrollChart.destroy();
-  bankrollChart = new Chart(document.getElementById("chart-bankroll"), {
-    type: "line",
-    data: {
-      labels: brLabels,
-      datasets: [{
-        data: brData,
-        borderColor: "#2d6ae0",
-        backgroundColor: "rgba(26,79,196,0.06)",
-        borderWidth: 2,
-        pointRadius: 3,
-        tension: 0.35,
-        fill: true
-      }]
-    },
-    options: chartOpts
-  });
-
-  const plData   = [...myBets].reverse().map(b => b.result === "won" ? parseFloat((b.stake*(b.odds-1)).toFixed(2)) : b.result === "lost" ? -b.stake : 0);
-  const plLabels = [...myBets].reverse().map((_, i) => `B${i+1}`);
-
-  if (plChart) plChart.destroy();
-  plChart = new Chart(document.getElementById("chart-pl"), {
-    type: "bar",
-    data: {
-      labels: plLabels,
-      datasets: [{
-        data: plData,
-        backgroundColor: plData.map(v => v >= 0 ? "rgba(45,106,224,0.55)" : "rgba(45,106,224,0.25)"),
-        borderRadius: 4
-      }]
-    },
-    options: chartOpts
-  });
-
-  const avgStake = myBets.length > 0 ? myBets.reduce((a, b) => a + b.stake, 0) / myBets.length : br * 0.01;
-  const avgEvPct = parseFloat(avgEV) || 4;
-  const weeklyEV = avgStake * (avgEvPct / 100) * 20;
-
-  document.getElementById("forecast-rows").innerHTML = [
-    { label: fi ? "Avg panos"                : "Avg stake",             value: avgStake.toFixed(2) + "€" },
-    { label: fi ? "Avg EV %"                 : "Avg EV %",              value: "+" + avgEvPct.toFixed(1) + "%" },
-    { label: fi ? "Betsejä / viikko (arvio)" : "Bets / week (est.)",    value: "20" },
-    { label: fi ? "Odotettu tuotto / viikko" : "Expected profit / week", value: "+" + weeklyEV.toFixed(2) + "€" },
-    { label: fi ? "Odotettu tuotto / kk"    : "Expected profit / month", value: "+" + (weeklyEV*4).toFixed(2) + "€" },
-    { label: fi ? "Nykyinen kassa"           : "Current bankroll",       value: br.toLocaleString("fi-FI") + "€" },
-    { label: fi ? "Ennuste 1kk"              : "Forecast 1mo",           value: (br + weeklyEV*4).toFixed(2) + "€" },
-    { label: fi ? "Ennuste 3kk"              : "Forecast 3mo",           value: (br + weeklyEV*12).toFixed(2) + "€" },
-  ].map(r => `<div class="forecast-row"><span class="label">${r.label}</span><span class="value">${r.value}</span></div>`).join("");
+  const fi=lang==="fi";
+  const settled=myBets.filter(b=>b.result!=="pending"), won=settled.filter(b=>b.result==="won").length;
+  const totalStake=settled.reduce((a,b)=>a+b.stake,0);
+  const totalProfit=myBets.reduce((a,b)=>{if(b.result==="won")return a+b.stake*(b.odds-1);if(b.result==="lost")return a-b.stake;return a;},0);
+  const roi=totalStake>0?(totalProfit/totalStake*100).toFixed(1):"—";
+  const hitRate=settled.length>0?(won/settled.length*100).toFixed(1):"—";
+  const avgEV=myBets.length>0?(myBets.reduce((a,b)=>a+b.ev,0)/myBets.length).toFixed(1):"—";
+  document.getElementById("an-profit").textContent=totalProfit>=0?`+${totalProfit.toFixed(2)}€`:`${totalProfit.toFixed(2)}€`;
+  document.getElementById("an-roi").textContent=roi!=="—"?roi+"%":"—";
+  document.getElementById("an-hit").textContent=hitRate!=="—"?hitRate+"%":"—";
+  document.getElementById("an-avgev").textContent=avgEV!=="—"?"+"+avgEV+"%":"—";
+  const br=parseFloat(document.getElementById("bankroll").value)||1000;
+  let running=br; const brLabels=[fi?"Alku":"Start"], brData=[br];
+  [...myBets].reverse().forEach((b,i)=>{if(b.result==="won")running+=b.stake*(b.odds-1);else if(b.result==="lost")running-=b.stake;brLabels.push(`B${i+1}`);brData.push(parseFloat(running.toFixed(2)));});
+  const tickColor=currentTheme==="dark"?"#3a4f6a":"#6080a8", gridColor=currentTheme==="dark"?"rgba(26,79,196,0.06)":"rgba(26,79,196,0.08)";
+  const chartOpts={responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tickColor},grid:{color:gridColor}},y:{ticks:{color:tickColor},grid:{color:gridColor}}}};
+  if(bankrollChart)bankrollChart.destroy();
+  bankrollChart=new Chart(document.getElementById("chart-bankroll"),{type:"line",data:{labels:brLabels,datasets:[{data:brData,borderColor:"#2d6ae0",backgroundColor:"rgba(26,79,196,0.06)",borderWidth:2,pointRadius:3,tension:0.35,fill:true}]},options:chartOpts});
+  const plData=[...myBets].reverse().map(b=>b.result==="won"?parseFloat((b.stake*(b.odds-1)).toFixed(2)):b.result==="lost"?-b.stake:0);
+  const plLabels=[...myBets].reverse().map((_,i)=>`B${i+1}`);
+  if(plChart)plChart.destroy();
+  plChart=new Chart(document.getElementById("chart-pl"),{type:"bar",data:{labels:plLabels,datasets:[{data:plData,backgroundColor:plData.map(v=>v>=0?"rgba(45,106,224,0.55)":"rgba(45,106,224,0.25)"),borderRadius:4}]},options:chartOpts});
 }
 
-// ===== TIMER =====
 function startTimer() {
   clearInterval(timer);
-  timer = setInterval(() => {
-    countdown--;
-    if (countdown <= 0) { fetchAll(); }
-  }, 1000);
+  timer=setInterval(()=>{countdown--;if(countdown<=0)fetchAll();},1000);
 }
 
 function initAuthControls() {
-  document.getElementById("tab-login")?.addEventListener("click", () => switchAuthTab("login"));
-  document.getElementById("tab-register")?.addEventListener("click", () => switchAuthTab("register"));
-
-  document.getElementById("auth-theme-btn")?.addEventListener("click", toggleTheme);
-  document.getElementById("auth-btn-fi")?.addEventListener("click", () => { setLang("fi"); syncAuthLangBtns(); });
-  document.getElementById("auth-btn-en")?.addEventListener("click", () => { setLang("en"); syncAuthLangBtns(); });
-
-  document.getElementById("login-btn")?.addEventListener("click", doLogin);
-  document.getElementById("register-btn")?.addEventListener("click", doRegister);
-
-  document.getElementById("login-password")?.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
-  document.getElementById("reg-password")?.addEventListener("keydown", e => { if (e.key === "Enter") doRegister(); });
+  document.getElementById("tab-login")?.addEventListener("click",()=>switchAuthTab("login"));
+  document.getElementById("tab-register")?.addEventListener("click",()=>switchAuthTab("register"));
+  document.getElementById("auth-theme-btn")?.addEventListener("click",toggleTheme);
+  document.getElementById("auth-btn-fi")?.addEventListener("click",()=>{setLang("fi");syncAuthLangBtns();});
+  document.getElementById("auth-btn-en")?.addEventListener("click",()=>{setLang("en");syncAuthLangBtns();});
+  document.getElementById("login-btn")?.addEventListener("click",doLogin);
+  document.getElementById("register-btn")?.addEventListener("click",doRegister);
+  document.getElementById("login-password")?.addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+  document.getElementById("reg-password")?.addEventListener("keydown",e=>{if(e.key==="Enter")doRegister();});
 }
 
-// ===== INIT =====
 applyTheme(currentTheme);
 setLang(lang);
 syncAuthLangBtns();
 initAuthControls();
-// fetchAll() ja startTimer() käynnistyvät vasta showApp():ssa kirjautumisen jälkeen
 </script>
 </body>
 </html>
