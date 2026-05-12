@@ -47,6 +47,8 @@ body { background:var(--bg); color:var(--text); font-family:'Barlow',sans-serif;
 .auth-field label { font-family:'Barlow Condensed',sans-serif; font-size:0.6rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); }
 .auth-field input { background:var(--bg); border:1px solid var(--border2); color:var(--text); font-family:'Barlow',sans-serif; font-size:0.9rem; padding:10px 12px; border-radius:var(--radius-sm); outline:none; transition:border-color 0.18s; width:100%; }
 .auth-field input:focus { border-color:var(--blue-lt); }
+.auth-field select { background:var(--bg); border:1px solid var(--border2); color:var(--text); font-family:'Barlow',sans-serif; font-size:0.9rem; padding:10px 12px; border-radius:var(--radius-sm); outline:none; transition:border-color 0.18s; width:100%; }
+.auth-field select:focus { border-color:var(--blue-lt); }
 .auth-btn { width:100%; background:var(--blue); border:none; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:0.9rem; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:11px; border-radius:var(--radius-sm); cursor:pointer; transition:background 0.18s; margin-top:0.5rem; }
 .auth-btn:hover { background:var(--blue-lt); }
 .auth-btn:disabled { opacity:0.5; cursor:not-allowed; }
@@ -187,6 +189,18 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
     <div id="auth-register-form" style="display:none">
       <div class="auth-field"><label>Sähköposti</label><input type="email" id="reg-email" placeholder="sinä@email.com" autocomplete="email"></div>
       <div class="auth-field"><label>Salasana</label><input type="password" id="reg-password" placeholder="min. 6 merkkiä" autocomplete="new-password"></div>
+      <div class="auth-field"><label>Aloituskassa (€)</label><input type="number" id="reg-bankroll" min="10" placeholder="esim. 300"></div>
+      <div class="auth-field"><label>Varovaisuustaso</label>
+        <select id="reg-risk-level">
+          <option value="conservative">Varovainen — 0.5% kassasta per betsi</option>
+          <option value="normal" selected>Normaali — 1.0% kassasta per betsi</option>
+          <option value="aggressive">Rohkea — 1.5% kassasta per betsi</option>
+        </select>
+      </div>
+      <div class="auth-field" style="flex-direction:row;align-items:flex-start;gap:10px">
+        <input type="checkbox" id="reg-disclaimer" style="margin-top:3px;flex-shrink:0;width:auto">
+        <label for="reg-disclaimer" style="font-size:0.75rem;color:var(--text2);line-height:1.4;text-transform:none;letter-spacing:0;cursor:pointer">Ymmärrän, että Vedox ei anna sijoitus- tai vedonlyöntineuvontaa, eikä takaa vetojen osumista. Vedonlyöntiin liittyy riski menettää panostettu raha.</label>
+      </div>
       <button class="auth-btn" id="register-btn">Luo tunnus</button>
     </div>
     <div class="auth-msg" id="auth-msg"></div>
@@ -232,6 +246,13 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
     </div>
     <div class="toolbar">
       <div class="fg"><label data-fi="Bankroll (€)" data-en="Bankroll (€)">Bankroll (€)</label><input type="number" id="bankroll" value="1000" min="10" step="100" oninput="onBankrollChange(this)"></div>
+      <div class="fg"><label data-fi="Varovaisuustaso" data-en="Risk Level">Varovaisuustaso</label>
+        <select id="risk-level" onchange="onRiskLevelChange(this)">
+          <option value="conservative">Varovainen 0.5%</option>
+          <option value="normal" selected>Normaali 1.0%</option>
+          <option value="aggressive">Rohkea 1.5%</option>
+        </select>
+      </div>
       <div class="fg"><label data-fi="Min EV %" data-en="Min EV %">Min EV %</label><input type="number" id="f-ev-min" value="3" step="0.5" oninput="renderBets()"></div>
       <div class="fg"><label data-fi="Min kerroin" data-en="Min odds">Min kerroin</label><input type="number" id="f-odds-min" value="1.4" step="0.05" oninput="renderBets()"></div>
       <div class="fg"><label data-fi="Max kerroin" data-en="Max odds">Max kerroin</label><input type="number" id="f-odds-max" value="2.5" step="0.05" oninput="renderBets()"></div>
@@ -316,6 +337,7 @@ let lang         = localStorage.getItem("vedox_lang") || "fi";
 let currentTheme = localStorage.getItem("vedox_theme") || "dark";
 let bankrollChart, plChart;
 let currentUser = null;
+let stakePct = 0.01;
 
 // ===== AUTH =====
 function switchAuthTab(tab) {
@@ -342,14 +364,35 @@ async function doLogin() {
 }
 
 async function doRegister() {
-  const email=document.getElementById("reg-email").value.trim(), password=document.getElementById("reg-password").value;
-  if (!email||!password) { setAuthMsg("Täytä sähköposti ja salasana.","error"); return; }
-  if (password.length<6) { setAuthMsg("Salasana on liian lyhyt (min. 6 merkkiä).","error"); return; }
-  const btn=document.getElementById("register-btn"); btn.disabled=true; btn.textContent="Luodaan..."; setAuthMsg("","");
-  const {data,error}=await sbClient.auth.signUp({email,password});
-  btn.disabled=false; btn.textContent="Luo tunnus";
-  if (error) { setAuthMsg(error.message,"error"); return; }
-  if (!data.session) setAuthMsg("Tunnus luotu! Tarkista sähköpostisi ja vahvista osoite ennen kirjautumista.","success");
+  const email     = document.getElementById("reg-email").value.trim();
+  const password  = document.getElementById("reg-password").value;
+  const bankroll  = parseFloat(document.getElementById("reg-bankroll").value);
+  const riskLevel = document.getElementById("reg-risk-level").value;
+  const disclaimer = document.getElementById("reg-disclaimer").checked;
+  const pctMap = { conservative: 0.005, normal: 0.01, aggressive: 0.015 };
+  const stakePctVal = pctMap[riskLevel] || 0.01;
+
+  if (!email || !password) { setAuthMsg("Täytä sähköposti ja salasana.", "error"); return; }
+  if (password.length < 6)  { setAuthMsg("Salasana on liian lyhyt (min. 6 merkkiä).", "error"); return; }
+  if (!bankroll || bankroll < 10) { setAuthMsg("Syötä aloituskassa (min. 10 €).", "error"); return; }
+  if (!disclaimer) { setAuthMsg("Hyväksy disclaimer ennen rekisteröitymistä.", "error"); return; }
+
+  const btn = document.getElementById("register-btn");
+  btn.disabled = true; btn.textContent = "Luodaan..."; setAuthMsg("", "");
+  const { data, error } = await sbClient.auth.signUp({ email, password });
+  btn.disabled = false; btn.textContent = "Luo tunnus";
+  if (error) { setAuthMsg(error.message, "error"); return; }
+  if (data.user) {
+    localStorage.setItem(`vedox_bankroll_${data.user.id}`,   String(bankroll));
+    localStorage.setItem(`vedox_risk_level_${data.user.id}`, riskLevel);
+    localStorage.setItem(`vedox_stake_pct_${data.user.id}`,  String(stakePctVal));
+    localStorage.setItem(`vedox_disclaimer_${data.user.id}`, "true");
+  }
+  if (!data.session) {
+    setAuthMsg("Tunnus luotu! Tarkista sähköpostisi ja vahvista osoite ennen kirjautumista.", "success");
+  } else {
+    setAuthMsg("Tunnus luotu ja kirjauduttu sisään.", "success");
+  }
 }
 
 async function doLogout() { await sbClient.auth.signOut(); }
@@ -361,6 +404,11 @@ function showApp(user) {
   myBets     = JSON.parse(localStorage.getItem(`vedox_bets_${user.id}`)    || "[]");
   const savedBankroll = localStorage.getItem(`vedox_bankroll_${user.id}`);
   if (savedBankroll) document.getElementById("bankroll").value = savedBankroll;
+ 
+  const savedRiskLevel = localStorage.getItem(`vedox_risk_level_${user.id}`) || "normal";
+  document.getElementById("risk-level").value = savedRiskLevel;
+  const savedStakePct = localStorage.getItem(`vedox_stake_pct_${user.id}`) || "0.01";
+  stakePct = parseFloat(savedStakePct) || 0.01;
 
   document.getElementById("auth-overlay").style.display = "none";
   document.getElementById("user-pill").style.display    = "flex";
@@ -375,6 +423,7 @@ function showApp(user) {
 
 function hideApp() {
   currentUser = null;
+  stakePct = 0.01;
   clearInterval(timer);
   allBets    = [];
   myBets     = [];
@@ -387,10 +436,14 @@ function hideApp() {
   document.getElementById("bets-stats").style.display = "none";
   document.getElementById("bets-loading").style.display = "none";
   document.getElementById("bets-empty").style.display = "none";
+  document.getElementById("risk-level").value = "normal";
+  document.getElementById("bankroll").value = "1000";
   renderMyBets();
 }
 
-function showAuthModal() {}
+function showAuthModal() {
+  document.getElementById("auth-overlay").style.display = "flex";
+}
 
 sbClient.auth.onAuthStateChange((_event, session) => {
   if (session?.user) showApp(session.user);
@@ -461,6 +514,16 @@ function onBankrollChange(el) {
   if (currentUser) localStorage.setItem(`vedox_bankroll_${currentUser.id}`, el.value);
 }
 
+function onRiskLevelChange(el) {
+  const pctMap = { conservative: 0.005, normal: 0.01, aggressive: 0.015 };
+  stakePct = pctMap[el.value] || 0.01;
+  if (currentUser) {
+    localStorage.setItem(`vedox_risk_level_${currentUser.id}`, el.value);
+    localStorage.setItem(`vedox_stake_pct_${currentUser.id}`,  String(stakePct));
+  }
+  renderBets();
+}
+
 function resetFilters() {
   document.getElementById("f-ev-min").value="3";
   document.getElementById("f-odds-min").value="1.4";
@@ -479,12 +542,13 @@ function sportLabel(liiga) {
 }
 function evClass(ev) { if(ev>=7)return "top"; if(ev>=5)return "high"; return ""; }
 
-// ===== PLACE BET — tallentaa sourceBetId =====
+// ===== PLACE BET — tallentaa sourceBetId, käyttää stakePct =====
 function placeBet(idx) {
   const filtered=getFiltered(), b=filtered[idx]; if(!b) return;
   const br=parseFloat(document.getElementById("bankroll").value)||1000;
   const inputEl=document.getElementById(`stake-${idx}`);
-  const stake=inputEl?parseFloat(inputEl.value)||parseFloat((br*0.01).toFixed(2)):parseFloat((br*0.01).toFixed(2));
+ 
+  const stake=inputEl?parseFloat(inputEl.value)||parseFloat((br*stakePct).toFixed(2)):parseFloat((br*stakePct).toFixed(2));
   const pot=parseFloat((stake*b.kerroin).toFixed(2));
   const sid=betId(b);
 
@@ -505,7 +569,8 @@ function skipBet(idx) {
 
 function renderBets() {
   const br=parseFloat(document.getElementById("bankroll").value)||1000;
-  const stake=parseFloat((br*0.01).toFixed(2));
+ 
+  const stake=parseFloat((br*stakePct).toFixed(2));
   const list=document.getElementById("bets-list"), empty=document.getElementById("bets-empty"), stats=document.getElementById("bets-stats");
   const filtered=getFiltered(), fi=lang==="fi";
   const skippedCount=skippedIds.length;
