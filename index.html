@@ -976,10 +976,13 @@ async function uploadAvatarIfSelected(user) {
   if (!selectedAvatarFile) return null;
   const ext = selectedAvatarFile.name.split(".").pop()?.toLowerCase() || "jpg";
   const path = `${user.id}/avatar.${ext}`;
-  const { error } = await sbClient.storage
+  const { data: uploadData, error } = await sbClient.storage
     .from("avatars")
     .upload(path, selectedAvatarFile, { upsert: true, contentType: selectedAvatarFile.type || "image/jpeg" });
-  if (error) throw error;
+  if (error) {
+    console.error("[Vedox] avatar upload failed:", error);
+    throw error;
+  }
   const { data } = sbClient.storage.from("avatars").getPublicUrl(path);
   return withCacheBuster(data.publicUrl);
 }
@@ -994,7 +997,10 @@ async function upsertProfile(user, username, avatarUrl) {
   const { error } = await sbClient
     .from("profiles")
     .upsert({ id: user.id, username, avatar_url: avatarUrl, updated_at: new Date().toISOString() }, { onConflict: "id" });
-  if (error) throw error;
+  if (error) {
+    console.error("[Vedox] profile upsert failed:", error);
+    throw error;
+  }
 }
 
 async function openProfileModal() {
@@ -1061,8 +1067,9 @@ async function saveProfile() {
     selectedAvatarFile = null;
     closeProfileModal();
   } catch (e) {
-    console.error("[Vedox] profile save failed:", e.message || e);
-    alert(lang==="fi" ? "Profiilin tallennus epäonnistui." : "Profile save failed.");
+    const message = e?.message || e?.error_description || JSON.stringify(e) || "Tuntematon virhe";
+    console.error("[Vedox] profile save failed:", e);
+    alert((lang==="fi" ? "Profiilin tallennus epäonnistui: " : "Profile save failed: ") + message);
   }
 }
 
