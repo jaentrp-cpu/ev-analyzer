@@ -176,6 +176,20 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
 .btn-profile-logout:hover { background:var(--red-dim); }
 .btn-profile-close { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text3); font-size:1.2rem; cursor:pointer; line-height:1; }
 .btn-profile-close:hover { color:var(--text); }
+.info-modal-overlay { position:fixed; inset:0; z-index:1200; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; padding:1rem; }
+.info-modal-overlay.open { display:flex; }
+.info-modal { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:2rem; width:100%; max-width:560px; max-height:85vh; overflow-y:auto; animation:fadeUp 0.2s ease; position:relative; }
+.info-modal h2 { font-family:'Barlow Condensed',sans-serif; font-size:1.2rem; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--text); margin-bottom:1.25rem; padding-right:2rem; }
+.info-modal h3 { font-family:'Barlow Condensed',sans-serif; font-size:0.8rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--blue-lt); margin:1.1rem 0 0.4rem; }
+.info-modal p { font-size:0.82rem; color:var(--text2); line-height:1.65; margin-bottom:0.5rem; }
+.info-modal ul { padding-left:1.1rem; margin-bottom:0.5rem; }
+.info-modal ul li { font-size:0.82rem; color:var(--text2); line-height:1.65; }
+.info-modal .disclaimer-box { background:var(--red-dim); border:1px solid rgba(224,58,82,0.2); border-radius:6px; padding:0.75rem 1rem; margin-bottom:1rem; font-size:0.8rem; color:var(--text2); line-height:1.6; }
+.btn-info-close { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text3); font-size:1.2rem; cursor:pointer; line-height:1; }
+.btn-info-close:hover { color:var(--text); }
+.legal-links { display:flex; justify-content:center; gap:12px; margin-top:0.75rem; flex-wrap:wrap; }
+.legal-link { background:none; border:none; color:var(--text3); font-family:'Barlow',sans-serif; font-size:0.68rem; cursor:pointer; text-decoration:underline; text-underline-offset:2px; padding:0; transition:color 0.15s; }
+.legal-link:hover { color:var(--text2); }
 @media (max-width:900px) {
   .stats-row { grid-template-columns:repeat(2,1fr); }
   .bet-main { grid-template-columns:1fr 1fr; }
@@ -217,6 +231,10 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
         </select>
       </div>
       <div class="auth-field" style="flex-direction:row;align-items:flex-start;gap:10px">
+        <input type="checkbox" id="reg-age" style="margin-top:3px;flex-shrink:0;width:auto">
+        <label for="reg-age" style="font-size:0.75rem;color:var(--text2);line-height:1.4;text-transform:none;letter-spacing:0;cursor:pointer">Vahvistan, että olen vähintään 18-vuotias ja hyväksyn <button type="button" onclick="openInfoModal('terms')" style="background:none;border:none;color:var(--blue-lt);font-size:0.75rem;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px">käyttöehdot</button> sekä olen tutustunut <button type="button" onclick="openInfoModal('privacy')" style="background:none;border:none;color:var(--blue-lt);font-size:0.75rem;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px">tietosuojaselosteeseen</button>.</label>
+      </div>
+      <div class="auth-field" style="flex-direction:row;align-items:flex-start;gap:10px">
         <input type="checkbox" id="reg-disclaimer" style="margin-top:3px;flex-shrink:0;width:auto">
         <label for="reg-disclaimer" style="font-size:0.75rem;color:var(--text2);line-height:1.4;text-transform:none;letter-spacing:0;cursor:pointer">Ymmärrän, että Vedox ei anna sijoitus- tai vedonlyöntineuvontaa, eikä takaa vetojen osumista. Vedonlyöntiin liittyy riski menettää panostettu raha.</label>
       </div>
@@ -227,6 +245,11 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
       <button style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-size:0.9rem;width:30px;height:30px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center" id="auth-theme-btn">☀️</button>
       <button id="auth-btn-fi" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:600;letter-spacing:0.08em;padding:5px 10px;border-radius:5px;cursor:pointer">FI</button>
       <button id="auth-btn-en" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:600;letter-spacing:0.08em;padding:5px 10px;border-radius:5px;cursor:pointer">EN</button>
+    </div>
+    <div class="legal-links">
+      <button class="legal-link" onclick="openInfoModal('terms')">Käyttöehdot</button>
+      <button class="legal-link" onclick="openInfoModal('privacy')">Tietosuoja</button>
+      <button class="legal-link" onclick="openInfoModal('responsible')">Vastuullinen pelaaminen</button>
     </div>
   </div>
 </div>
@@ -275,6 +298,107 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
       <button class="btn-profile-save" onclick="saveProfile()">Tallenna</button>
       <button class="btn-profile-logout" onclick="doLogout()">Kirjaudu ulos</button>
     </div>
+    <div class="legal-links" style="margin-top:1rem">
+      <button class="legal-link" onclick="openInfoModal('terms')">Käyttöehdot</button>
+      <button class="legal-link" onclick="openInfoModal('privacy')">Tietosuoja</button>
+      <button class="legal-link" onclick="openInfoModal('responsible')">Vastuullinen pelaaminen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Käyttöehdot -->
+<div class="info-modal-overlay" id="modal-terms" onclick="closeInfoModalOutside(event,'modal-terms')">
+  <div class="info-modal">
+    <button class="btn-info-close" onclick="closeInfoModal('modal-terms')">✕</button>
+    <h2>Käyttöehdot</h2>
+    <div class="disclaimer-box">Vedox ei ole vedonvälittäjä eikä ota vastaan panoksia. Palvelu on tarkoitettu vain 18 vuotta täyttäneille henkilöille.</div>
+    <h3>Palvelun kuvaus</h3>
+    <p>Vedox on analyyttinen työkalu, joka tarjoaa tilastolliseen mallinnukseen perustuvia EV-arvioita (expected value) urheiluvedonlyöntikohteista. Palvelu ei anna sijoitus-, talous- tai vedonlyöntineuvontaa eikä takaa voittoja.</p>
+    <h3>Käyttäjän vastuu</h3>
+    <p>Käyttäjä vastaa itse kaikista vedonlyöntipäätöksistään. Vedoxin tarjoamat tiedot ovat viitteellisiä ja voivat olla virheellisiä tai viivästyneitä. Käyttäjä sitoutuu käyttämään palvelua voimassaolevan lainsäädännön mukaisesti omassa maassaan.</p>
+    <h3>Ikäraja</h3>
+    <p>Palvelu on tarkoitettu ainoastaan 18 vuotta täyttäneille. Alaikäisten käyttö on kielletty.</p>
+    <h3>Tietojen oikeellisuus</h3>
+    <p>Vedox pyrkii tarjoamaan ajantasaista tietoa, mutta ei takaa tietojen oikeellisuutta, täydellisyyttä tai ajantasaisuutta. Kertoimet, todennäköisyydet ja EV-arviot voivat muuttua tai olla virheellisiä teknisten viiveiden tai muiden tekijöiden vuoksi.</p>
+    <h3>Vastuunrajoitus</h3>
+    <p>Vedox ei vastaa käyttäjälle aiheutuneista taloudellisista tappioista, menetetyistä panoksista tai muista välillisistä vahingoista. Palvelua käytetään omalla vastuulla.</p>
+    <h3>Muutokset</h3>
+    <p>Vedox pidättää oikeuden muuttaa käyttöehtoja ilman ennakkoilmoitusta. Palvelun käytön jatkaminen muutosten jälkeen katsotaan hyväksynnäksi.</p>
+    <h3>Yhteydenotot</h3>
+    <p>Kysymykset käyttöehdoista: support@vedox.fi</p>
+    <p style="font-size:0.75rem;color:var(--text3);margin-top:0.75rem">Tämä on MVP-vaiheen seloste ja sitä voidaan päivittää palvelun kehittyessä.</p>
+  </div>
+</div>
+
+<!-- Tietosuojaseloste -->
+<div class="info-modal-overlay" id="modal-privacy" onclick="closeInfoModalOutside(event,'modal-privacy')">
+  <div class="info-modal">
+    <button class="btn-info-close" onclick="closeInfoModal('modal-privacy')">✕</button>
+    <h2>Tietosuojaseloste</h2>
+    <h3>Rekisterinpitäjä</h3>
+    <p>Vedox-palvelu. Yhteydenotot tietosuoja-asioissa: support@vedox.fi</p>
+    <h3>Kerättävät tiedot</h3>
+    <p>Palvelu kerää ja käsittelee seuraavia tietoja:</p>
+    <ul>
+      <li>Sähköpostiosoite (kirjautuminen)</li>
+      <li>Käyttäjänimi ja profiilikuva (vapaaehtoinen)</li>
+      <li>Bankroll-arvo ja varovaisuustaso</li>
+      <li>Käyttäjän tallentamat betsit ja tulokset</li>
+    </ul>
+    <h3>Tietojen käyttötarkoitus</h3>
+    <p>Tietoja käytetään ainoastaan palvelun toimittamiseen ja käyttäjätilin ylläpitoon. Tietoja ei myydä, luovuteta kolmansille osapuolille eikä käytetä markkinointiin ilman suostumusta.</p>
+    <h3>Tietojen säilytys</h3>
+    <p>Tiedot säilytetään Supabase-palvelussa EU:n tietosuoja-asetuksen (GDPR) mukaisesti. Profiilissa oleva käyttäjänimi ja avatar tallennetaan Supabasen tietokantaan ja tallennustilaan. Betsit ja kassatiedot voivat olla myös selaimen paikallisessa muistissa (localStorage).</p>
+    <h3>Käyttäjän oikeudet</h3>
+    <p>Käyttäjällä on oikeus:</p>
+    <ul>
+      <li>Tarkastaa omat tietonsa</li>
+      <li>Pyytää tietojensa oikaisua</li>
+      <li>Pyytää tietojensa poistamista lähettämällä sähköpostia osoitteeseen support@vedox.fi</li>
+      <li>Peruuttaa suostumuksensa milloin tahansa</li>
+    </ul>
+    <h3>Evästeet ja localStorage</h3>
+    <p>Palvelu käyttää selaimen localStorage-tallennusta käyttäjäkohtaisten asetusten (kieli, teema, kassa) säilyttämiseen. Vedox ei käytä analytiikka- tai markkinointievästeitä. Palvelu voi ladata teknisiä resursseja kolmansilta osapuolilta, kuten fontteja tai kirjastoja.</p>
+    <p style="font-size:0.75rem;color:var(--text3);margin-top:0.5rem">Tämä on MVP-vaiheen seloste ja sitä voidaan päivittää palvelun kehittyessä.</p>
+    <h3>Kolmannet osapuolet</h3>
+    <p>Palvelu käyttää Supabase-alustaa tietokanta- ja autentikointipalveluihin. Supabasella on oma tietosuojapolitiikkansa (supabase.com/privacy).</p>
+  </div>
+</div>
+
+<!-- Vastuullinen pelaaminen -->
+<div class="info-modal-overlay" id="modal-responsible" onclick="closeInfoModalOutside(event,'modal-responsible')">
+  <div class="info-modal">
+    <button class="btn-info-close" onclick="closeInfoModal('modal-responsible')">✕</button>
+    <h2>Vastuullinen pelaaminen</h2>
+    <div class="disclaimer-box">Vedonlyöntiin liittyy aina riski menettää panostettu raha. Vedox ei takaa voittoja. Pelaa vain summilla, joiden menettämisen voit hyväksyä.</div>
+    <h3>Periaatteet</h3>
+    <ul>
+      <li>Aseta selkeä budjetti etukäteen äläkä ylitä sitä.</li>
+      <li>Älä pelaa lainalla tai velaksi.</li>
+      <li>Älä yritä kotiuttaa tappioita korottamalla panoksia.</li>
+      <li>Vedonlyönti ei ole tulonlähde — se on viihde.</li>
+      <li>Pidä taukoja ja seuraa käyttäytymistäsi.</li>
+    </ul>
+    <h3>Varoitusmerkkejä</h3>
+    <p>Ota tilanne vakavasti, jos huomaat seuraavia merkkejä:</p>
+    <ul>
+      <li>Pelaat enemmän kuin olet suunnitellut</li>
+      <li>Yrität kotiuttaa häviöitä</li>
+      <li>Pelaaminen vaikuttaa ihmissuhteisiin tai töihin</li>
+      <li>Käytät välttämättömyyksiin varattuja rahoja</li>
+      <li>Ajattelet pelejä pakonomaisesti</li>
+    </ul>
+    <h3>Apua ja tukea</h3>
+    <p>Jos pelaaminen tuntuu ongelmalliselta, apua on saatavilla:</p>
+    <ul>
+      <li><strong>Peluuri</strong> (Suomi): 0800 100 101 — maksuton auttava puhelin, peluuri.fi</li>
+      <li><strong>Gamblers Anonymous</strong>: ga.org</li>
+      <li><strong>BeGambleAware</strong>: begambleaware.org</li>
+    </ul>
+    <h3>Rajoitustyökalut</h3>
+    <p>Käytä vedonvälittäjäsi tarjoamia rajoitustyökaluja: talletusrajat, tauot ja itsekielto ovat tehokkaita tapoja hallita pelaamista. Vedox suosittelee näiden käyttöä kaikille käyttäjille.</p>
+    <h3>Ikäraja</h3>
+    <p>Vedox on tarkoitettu vain 18 vuotta täyttäneille. Alaikäisten rahapelaaminen on kiellettyä.</p>
   </div>
 </div>
 
@@ -412,12 +536,14 @@ async function doRegister() {
   const bankroll  = parseFloat(document.getElementById("reg-bankroll").value);
   const riskLevel = document.getElementById("reg-risk-level").value;
   const disclaimer = document.getElementById("reg-disclaimer").checked;
+  const ageConfirmed = document.getElementById("reg-age").checked;
   const pctMap = { conservative: 0.005, normal: 0.01, aggressive: 0.015 };
   const stakePctVal = pctMap[riskLevel] || 0.01;
 
   if (!email || !password) { setAuthMsg("Täytä sähköposti ja salasana.", "error"); return; }
   if (password.length < 6)  { setAuthMsg("Salasana on liian lyhyt (min. 6 merkkiä).", "error"); return; }
   if (!bankroll || bankroll < 10) { setAuthMsg("Syötä aloituskassa (min. 10 €).", "error"); return; }
+  if (!ageConfirmed) { setAuthMsg("Vahvista ikäsi ja hyväksy käyttöehdot.", "error"); return; }
   if (!disclaimer) { setAuthMsg("Hyväksy disclaimer ennen rekisteröitymistä.", "error"); return; }
 
   const btn = document.getElementById("register-btn");
@@ -798,6 +924,18 @@ function renderAnalytics() {
   const plLabels=[...myBets].reverse().map((_,i)=>`B${i+1}`);
   if(plChart)plChart.destroy();
   plChart=new Chart(document.getElementById("chart-pl"),{type:"bar",data:{labels:plLabels,datasets:[{data:plData,backgroundColor:plData.map(v=>v>=0?"rgba(45,106,224,0.55)":"rgba(45,106,224,0.25)"),borderRadius:4}]},options:chartOpts});
+}
+
+function openInfoModal(type) {
+  const ids = { terms:'modal-terms', privacy:'modal-privacy', responsible:'modal-responsible' };
+  const id = ids[type]; if (!id) return;
+  document.getElementById(id).classList.add("open");
+}
+function closeInfoModal(id) {
+  document.getElementById(id).classList.remove("open");
+}
+function closeInfoModalOutside(e, id) {
+  if (e.target === document.getElementById(id)) closeInfoModal(id);
 }
 
 function updateHeaderProfile(name, avatarDataUrl) {
