@@ -172,6 +172,7 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
 .profile-modal-actions { display:flex; flex-direction:column; gap:8px; margin-top:1.25rem; }
 .btn-profile-save { background:var(--blue); border:none; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:10px; border-radius:var(--radius-sm); cursor:pointer; transition:background 0.18s; }
 .btn-profile-save:hover { background:var(--blue-lt); }
+.btn-profile-save:disabled { opacity:0.55; cursor:not-allowed; }
 .btn-profile-logout { background:none; border:1px solid rgba(224,58,82,0.3); color:var(--red); font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:10px; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.18s; }
 .btn-profile-logout:hover { background:var(--red-dim); }
 .btn-profile-close { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text3); font-size:1.2rem; cursor:pointer; line-height:1; }
@@ -300,7 +301,7 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
       <input type="file" id="profile-avatar-input" accept="image/*" onchange="onAvatarSelected(this)" style="background:none;border:none;color:var(--text2);padding:0;font-size:0.82rem">
     </div>
     <div class="profile-modal-actions">
-      <button class="btn-profile-save" onclick="saveProfile()">Tallenna</button>
+      <button class="btn-profile-save" id="profile-save-btn" onclick="saveProfile()">Tallenna</button>
       <button class="btn-profile-logout" onclick="doLogout()">Kirjaudu ulos</button>
     </div>
     <div class="profile-msg" id="profile-msg"></div>
@@ -1063,8 +1064,11 @@ function onAvatarSelected(input) {
 
 async function saveProfile() {
   if (!currentUser) return;
+  const btn = document.getElementById("profile-save-btn");
+  if (btn?.disabled) return;
   const name = document.getElementById("profile-name-input").value.trim() || currentUser.email.split("@")[0];
   try {
+    if (btn) { btn.disabled = true; btn.textContent = lang==="fi" ? "Tallennetaan..." : "Saving..."; }
     let avatarUrl = null;
     if (selectedAvatarFile) {
       avatarUrl = await uploadAvatarIfSelected(currentUser);
@@ -1087,6 +1091,8 @@ async function saveProfile() {
         : "Profile save failed. Please try again in a moment.",
       "error"
     );
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = lang==="fi" ? "Tallenna" : "Save"; }
   }
 }
 
