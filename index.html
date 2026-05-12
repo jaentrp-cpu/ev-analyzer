@@ -569,6 +569,7 @@ async function doRegister() {
 async function doLogout() { await sbClient.auth.signOut(); }
 
 function showApp(user) {
+  const isSameUser = currentUser?.id === user.id;
   currentUser = user;
   skippedIds = JSON.parse(localStorage.getItem(`vedox_skipped_${user.id}`) || "[]");
   myBets     = JSON.parse(localStorage.getItem(`vedox_bets_${user.id}`)    || "[]");
@@ -590,9 +591,13 @@ function showApp(user) {
   document.getElementById("auth-overlay").style.display = "none";
   document.getElementById("profile-btn").style.display  = "flex";
   document.getElementById("btn-login-header").style.display = "none";
-  document.getElementById("bets-loading").style.display = "block";
-  fetchAll();
-  startTimer();
+
+  if (!isSameUser && allBets.length === 0) {
+    document.getElementById("bets-loading").style.display = "block";
+  }
+  if (!isSameUser || allBets.length === 0) fetchAll();
+  if (!isSameUser) startTimer();
+
   renderMyBets();
 }
 
@@ -976,7 +981,13 @@ async function uploadAvatarIfSelected(user) {
     .upload(path, selectedAvatarFile, { upsert: true, contentType: selectedAvatarFile.type || "image/jpeg" });
   if (error) throw error;
   const { data } = sbClient.storage.from("avatars").getPublicUrl(path);
-  return data.publicUrl;
+  return withCacheBuster(data.publicUrl);
+}
+
+function withCacheBuster(url) {
+  if (!url) return url;
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}v=${Date.now()}`;
 }
 
 async function upsertProfile(user, username, avatarUrl) {
