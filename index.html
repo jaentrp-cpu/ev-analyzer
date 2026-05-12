@@ -380,6 +380,7 @@ let currentTheme = localStorage.getItem("vedox_theme") || "dark";
 let bankrollChart, plChart;
 let currentUser = null;
 let stakePct = 0.01;
+let selectedAvatarFile = null;
 
 // ===== AUTH =====
 function switchAuthTab(tab) {
@@ -450,11 +451,13 @@ function showApp(user) {
   const savedStakePct = localStorage.getItem(`vedox_stake_pct_${user.id}`) || "0.01";
   stakePct = parseFloat(savedStakePct) || 0.01;
 
-  // Lataa profiili
-  const savedName   = localStorage.getItem(`vedox_profile_name_${user.id}`);
-  const savedAvatar = localStorage.getItem(`vedox_profile_avatar_${user.id}`);
-  const displayName = savedName || user.email.split("@")[0];
-  updateHeaderProfile(displayName, savedAvatar);
+  // Lataa profiili Supabasesta
+  loadProfile(user).then(profile => {
+    updateHeaderProfile(profile.username, profile.avatar_url);
+  }).catch(err => {
+    console.warn("[Vedox] profile init failed:", err.message || err);
+    updateHeaderProfile(user.email.split("@")[0], null);
+  });
 
   document.getElementById("auth-overlay").style.display = "none";
   document.getElementById("profile-btn").style.display  = "flex";
@@ -808,15 +811,56 @@ function updateHeaderProfile(name, avatarDataUrl) {
   }
 }
 
-function openProfileModal() {
+async function loadProfile(user) {
+  const fallbackName = user.email.split("@")[0];
+  const { data, error } = await sbClient
+    .from("profiles")
+    .select("username, avatar_url")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (error) {
+    console.warn("[Vedox] profile load failed:", error.message);
+    const localName   = localStorage.getItem(`vedox_profile_name_${user.id}`);
+    const localAvatar = localStorage.getItem(`vedox_profile_avatar_${user.id}`);
+    return { username: localName || fallbackName, avatar_url: localAvatar || null };
+  }
+  return { username: data?.username || fallbackName, avatar_url: data?.avatar_url || null };
+}
+
+async function uploadAvatarIfSelected(user) {
+  if (!selectedAvatarFile) return null;
+  const ext = selectedAvatarFile.name.split(".").pop()?.toLowerCase() || "jpg";
+  const path = `${user.id}/avatar.${ext}`;
+  const { error } = await sbClient.storage
+    .from("avatars")
+    .upload(path, selectedAvatarFile, { upsert: true, contentType: selectedAvatarFile.type || "image/jpeg" });
+  if (error) throw error;
+  const { data } = sbClient.storage.from("avatars").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+async function upsertProfile(user, username, avatarUrl) {
+  const { error } = await sbClient
+    .from("profiles")
+    .upsert({ id: user.id, username, avatar_url: avatarUrl, updated_at: new Date().toISOString() }, { onConflict: "id" });
+  if (error) throw error;
+}
+
+async function openProfileModal() {
   if (!currentUser) return;
-  const savedName   = localStorage.getItem(`vedox_profile_name_${currentUser.id}`) || "";
-  const savedAvatar = localStorage.getItem(`vedox_profile_avatar_${currentUser.id}`);
-  document.getElementById("profile-name-input").value = savedName;
+  selectedAvatarFile = null;
+  document.getElementById("profile-avatar-input").value = "";
+  let profile;
+  try {
+    profile = await loadProfile(currentUser);
+  } catch (e) {
+    profile = { username: currentUser.email.split("@")[0], avatar_url: null };
+  }
+  document.getElementById("profile-name-input").value = profile.username || "";
   const preview = document.getElementById("modal-avatar-preview");
-  const initial = (savedName || currentUser.email.split("@")[0] || "?")[0].toUpperCase();
-  if (savedAvatar) {
-    preview.innerHTML = `<img src="${savedAvatar}" alt="avatar">`;
+  const initial = (profile.username || currentUser.email.split("@")[0] || "?")[0].toUpperCase();
+  if (profile.avatar_url) {
+    preview.innerHTML = `<img src="${profile.avatar_url}" alt="avatar">`;
   } else {
     preview.innerHTML = `<span>${initial}</span>`;
   }
@@ -834,24 +878,35 @@ function closeProfileModalOutside(e) {
 function onAvatarSelected(input) {
   const file = input.files[0]; if (!file) return;
   if (file.size > 1024*1024) { alert("Kuva on liian suuri (max 1 MB)."); input.value=""; return; }
+  selectedAvatarFile = file;
   const reader = new FileReader();
   reader.onload = e => {
-    const dataUrl = e.target.result;
-    document.getElementById("modal-avatar-preview").innerHTML = `<img src="${dataUrl}" alt="avatar">`;
+    document.getElementById("modal-avatar-preview").innerHTML = `<img src="${e.target.result}" alt="avatar">`;
   };
   reader.readAsDataURL(file);
 }
 
-function saveProfile() {
+async function saveProfile() {
   if (!currentUser) return;
-  const name = document.getElementById("profile-name-input").value.trim();
-  const imgEl = document.querySelector("#modal-avatar-preview img");
-  const avatarDataUrl = imgEl ? imgEl.src : null;
-  localStorage.setItem(`vedox_profile_name_${currentUser.id}`, name);
-  if (avatarDataUrl) localStorage.setItem(`vedox_profile_avatar_${currentUser.id}`, avatarDataUrl);
-  const displayName = name || currentUser.email.split("@")[0];
-  updateHeaderProfile(displayName, avatarDataUrl || localStorage.getItem(`vedox_profile_avatar_${currentUser.id}`));
-  closeProfileModal();
+  const name = document.getElementById("profile-name-input").value.trim() || currentUser.email.split("@")[0];
+  try {
+    let avatarUrl = null;
+    if (selectedAvatarFile) {
+      avatarUrl = await uploadAvatarIfSelected(currentUser);
+    } else {
+      const existing = await loadProfile(currentUser);
+      avatarUrl = existing.avatar_url;
+    }
+    await upsertProfile(currentUser, name, avatarUrl);
+    localStorage.setItem(`vedox_profile_name_${currentUser.id}`, name);
+    if (avatarUrl) localStorage.setItem(`vedox_profile_avatar_${currentUser.id}`, avatarUrl);
+    updateHeaderProfile(name, avatarUrl);
+    selectedAvatarFile = null;
+    closeProfileModal();
+  } catch (e) {
+    console.error("[Vedox] profile save failed:", e.message || e);
+    alert(lang==="fi" ? "Profiilin tallennus epäonnistui." : "Profile save failed.");
+  }
 }
 
 function startTimer() {
