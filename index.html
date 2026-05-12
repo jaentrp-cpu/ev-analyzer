@@ -157,6 +157,25 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
 ::-webkit-scrollbar { width:6px; }
 ::-webkit-scrollbar-track { background:var(--bg); }
 ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+.profile-btn { display:flex; align-items:center; gap:8px; background:var(--bg3); border:1px solid var(--border2); color:var(--text2); font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:600; letter-spacing:0.06em; padding:5px 10px; border-radius:20px; cursor:pointer; transition:all 0.18s; max-width:180px; overflow:hidden; }
+.profile-btn:hover { border-color:var(--blue-lt); }
+.profile-avatar { width:26px; height:26px; border-radius:50%; background:var(--blue); color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:0.8rem; font-weight:700; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; }
+.profile-avatar img { width:100%; height:100%; object-fit:cover; }
+.profile-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.profile-modal-overlay { position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; }
+.profile-modal-overlay.open { display:flex; }
+.profile-modal { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:2rem; width:100%; max-width:360px; animation:fadeUp 0.2s ease; position:relative; }
+.profile-modal h3 { font-family:'Barlow Condensed',sans-serif; font-size:1.1rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text); margin-bottom:1.25rem; }
+.profile-modal .auth-field { margin-bottom:0.9rem; }
+.profile-avatar-preview { width:64px; height:64px; border-radius:50%; background:var(--blue); color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:1.6rem; font-weight:700; display:flex; align-items:center; justify-content:center; overflow:hidden; margin:0 auto 1rem; border:2px solid var(--border2); }
+.profile-avatar-preview img { width:100%; height:100%; object-fit:cover; }
+.profile-modal-actions { display:flex; flex-direction:column; gap:8px; margin-top:1.25rem; }
+.btn-profile-save { background:var(--blue); border:none; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:10px; border-radius:var(--radius-sm); cursor:pointer; transition:background 0.18s; }
+.btn-profile-save:hover { background:var(--blue-lt); }
+.btn-profile-logout { background:none; border:1px solid rgba(224,58,82,0.3); color:var(--red); font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:10px; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.18s; }
+.btn-profile-logout:hover { background:var(--red-dim); }
+.btn-profile-close { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text3); font-size:1.2rem; cursor:pointer; line-height:1; }
+.btn-profile-close:hover { color:var(--text); }
 @media (max-width:900px) {
   .stats-row { grid-template-columns:repeat(2,1fr); }
   .bet-main { grid-template-columns:1fr 1fr; }
@@ -227,14 +246,37 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
   </nav>
   <div class="header-right">
     <div class="live-pill"><span class="live-dot"></span><span id="live-txt">LIVE</span></div>
-    <div class="user-pill" id="user-pill" style="display:none"><span>👤</span><span class="user-email" id="user-email-display"></span></div>
-    <button class="btn-logout" id="logout-btn" style="display:none" onclick="doLogout()">Kirjaudu ulos</button>
+    <button class="profile-btn" id="profile-btn" style="display:none" onclick="openProfileModal()">
+      <div class="profile-avatar" id="header-avatar"><span id="header-avatar-initial">?</span></div>
+      <span class="profile-name" id="header-profile-name"></span>
+    </button>
     <button class="btn-logout" id="btn-login-header" onclick="showAuthModal()" style="color:var(--blue-lt);border-color:var(--blue)">Kirjaudu</button>
     <button class="theme-btn" onclick="toggleTheme()" id="theme-icon" title="Toggle theme">☀️</button>
     <button class="lang-btn active" onclick="setLang('fi')" id="btn-fi">FI</button>
     <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
   </div>
 </header>
+
+<!-- Profiilimodaali -->
+<div class="profile-modal-overlay" id="profile-modal-overlay" onclick="closeProfileModalOutside(event)">
+  <div class="profile-modal">
+    <button class="btn-profile-close" onclick="closeProfileModal()">✕</button>
+    <h3>Profiili</h3>
+    <div class="profile-avatar-preview" id="modal-avatar-preview"><span id="modal-avatar-initial">?</span></div>
+    <div class="auth-field">
+      <label>Käyttäjänimi</label>
+      <input type="text" id="profile-name-input" placeholder="esim. BetMaster">
+    </div>
+    <div class="auth-field">
+      <label>Profiilikuva</label>
+      <input type="file" id="profile-avatar-input" accept="image/*" onchange="onAvatarSelected(this)" style="background:none;border:none;color:var(--text2);padding:0;font-size:0.82rem">
+    </div>
+    <div class="profile-modal-actions">
+      <button class="btn-profile-save" onclick="saveProfile()">Tallenna</button>
+      <button class="btn-profile-logout" onclick="doLogout()">Kirjaudu ulos</button>
+    </div>
+  </div>
+</div>
 
 <main>
   <div class="page active" id="page-bets">
@@ -399,22 +441,24 @@ async function doLogout() { await sbClient.auth.signOut(); }
 
 function showApp(user) {
   currentUser = user;
-  // Lataa käyttäjäkohtaiset tiedot
   skippedIds = JSON.parse(localStorage.getItem(`vedox_skipped_${user.id}`) || "[]");
   myBets     = JSON.parse(localStorage.getItem(`vedox_bets_${user.id}`)    || "[]");
   const savedBankroll = localStorage.getItem(`vedox_bankroll_${user.id}`);
   if (savedBankroll) document.getElementById("bankroll").value = savedBankroll;
- 
   const savedRiskLevel = localStorage.getItem(`vedox_risk_level_${user.id}`) || "normal";
   document.getElementById("risk-level").value = savedRiskLevel;
   const savedStakePct = localStorage.getItem(`vedox_stake_pct_${user.id}`) || "0.01";
   stakePct = parseFloat(savedStakePct) || 0.01;
 
+  // Lataa profiili
+  const savedName   = localStorage.getItem(`vedox_profile_name_${user.id}`);
+  const savedAvatar = localStorage.getItem(`vedox_profile_avatar_${user.id}`);
+  const displayName = savedName || user.email.split("@")[0];
+  updateHeaderProfile(displayName, savedAvatar);
+
   document.getElementById("auth-overlay").style.display = "none";
-  document.getElementById("user-pill").style.display    = "flex";
-  document.getElementById("logout-btn").style.display   = "block";
+  document.getElementById("profile-btn").style.display  = "flex";
   document.getElementById("btn-login-header").style.display = "none";
-  document.getElementById("user-email-display").textContent = user.email;
   document.getElementById("bets-loading").style.display = "block";
   fetchAll();
   startTimer();
@@ -429,8 +473,7 @@ function hideApp() {
   myBets     = [];
   skippedIds = [];
   document.getElementById("auth-overlay").style.display = "flex";
-  document.getElementById("user-pill").style.display    = "none";
-  document.getElementById("logout-btn").style.display   = "none";
+  document.getElementById("profile-btn").style.display  = "none";
   document.getElementById("btn-login-header").style.display = "block";
   document.getElementById("bets-list").innerHTML = "";
   document.getElementById("bets-stats").style.display = "none";
@@ -545,17 +588,21 @@ function evClass(ev) { if(ev>=7)return "top"; if(ev>=5)return "high"; return "";
 // ===== PLACE BET — tallentaa sourceBetId, käyttää stakePct =====
 function placeBet(idx) {
   const filtered=getFiltered(), b=filtered[idx]; if(!b) return;
-  const br=parseFloat(document.getElementById("bankroll").value)||1000;
+  const currentBr=parseFloat(document.getElementById("bankroll").value)||0;
   const inputEl=document.getElementById(`stake-${idx}`);
- 
-  const stake=inputEl?parseFloat(inputEl.value)||parseFloat((br*stakePct).toFixed(2)):parseFloat((br*stakePct).toFixed(2));
+  const stake=inputEl?parseFloat(inputEl.value)||parseFloat((currentBr*stakePct).toFixed(2)):parseFloat((currentBr*stakePct).toFixed(2));
+  if (!stake || stake <= 0) { alert(lang==="fi"?"Panos pitää olla yli 0.":"Stake must be greater than 0."); return; }
+  if (stake > currentBr) { alert(lang==="fi"?"Panos ei voi olla suurempi kuin kassa.":"Stake cannot exceed bankroll."); return; }
   const pot=parseFloat((stake*b.kerroin).toFixed(2));
   const sid=betId(b);
+  const newBr=parseFloat((currentBr-stake).toFixed(2));
+  document.getElementById("bankroll").value=newBr;
+  if (currentUser) localStorage.setItem(`vedox_bankroll_${currentUser.id}`,String(newBr));
 
-  myBets.unshift({id:Date.now(),date:new Date().toLocaleDateString("fi-FI"),match:b.ottelu,target:b.kohde,book:b.kirja,odds:b.kerroin,stake,ev:b.ev,pinn:parseFloat((b.pinnProb||"0").replace(",",".").replace("%",""))||0,result:"pending",market:b.markkina.replace(/_/g," "),potential:pot,sourceBetId:sid});
+  myBets.unshift({id:Date.now(),date:new Date().toLocaleDateString("fi-FI"),match:b.ottelu,target:b.kohde,book:b.kirja,odds:b.kerroin,stake,ev:b.ev,pinn:parseFloat((b.pinnProb||"0").replace(",",".").replace("%",""))||0,result:"pending",settled:false,returnedAmount:0,market:b.markkina.replace(/_/g," "),potential:pot,sourceBetId:sid});
   saveBets();
   skippedIds.push(sid);
-  if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`, JSON.stringify(skippedIds));
+  if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`,JSON.stringify(skippedIds));
   renderBets(); renderMyBets();
 }
 
@@ -586,7 +633,7 @@ function renderBets() {
   document.getElementById("s-bankroll").textContent=br.toLocaleString("fi-FI")+"€";
   list.innerHTML=filtered.map((b,i)=>{
     const ec=evClass(b.ev), icon=sportLabel(b.liiga), mktLabel=b.markkina.replace(/_/g," ").toUpperCase(), pot=(stake*b.kerroin).toFixed(0);
-    return `<div class="bet-card ${ec}"><div class="bet-main"><div><div class="match-top"><span class="badge badge-sport">${icon} ${b.liiga.split("_")[1]?.toUpperCase()||"SPT"}</span><span class="badge badge-mkt">${mktLabel}</span></div><div class="match-name">${b.ottelu} · ${b.alkaa}</div><div class="bet-target">${b.kohde}</div><div class="bet-meta"><span class="meta-tag">${b.kirja}</span><span class="meta-tag">${fi?"Voitto":"Win"}: ${pot}€</span></div></div><div class="cell"><div class="cell-lbl">${fi?"Kerroin":"Odds"}</div><div class="cell-val">${b.kerroin.toFixed(2)}</div><div class="cell-sub">${b.kirja}</div></div><div class="cell"><div class="cell-lbl">EV</div><div class="cell-val">+${b.ev.toFixed(1)}%</div><div class="cell-sub">&nbsp;</div></div><div class="stake-box"><div class="stake-lbl">${fi?"Suositeltu panos":"Recommended stake"}</div><input class="stake-input" id="stake-${i}" type="number" value="${stake.toFixed(0)}" min="1" step="1"><div class="stake-btns"><button class="btn-placed" onclick="placeBet(${i})">${fi?"Laitoin ✓":"Placed ✓"}</button><button class="btn-skip" onclick="skipBet(${i})">${fi?"Ohita ✗":"Skip ✗"}</button></div></div></div></div>`;
+    return `<div class="bet-card ${ec}"><div class="bet-main"><div><div class="match-top"><span class="badge badge-sport">${icon} ${b.liiga.split("_")[1]?.toUpperCase()||"SPT"}</span><span class="badge badge-mkt">${mktLabel}</span></div><div class="match-name">${b.ottelu} · ${b.alkaa}</div><div class="bet-target">${b.kohde}</div><div class="bet-meta"><span class="meta-tag">${b.kirja}</span><span class="meta-tag">${fi?"Voitto":"Win"}: ${pot}€</span></div></div><div class="cell"><div class="cell-lbl">${fi?"Kerroin":"Odds"}</div><div class="cell-val">${b.kerroin.toFixed(2)}</div><div class="cell-sub">${b.kirja}</div></div><div class="cell"><div class="cell-lbl">EV</div><div class="cell-val">+${b.ev.toFixed(1)}%</div><div class="cell-sub">&nbsp;</div></div><div class="stake-box"><div class="stake-lbl">${fi?"Suositeltu panos":"Recommended stake"}</div><input class="stake-input" id="stake-${i}" type="number" value="${stake.toFixed(2)}" min="0.01" step="0.01"><div class="stake-btns"><button class="btn-placed" onclick="placeBet(${i})">${fi?"Laitoin ✓":"Placed ✓"}</button><button class="btn-skip" onclick="skipBet(${i})">${fi?"Ohita ✗":"Skip ✗"}</button></div></div></div></div>`;
   }).join("");
 }
 
@@ -603,22 +650,71 @@ function toggleAddForm() {
 function saveBet() {
   const match=document.getElementById("f-match").value.trim(), target=document.getElementById("f-target").value.trim();
   if (!match||!target) { alert(lang==="fi"?"Täytä ainakin ottelu ja kohde.":"Fill in at least match and selection."); return; }
-  myBets.unshift({id:Date.now(),date:new Date().toLocaleDateString("fi-FI"),match,target,book:document.getElementById("f-book").value,odds:parseFloat(document.getElementById("f-odds").value)||0,stake:parseFloat(document.getElementById("f-stake").value)||0,ev:parseFloat(document.getElementById("f-ev").value)||0,pinn:parseFloat(document.getElementById("f-pinn").value)||0,result:document.getElementById("f-result").value});
+  const odds=parseFloat(document.getElementById("f-odds").value)||0;
+  const stake=parseFloat(document.getElementById("f-stake").value)||0;
+  const result=document.getElementById("f-result").value;
+  const returnedAmount=result==="won"?parseFloat((stake*odds).toFixed(2)):0;
+  myBets.unshift({id:Date.now(),date:new Date().toLocaleDateString("fi-FI"),match,target,book:document.getElementById("f-book").value,odds,stake,ev:parseFloat(document.getElementById("f-ev").value)||0,pinn:parseFloat(document.getElementById("f-pinn").value)||0,result,settled:result!=="pending",returnedAmount});
   saveBets(); renderMyBets(); toggleAddForm();
   ["f-match","f-target","f-book","f-odds","f-stake","f-ev","f-pinn"].forEach(id=>document.getElementById(id).value="");
 }
 
-function updateResult(id, val) {
-  const b=myBets.find(x=>x.id===id); if(b){b.result=val;saveBets();renderMyBets();}
+function getReturnAmount(b) {
+  const saved=parseFloat(b.returnedAmount);
+  if (!isNaN(saved) && saved > 0) return saved;
+  return parseFloat((b.stake*b.odds).toFixed(2));
 }
 
-// ===== DELETE BET — palauttaa sourceBetId:n Vedot-listalle =====
+function updateResult(id, val) {
+  const b=myBets.find(x=>x.id===id); if(!b) return;
+  const oldResult=b.result;
+  if (oldResult===val) return;
+  let br=parseFloat(document.getElementById("bankroll").value)||0;
+  const ret=getReturnAmount(b);
+
+  // Peruuta edellinen settlement
+  if (oldResult==="won") br=parseFloat((br-ret).toFixed(2));
+  // lost: ei palautusta, ei peruutettavaa
+
+  // Tee uusi settlement
+  if (val==="won") {
+    br=parseFloat((br+ret).toFixed(2));
+    b.returnedAmount=ret;
+    b.settled=true;
+  } else if (val==="lost") {
+    b.returnedAmount=0;
+    b.settled=true;
+  } else {
+    // pending: peruuta vain settlement, stake pysyy vähennettynä koska betsi on edelleen auki
+    b.returnedAmount=0;
+    b.settled=false;
+  }
+
+  b.result=val;
+  document.getElementById("bankroll").value=br;
+  if (currentUser) localStorage.setItem(`vedox_bankroll_${currentUser.id}`,String(br));
+  saveBets(); renderMyBets();
+}
+
 function deleteBet(id) {
   const bet=myBets.find(x=>x.id===id);
-  if (bet?.sourceBetId) {
-    skippedIds=skippedIds.filter(sid=>sid!==bet.sourceBetId);
-    if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`, JSON.stringify(skippedIds));
-    renderBets();
+  if (bet) {
+    let br=parseFloat(document.getElementById("bankroll").value)||0;
+    if (bet.result==="pending") {
+      br=parseFloat((br+bet.stake).toFixed(2));
+    } else if (bet.result==="won") {
+      const ret=getReturnAmount(bet);
+      br=parseFloat((br-ret+bet.stake).toFixed(2));
+    } else if (bet.result==="lost") {
+      br=parseFloat((br+bet.stake).toFixed(2));
+    }
+    document.getElementById("bankroll").value=br;
+    if (currentUser) localStorage.setItem(`vedox_bankroll_${currentUser.id}`,String(br));
+    if (bet.sourceBetId) {
+      skippedIds=skippedIds.filter(sid=>sid!==bet.sourceBetId);
+      if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`,JSON.stringify(skippedIds));
+      renderBets();
+    }
   }
   myBets=myBets.filter(x=>x.id!==id);
   saveBets(); renderMyBets();
@@ -668,6 +764,63 @@ function renderAnalytics() {
   const plLabels=[...myBets].reverse().map((_,i)=>`B${i+1}`);
   if(plChart)plChart.destroy();
   plChart=new Chart(document.getElementById("chart-pl"),{type:"bar",data:{labels:plLabels,datasets:[{data:plData,backgroundColor:plData.map(v=>v>=0?"rgba(45,106,224,0.55)":"rgba(45,106,224,0.25)"),borderRadius:4}]},options:chartOpts});
+}
+
+function updateHeaderProfile(name, avatarDataUrl) {
+  const initial = (name||"?")[0].toUpperCase();
+  document.getElementById("header-profile-name").textContent = name || "";
+  const avatarEl = document.getElementById("header-avatar");
+  if (avatarDataUrl) {
+    avatarEl.innerHTML = `<img src="${avatarDataUrl}" alt="avatar">`;
+  } else {
+    avatarEl.innerHTML = `<span>${initial}</span>`;
+  }
+}
+
+function openProfileModal() {
+  if (!currentUser) return;
+  const savedName   = localStorage.getItem(`vedox_profile_name_${currentUser.id}`) || "";
+  const savedAvatar = localStorage.getItem(`vedox_profile_avatar_${currentUser.id}`);
+  document.getElementById("profile-name-input").value = savedName;
+  const preview = document.getElementById("modal-avatar-preview");
+  const initial = (savedName || currentUser.email.split("@")[0] || "?")[0].toUpperCase();
+  if (savedAvatar) {
+    preview.innerHTML = `<img src="${savedAvatar}" alt="avatar">`;
+  } else {
+    preview.innerHTML = `<span>${initial}</span>`;
+  }
+  document.getElementById("profile-modal-overlay").classList.add("open");
+}
+
+function closeProfileModal() {
+  document.getElementById("profile-modal-overlay").classList.remove("open");
+}
+
+function closeProfileModalOutside(e) {
+  if (e.target === document.getElementById("profile-modal-overlay")) closeProfileModal();
+}
+
+function onAvatarSelected(input) {
+  const file = input.files[0]; if (!file) return;
+  if (file.size > 1024*1024) { alert("Kuva on liian suuri (max 1 MB)."); input.value=""; return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    document.getElementById("modal-avatar-preview").innerHTML = `<img src="${dataUrl}" alt="avatar">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveProfile() {
+  if (!currentUser) return;
+  const name = document.getElementById("profile-name-input").value.trim();
+  const imgEl = document.querySelector("#modal-avatar-preview img");
+  const avatarDataUrl = imgEl ? imgEl.src : null;
+  localStorage.setItem(`vedox_profile_name_${currentUser.id}`, name);
+  if (avatarDataUrl) localStorage.setItem(`vedox_profile_avatar_${currentUser.id}`, avatarDataUrl);
+  const displayName = name || currentUser.email.split("@")[0];
+  updateHeaderProfile(displayName, avatarDataUrl || localStorage.getItem(`vedox_profile_avatar_${currentUser.id}`));
+  closeProfileModal();
 }
 
 function startTimer() {
