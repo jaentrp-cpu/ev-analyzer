@@ -281,7 +281,9 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
 </header>
 
 <!-- Profiilimodaali -->
-<div class="profile-modal-overlay" id="profile-modal-overlay" onclick="closeProfileModalOutside(event)">
+<div class="profile-modal-overlay" id="profile-modal-overlay"
+     onmousedown="onProfileModalMouseDown(event)"
+     onmouseup="onProfileModalMouseUp(event)">
   <div class="profile-modal">
     <button class="btn-profile-close" onclick="closeProfileModal()">✕</button>
     <h3>Profiili</h3>
@@ -1005,12 +1007,18 @@ async function openProfileModal() {
   document.getElementById("profile-modal-overlay").classList.add("open");
 }
 
-function closeProfileModal() {
-  document.getElementById("profile-modal-overlay").classList.remove("open");
+let profileModalMouseDownOnOverlay = false;
+
+function onProfileModalMouseDown(e) {
+  profileModalMouseDownOnOverlay = e.target === e.currentTarget;
+}
+function onProfileModalMouseUp(e) {
+  if (profileModalMouseDownOnOverlay && e.target === e.currentTarget) closeProfileModal();
+  profileModalMouseDownOnOverlay = false;
 }
 
-function closeProfileModalOutside(e) {
-  if (e.target === document.getElementById("profile-modal-overlay")) closeProfileModal();
+function closeProfileModal() {
+  document.getElementById("profile-modal-overlay").classList.remove("open");
 }
 
 function onAvatarSelected(input) {
