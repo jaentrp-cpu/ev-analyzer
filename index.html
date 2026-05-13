@@ -515,6 +515,7 @@ let stakePct = 0.01;
 let selectedAvatarFile = null;
 let lastSupabaseError = "";
 let _bankrollDebounceTimer = null;
+let _bankrollSnapshotDebounceTimer = null;
 
 // ===== AUTH =====
 function switchAuthTab(tab) {
@@ -768,6 +769,10 @@ function hideApp() {
   currentUser = null;
   stakePct = 0.01;
   clearInterval(timer);
+  clearTimeout(_bankrollDebounceTimer);
+  clearTimeout(_bankrollSnapshotDebounceTimer);
+  _bankrollDebounceTimer = null;
+  _bankrollSnapshotDebounceTimer = null;
   allBets    = [];
   myBets     = [];
   skippedIds = [];
@@ -875,6 +880,19 @@ function getFiltered() {
   return afterSkip.filter(b=>b.ev>=evMin&&b.kerroin>=oddsMin&&b.kerroin<=oddsMax&&(!sport||b.liiga.includes(sport)));
 }
 
+// ===== BANKROLL SNAPSHOTS =====
+async function addBankrollSnapshot(bankroll, reason) {
+  if (!currentUser) return;
+  const br = parseFloat(bankroll);
+  if (!Number.isFinite(br)) return;
+  try {
+    const { error } = await sbClient
+      .from("bankroll_snapshots")
+      .insert({ user_id: currentUser.id, bankroll: br, reason: reason || null });
+    if (error) { lastSupabaseError = error.message; console.warn("[Vedox] bankroll snapshot insert failed:", error.message); }
+  } catch(e) { lastSupabaseError = e.message || String(e); console.warn("[Vedox] bankroll snapshot exception:", e); }
+}
+
 // Bankroll change — tallenna käyttäjäkohtaisesti
 function onBankrollChange(el) {
   renderBets();
@@ -884,6 +902,10 @@ function onBankrollChange(el) {
     _bankrollDebounceTimer = setTimeout(() => {
       saveUserSettings({ bankroll: parseFloat(el.value) || 0 });
     }, 500);
+    clearTimeout(_bankrollSnapshotDebounceTimer);
+    _bankrollSnapshotDebounceTimer = setTimeout(() => {
+      addBankrollSnapshot(parseFloat(el.value) || 0, "manual_bankroll_change");
+    }, 1200);
   }
 }
 
@@ -935,8 +957,7 @@ function placeBet(idx) {
   const pot=parseFloat((stake*b.kerroin).toFixed(2));
   const sid=betId(b);
   const newBr=parseFloat((currentBr-stake).toFixed(2));
-  document.getElementById("bankroll").value=newBr;
-  if (currentUser) localStorage.setItem(`vedox_bankroll_${currentUser.id}`,String(newBr));
+  setCurrentBankroll(newBr);
 
   const newBet = {id:Date.now(),date:new Date().toLocaleDateString("fi-FI"),match:b.ottelu,target:b.kohde,book:b.kirja,odds:b.kerroin,stake,ev:b.ev,pinn:parseFloat((b.pinnProb||"0").replace(",",".").replace("%",""))||0,result:"pending",settled:false,returnedAmount:0,market:b.markkina.replace(/_/g," "),potential:pot,sourceBetId:sid};
   myBets.unshift(newBet);
@@ -945,11 +966,11 @@ function placeBet(idx) {
       saveBets();
       evBetStates[sid] = "placed";
       upsertEvBetState(sid, "placed");
+      addBankrollSnapshot(newBr, "bet_placed");
       renderMyBets();
     } else {
       myBets = myBets.filter(x => x !== newBet);
-      document.getElementById("bankroll").value = currentBr;
-      if (currentUser) localStorage.setItem(`vedox_bankroll_${currentUser.id}`, String(currentBr));
+      setCurrentBankroll(currentBr);
       delete evBetStates[sid];
       skippedIds = Object.keys(evBetStates);
       if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`, JSON.stringify(skippedIds));
@@ -1060,7 +1081,7 @@ function saveBet() {
   if (newBr < 0) { alert(lang==="fi"?"Betsi veisi kassan miinukselle.":"Bet would make bankroll negative."); return; }
   myBets.unshift(bet);
   upsertBetToDb(bet).then(ok => {
-    if (ok) { saveBets(); renderMyBets(); }
+    if (ok) { saveBets(); addBankrollSnapshot(newBr, "manual_bet_saved"); renderMyBets(); }
     else {
       myBets = myBets.filter(x => x !== bet);
       setCurrentBankroll(br);
@@ -1131,7 +1152,7 @@ function updateResult(id, val) {
   b.result=val;
   setCurrentBankroll(br);
   upsertBetToDb(b).then(ok => {
-    if (ok) { saveBets(); }
+    if (ok) { saveBets(); addBankrollSnapshot(br, "result_" + val); }
     else {
       b.result=oldResult;
       b.returnedAmount=oldReturnedAmount;
@@ -1157,6 +1178,7 @@ function deleteBet(id) {
       br=parseFloat((br+bet.stake).toFixed(2));
     }
     setCurrentBankroll(br);
+    addBankrollSnapshot(br, "bet_deleted");
     if (bet.sourceBetId) {
       delete evBetStates[bet.sourceBetId];
       skippedIds = Object.keys(evBetStates);
