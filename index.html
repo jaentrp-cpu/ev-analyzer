@@ -888,7 +888,7 @@ async function addBankrollSnapshot(bankroll, reason) {
   try {
     const { error } = await sbClient
       .from("bankroll_snapshots")
-      .insert({ user_id: currentUser.id, bankroll: br, muutos: reason || null });
+      .insert({ user_id: currentUser.id, bankroll: br, muutos: 0 });
     if (error) { lastSupabaseError = error.message; console.warn("[Vedox] bankroll snapshot insert failed:", error.message); }
   } catch(e) { lastSupabaseError = e.message || String(e); console.warn("[Vedox] bankroll snapshot exception:", e); }
 }
