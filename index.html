@@ -512,6 +512,8 @@ let bankrollChart, plChart;
 let currentUser = null;
 let stakePct = 0.01;
 let selectedAvatarFile = null;
+let lastSupabaseError = "";
+let _bankrollDebounceTimer = null;
 
 // ===== AUTH =====
 function switchAuthTab(tab) {
@@ -641,6 +643,39 @@ function showApp(user) {
   const savedStakePct = localStorage.getItem(`vedox_stake_pct_${user.id}`) || "0.01";
   stakePct = parseFloat(savedStakePct) || 0.01;
 
+  // Lataa user_settings Supabasesta — korvaa localStorage-arvot jos löytyy
+  loadUserSettings(user).then(settings => {
+    if (settings) {
+      // Korvaa arvot Supabasesta
+      if (settings.bankroll != null) {
+        document.getElementById("bankroll").value = settings.bankroll;
+        localStorage.setItem(`vedox_bankroll_${user.id}`, String(settings.bankroll));
+      }
+      if (settings.risk_level) {
+        document.getElementById("risk-level").value = settings.risk_level;
+        localStorage.setItem(`vedox_risk_level_${user.id}`, settings.risk_level);
+        const pctMap = { conservative: 0.005, normal: 0.01, aggressive: 0.015 };
+        stakePct = settings.stake_pct || pctMap[settings.risk_level] || 0.01;
+        localStorage.setItem(`vedox_stake_pct_${user.id}`, String(stakePct));
+      }
+      if (settings.lang && settings.lang !== lang) {
+        lang = settings.lang;
+        localStorage.setItem("vedox_lang", lang);
+        setLang(lang);
+        syncAuthLangBtns();
+      }
+      if (settings.theme && settings.theme !== currentTheme) {
+        applyTheme(settings.theme);
+      }
+      renderBets();
+    } else {
+      // user_settings ei löydy — luo nykyisillä arvoilla
+      const br = parseFloat(document.getElementById("bankroll").value) || 1000;
+      const rl = document.getElementById("risk-level").value || "normal";
+      saveUserSettings({ bankroll: br, risk_level: rl, stake_pct: stakePct, lang, theme: currentTheme });
+    }
+  });
+
   // Lataa profiili Supabasesta
   loadProfile(user).then(profile => {
     updateHeaderProfile(profile.username, profile.avatar_url);
@@ -696,6 +731,28 @@ function showAuthModal() {
   document.getElementById("auth-overlay").style.display = "flex";
 }
 
+// ===== USER SETTINGS =====
+async function loadUserSettings(user) {
+  try {
+    const { data, error } = await sbClient
+      .from("user_settings")
+      .select("bankroll,risk_level,stake_pct,lang,theme")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (error) { lastSupabaseError = error.message; console.warn("[Vedox] user_settings load failed:", error.message); return null; }
+    return data || null;
+  } catch(e) { lastSupabaseError = e.message || String(e); console.warn("[Vedox] user_settings exception:", e); return null; }
+}
+
+async function saveUserSettings(partial) {
+  if (!currentUser) return;
+  try {
+    const payload = { user_id: currentUser.id, ...partial, updated_at: new Date().toISOString() };
+    const { error } = await sbClient.from("user_settings").upsert(payload, { onConflict: "user_id" });
+    if (error) { lastSupabaseError = error.message; console.warn("[Vedox] user_settings save failed:", error.message); }
+  } catch(e) { lastSupabaseError = e.message || String(e); console.warn("[Vedox] user_settings exception:", e); }
+}
+
 sbClient.auth.onAuthStateChange((_event, session) => {
   if (session?.user) showApp(session.user);
   else hideApp();
@@ -706,6 +763,7 @@ function applyTheme(t) {
   currentTheme=t; document.documentElement.setAttribute("data-theme",t); localStorage.setItem("vedox_theme",t);
   const icon=t==="dark"?"☀️":"🌙"; document.getElementById("theme-icon").textContent=icon;
   const authBtn=document.getElementById("auth-theme-btn"); if(authBtn) authBtn.textContent=icon;
+  if (currentUser) saveUserSettings({ theme: t });
 }
 function toggleTheme() { applyTheme(currentTheme==="dark"?"light":"dark"); }
 
@@ -723,6 +781,7 @@ function setLang(l) {
   document.querySelectorAll("[data-fi]").forEach(el=>{const txt=el.getAttribute(`data-${l}`);if(txt&&!["INPUT","SELECT","OPTION"].includes(el.tagName))el.textContent=txt;});
   document.querySelectorAll("option[data-fi]").forEach(el=>{el.textContent=el.getAttribute(`data-${l}`)||el.textContent;});
   document.documentElement.lang=l;
+  if (currentUser) saveUserSettings({ lang: l });
   renderBets(); renderMyBets();
 }
 
@@ -762,7 +821,13 @@ function getFiltered() {
 // Bankroll change — tallenna käyttäjäkohtaisesti
 function onBankrollChange(el) {
   renderBets();
-  if (currentUser) localStorage.setItem(`vedox_bankroll_${currentUser.id}`, el.value);
+  if (currentUser) {
+    localStorage.setItem(`vedox_bankroll_${currentUser.id}`, el.value);
+    clearTimeout(_bankrollDebounceTimer);
+    _bankrollDebounceTimer = setTimeout(() => {
+      saveUserSettings({ bankroll: parseFloat(el.value) || 0 });
+    }, 500);
+  }
 }
 
 function onRiskLevelChange(el) {
@@ -771,6 +836,7 @@ function onRiskLevelChange(el) {
   if (currentUser) {
     localStorage.setItem(`vedox_risk_level_${currentUser.id}`, el.value);
     localStorage.setItem(`vedox_stake_pct_${currentUser.id}`,  String(stakePct));
+    saveUserSettings({ risk_level: el.value, stake_pct: stakePct });
   }
   renderBets();
 }
@@ -945,7 +1011,13 @@ function getCurrentBankroll() {
 function setCurrentBankroll(value) {
   const br=parseFloat(value.toFixed(2));
   document.getElementById("bankroll").value=br;
-  if (currentUser) localStorage.setItem(`vedox_bankroll_${currentUser.id}`,String(br));
+  if (currentUser) {
+    localStorage.setItem(`vedox_bankroll_${currentUser.id}`,String(br));
+    clearTimeout(_bankrollDebounceTimer);
+    _bankrollDebounceTimer = setTimeout(() => {
+      saveUserSettings({ bankroll: br });
+    }, 500);
+  }
   renderBets();
 }
 function getBetCashImpact(b) {
