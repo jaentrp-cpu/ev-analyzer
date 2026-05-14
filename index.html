@@ -164,7 +164,7 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
 .profile-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .profile-modal-overlay { position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; }
 .profile-modal-overlay.open { display:flex; }
-.profile-modal { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:2rem; width:100%; max-width:360px; animation:fadeUp 0.2s ease; position:relative; }
+.profile-modal { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:2rem; width:100%; max-width:360px; animation:fadeUp 0.2s ease; position:relative; max-height:90vh; overflow-y:auto; }
 .profile-modal h3 { font-family:'Barlow Condensed',sans-serif; font-size:1.1rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text); margin-bottom:1.25rem; }
 .profile-modal .auth-field { margin-bottom:0.9rem; }
 .profile-avatar-preview { width:64px; height:64px; border-radius:50%; background:var(--blue); color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:1.6rem; font-weight:700; display:flex; align-items:center; justify-content:center; overflow:hidden; margin:0 auto 1rem; border:2px solid var(--border2); }
@@ -180,6 +180,23 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
 .profile-msg { min-height:1.1em; margin-top:0.75rem; font-size:0.76rem; text-align:center; color:var(--text3); }
 .profile-msg.success { color:var(--green); }
 .profile-msg.error { color:var(--red); }
+
+/* ===== DEBUG PANEL ===== */
+.debug-panel { margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid var(--border); }
+.debug-panel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem; cursor:pointer; }
+.debug-panel-title { font-family:'Barlow Condensed',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--text3); }
+.debug-panel-toggle { font-size:0.65rem; color:var(--text3); }
+.debug-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px 10px; margin-bottom:0.75rem; }
+.debug-row { display:flex; flex-direction:column; gap:1px; }
+.debug-lbl { font-family:'Barlow Condensed',sans-serif; font-size:0.55rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); }
+.debug-val { font-family:'Barlow Condensed',sans-serif; font-size:0.8rem; font-weight:600; color:var(--text2); word-break:break-all; }
+.debug-val.ok { color:var(--green); }
+.debug-val.err { color:var(--red); }
+.debug-val.warn { color:var(--amber); }
+.btn-debug-clear { width:100%; background:var(--bg3); border:1px solid var(--border2); color:var(--text3); font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:7px; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.18s; }
+.btn-debug-clear:hover { color:var(--amber); border-color:var(--amber); }
+/* ===== /DEBUG PANEL ===== */
+
 .info-modal-overlay { position:fixed; inset:0; z-index:1200; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; padding:1rem; }
 .info-modal-overlay.open { display:flex; }
 .info-modal { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:2rem; width:100%; max-width:560px; max-height:85vh; overflow-y:auto; animation:fadeUp 0.2s ease; position:relative; }
@@ -309,6 +326,20 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
       <button class="legal-link" onclick="openInfoModal('terms')">Käyttöehdot</button>
       <button class="legal-link" onclick="openInfoModal('privacy')">Tietosuoja</button>
       <button class="legal-link" onclick="openInfoModal('responsible')">Vastuullinen pelaaminen</button>
+    </div>
+
+    <!-- DEBUG PANEL — näkyy vain kirjautuneelle -->
+    <div class="debug-panel" id="debug-panel" style="display:none">
+      <div class="debug-panel-header" onclick="toggleDebugPanel()">
+        <span class="debug-panel-title">🛠 Debug / Admin</span>
+        <span class="debug-panel-toggle" id="debug-toggle-icon">▼</span>
+      </div>
+      <div id="debug-panel-body">
+        <div class="debug-grid" id="debug-grid">
+          <!-- renderDebugInfo() täyttää tämän -->
+        </div>
+        <button class="btn-debug-clear" onclick="clearLocalCacheForCurrentUser()">🗑 Clear local cache</button>
+      </div>
     </div>
   </div>
 </div>
@@ -503,7 +534,7 @@ const REFRESH = 120;
 
 let allBets = [];
 let myBets  = [];
-let skippedIds = []; // ladataan käyttäjäkohtaisesti showApp():ssa
+let skippedIds = [];
 let evBetStates = {};
 let countdown = REFRESH;
 let timer;
@@ -516,6 +547,7 @@ let selectedAvatarFile = null;
 let lastSupabaseError = "";
 let _bankrollDebounceTimer = null;
 let _bankrollSnapshotDebounceTimer = null;
+let _debugPanelOpen = true;
 
 // ===== AUTH =====
 function switchAuthTab(tab) {
@@ -626,6 +658,7 @@ async function loadUserBets(user) {
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
   if (error) {
+    lastSupabaseError = error.message;
     console.warn("[Vedox] user_bets load failed, using localStorage:", error.message);
     return null;
   }
@@ -679,7 +712,6 @@ function showApp(user) {
   const isSameUser = currentUser?.id === user.id;
   currentUser = user;
   skippedIds = JSON.parse(localStorage.getItem(`vedox_skipped_${user.id}`) || "[]");
-  // Näytä localStorage-cache heti
   myBets = JSON.parse(localStorage.getItem(`vedox_bets_${user.id}`) || "[]");
   const savedBankroll = localStorage.getItem(`vedox_bankroll_${user.id}`);
   if (savedBankroll) document.getElementById("bankroll").value = savedBankroll;
@@ -688,10 +720,8 @@ function showApp(user) {
   const savedStakePct = localStorage.getItem(`vedox_stake_pct_${user.id}`) || "0.01";
   stakePct = parseFloat(savedStakePct) || 0.01;
 
-  // Lataa user_settings Supabasesta — korvaa localStorage-arvot jos löytyy
   loadUserSettings(user).then(settings => {
     if (settings) {
-      // Korvaa arvot Supabasesta
       if (settings.bankroll != null) {
         document.getElementById("bankroll").value = settings.bankroll;
         localStorage.setItem(`vedox_bankroll_${user.id}`, String(settings.bankroll));
@@ -714,14 +744,12 @@ function showApp(user) {
       }
       renderBets();
     } else {
-      // user_settings ei löydy — luo nykyisillä arvoilla
       const br = parseFloat(document.getElementById("bankroll").value) || 1000;
       const rl = document.getElementById("risk-level").value || "normal";
       saveUserSettings({ bankroll: br, risk_level: rl, stake_pct: stakePct, lang, theme: currentTheme });
     }
   });
 
-  // Lataa profiili Supabasesta
   loadProfile(user).then(profile => {
     updateHeaderProfile(profile.username, profile.avatar_url);
   }).catch(err => {
@@ -729,7 +757,6 @@ function showApp(user) {
     updateHeaderProfile(user.email.split("@")[0], null);
   });
 
-  // Lataa betsit Supabasesta, korvaa aina localStorage-cache
   loadUserBets(user).then(sbBets => {
     if (sbBets !== null) {
       myBets = sbBets;
@@ -741,7 +768,6 @@ function showApp(user) {
     console.warn("[Vedox] user_bets load error:", err.message || err);
   });
 
-  // Lataa EV-kohteiden tilat Supabasesta
   loadEvBetStates(user).then(states => {
     if (states !== null) {
       evBetStates = {};
@@ -860,9 +886,9 @@ function showPage(p, btn) {
 async function fetchAll() {
   try {
     const {data,error}=await sbClient.from('ev_bets').select('id,ottelu,alkaa,markkina,kohde,paras_kerroin,kirja,pinnacle_kerroin,pinnacle_prob,ev_pct,liiga,aalto').eq('aktiivinen',true).order('ev_pct',{ascending:false});
-    if (error) { console.error('[Vedox] Supabase fetch error:',error.message); document.getElementById("bets-loading").style.display="none"; return; }
+    if (error) { lastSupabaseError = error.message; console.error('[Vedox] Supabase fetch error:',error.message); document.getElementById("bets-loading").style.display="none"; return; }
     allBets=(data||[]).map(r=>({id:r.id,ottelu:r.ottelu,alkaa:r.alkaa?new Date(r.alkaa).toLocaleString("fi-FI",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"—",markkina:r.markkina||"",kohde:r.kohde,kerroin:parseFloat(r.paras_kerroin)||0,kirja:r.kirja||"",pinnacle:parseFloat(r.pinnacle_kerroin)||0,pinnProb:r.pinnacle_prob||"",ev:parseFloat(r.ev_pct)||0,liiga:r.liiga||"",aalto:r.aalto||""}));
-  } catch(e) { console.error('[Vedox] fetchAll poikkeus:',e.message||e); }
+  } catch(e) { lastSupabaseError = e.message || String(e); console.error('[Vedox] fetchAll poikkeus:',e.message||e); }
   renderBets();
   document.getElementById("bets-loading").style.display="none";
   countdown=REFRESH;
@@ -893,7 +919,6 @@ async function addBankrollSnapshot(bankroll, reason) {
   } catch(e) { lastSupabaseError = e.message || String(e); console.warn("[Vedox] bankroll snapshot exception:", e); }
 }
 
-// Bankroll change — tallenna käyttäjäkohtaisesti
 function onBankrollChange(el) {
   renderBets();
   if (currentUser) {
@@ -925,7 +950,6 @@ function resetFilters() {
   document.getElementById("f-odds-min").value="1.4";
   document.getElementById("f-odds-max").value="2.5";
   document.getElementById("f-sport").value="";
-  // Poista vain skipped-tilat, säilytä placed-tilat
   const skippedOnly = Object.entries(evBetStates)
     .filter(([, state]) => state === "skipped")
     .map(([sid]) => sid);
@@ -946,7 +970,7 @@ function sportLabel(liiga) {
 }
 function evClass(ev) { if(ev>=7)return "top"; if(ev>=5)return "high"; return ""; }
 
-// ===== PLACE BET — tallentaa sourceBetId, käyttää stakePct =====
+// ===== PLACE BET =====
 function placeBet(idx) {
   const filtered=getFiltered(), b=filtered[idx]; if(!b) return;
   const currentBr=parseFloat(document.getElementById("bankroll").value)||0;
@@ -978,7 +1002,7 @@ function placeBet(idx) {
       alert(lang==="fi" ? "Betsin tallennus epäonnistui. Yritä uudelleen." : "Saving bet failed. Please try again.");
     }
   });
-  evBetStates[sid] = "skipped"; // optimistinen, korvautuu "placed":ksi onnistumisessa
+  evBetStates[sid] = "skipped";
   skippedIds = Object.keys(evBetStates);
   if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`,JSON.stringify(skippedIds));
   renderBets(); renderMyBets();
@@ -998,7 +1022,6 @@ function skipBet(idx) {
 function renderBets() {
   const brVal=parseFloat(document.getElementById("bankroll").value);
   const br=Number.isFinite(brVal)?brVal:1000;
- 
   const stake=parseFloat((br*stakePct).toFixed(2));
   const list=document.getElementById("bets-list"), empty=document.getElementById("bets-empty"), stats=document.getElementById("bets-stats");
   const filtered=getFiltered(), fi=lang==="fi";
@@ -1030,7 +1053,7 @@ async function upsertBetToDb(bet) {
       .update(payload)
       .eq("id", bet._dbId)
       .eq("user_id", currentUser.id);
-    if (error) { console.warn("[Vedox] bet update failed:", error.message); return false; }
+    if (error) { lastSupabaseError = error.message; console.warn("[Vedox] bet update failed:", error.message); return false; }
     return true;
   }
 
@@ -1039,7 +1062,7 @@ async function upsertBetToDb(bet) {
     .insert(payload)
     .select("id")
     .single();
-  if (error) { console.warn("[Vedox] bet insert failed:", error.message); return false; }
+  if (error) { lastSupabaseError = error.message; console.warn("[Vedox] bet insert failed:", error.message); return false; }
   if (data?.id) { bet._dbId = data.id; bet.id = data.id; }
   return true;
 }
@@ -1047,11 +1070,10 @@ async function upsertBetToDb(bet) {
 async function deleteBetFromDb(bet) {
   if (!currentUser || !bet._dbId) return;
   const { error } = await sbClient.from("user_bets").delete().eq("id", bet._dbId).eq("user_id", currentUser.id);
-  if (error) console.warn("[Vedox] bet delete failed:", error.message);
+  if (error) { lastSupabaseError = error.message; console.warn("[Vedox] bet delete failed:", error.message); }
 }
 
 function saveBets() {
-  // localStorage fallback-cache
   if (currentUser) localStorage.setItem(`vedox_bets_${currentUser.id}`, JSON.stringify(myBets));
 }
 
@@ -1133,10 +1155,8 @@ function updateResult(id, val) {
   let br=originalBr;
   const ret=getReturnAmount(b);
 
-  // Peruuta edellinen settlement
   if (oldResult==="won") br=parseFloat((br-ret).toFixed(2));
 
-  // Tee uusi settlement
   if (val==="won") {
     br=parseFloat((br+ret).toFixed(2));
     b.returnedAmount=ret;
@@ -1247,6 +1267,82 @@ function renderAnalytics() {
   plChart=new Chart(document.getElementById("chart-pl"),{type:"bar",data:{labels:plLabels,datasets:[{data:plData,backgroundColor:plData.map(v=>v>=0?"rgba(45,106,224,0.55)":"rgba(45,106,224,0.25)"),borderRadius:4}]},options:chartOpts});
 }
 
+// ===== DEBUG PANEL =====
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// Sama avainlista sekä laskennalle että poistamiselle
+function getDebugLsKeys(uid) {
+  const prefixes = [
+    `vedox_bets_${uid}`,
+    `vedox_skipped_${uid}`,
+    `vedox_bankroll_${uid}`,
+    `vedox_risk_level_${uid}`,
+    `vedox_stake_pct_${uid}`,
+    `vedox_profile_name_${uid}`,
+    `vedox_profile_avatar_${uid}`,
+    `vedox_disclaimer_${uid}`,
+  ];
+  return Object.keys(localStorage).filter(k => prefixes.some(p => k.startsWith(p)));
+}
+
+function renderDebugInfo() {
+  if (!currentUser) return;
+  const panel = document.getElementById("debug-panel");
+  if (!panel) return;
+  panel.style.display = "block";
+
+  const br = getCurrentBankroll();
+  const errVal = lastSupabaseError || "OK";
+  const errClass = lastSupabaseError ? "err" : "ok";
+  const lsKeys = getDebugLsKeys(currentUser.id);
+
+  const rows = [
+    { lbl: "User ID",     val: currentUser.id.slice(0, 8) + "…", cls: "" },
+    { lbl: "My Bets",     val: myBets.length,                     cls: "" },
+    { lbl: "EV States",   val: Object.keys(evBetStates).length,   cls: "" },
+    { lbl: "Skipped IDs", val: skippedIds.length,                 cls: "" },
+    { lbl: "Bankroll",    val: br.toLocaleString("fi-FI") + " €", cls: "" },
+    { lbl: "LS keys",     val: lsKeys.length,                     cls: lsKeys.length > 0 ? "warn" : "ok" },
+    { lbl: "Supabase",    val: errVal,                             cls: errClass },
+  ];
+
+  document.getElementById("debug-grid").innerHTML = rows.map(r =>
+    `<div class="debug-row"><span class="debug-lbl">${escapeHtml(r.lbl)}</span><span class="debug-val ${r.cls}">${escapeHtml(r.val)}</span></div>`
+  ).join("");
+}
+
+function toggleDebugPanel() {
+  _debugPanelOpen = !_debugPanelOpen;
+  const body = document.getElementById("debug-panel-body");
+  const icon = document.getElementById("debug-toggle-icon");
+  if (body) body.style.display = _debugPanelOpen ? "block" : "none";
+  if (icon) icon.textContent = _debugPanelOpen ? "▼" : "▶";
+}
+
+function clearLocalCacheForCurrentUser() {
+  if (!currentUser) return;
+  const keys = getDebugLsKeys(currentUser.id);
+  keys.forEach(k => localStorage.removeItem(k));
+  console.log(`[Vedox Debug] Cleared ${keys.length} localStorage keys for user ${currentUser.id.slice(0,8)}…`);
+  renderDebugInfo();
+  const msg = document.getElementById("profile-msg");
+  if (msg) {
+    msg.textContent = `✓ Poistettu ${keys.length} localStorage-avainta. Muisti ja Supabase-data ennallaan.`;
+    msg.className = "profile-msg success";
+    setTimeout(() => { msg.textContent = ""; msg.className = "profile-msg"; }, 4000);
+  }
+}
+
+// ===== /DEBUG PANEL =====
+
 function openInfoModal(type) {
   const ids = { terms:'modal-terms', privacy:'modal-privacy', responsible:'modal-responsible' };
   const id = ids[type]; if (!id) return;
@@ -1344,6 +1440,8 @@ async function openProfileModal() {
     preview.innerHTML = `<span>${initial}</span>`;
   }
   document.getElementById("profile-modal-overlay").classList.add("open");
+  // Päivitä debug-info kun modaali avataan
+  renderDebugInfo();
 }
 
 let profileModalMouseDownOnOverlay = false;
@@ -1391,15 +1489,18 @@ async function saveProfile() {
     updateHeaderProfile(name, avatarUrl);
     selectedAvatarFile = null;
     setProfileMsg(lang==="fi" ? "Profiili tallennettu." : "Profile saved.", "success");
+    renderDebugInfo(); // Päivitä debug tallennuksen jälkeen
     setTimeout(closeProfileModal, 500);
   } catch (e) {
     console.error("[Vedox] profile save failed:", e);
+    lastSupabaseError = e.message || String(e);
     setProfileMsg(
       lang==="fi"
         ? "Profiilin tallennus epäonnistui. Yritä hetken päästä uudelleen."
         : "Profile save failed. Please try again in a moment.",
       "error"
     );
+    renderDebugInfo(); // Näytä virhe debugissa
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = lang==="fi" ? "Tallenna" : "Save"; }
   }
