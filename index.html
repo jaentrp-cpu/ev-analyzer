@@ -1225,7 +1225,7 @@ function renderMyBets() {
   document.getElementById("mb-lost").textContent=lost;
   document.getElementById("mb-roi").textContent=roi!=="—"?roi+"%":"—";
   const list=document.getElementById("mybets-list");
-  if (myBets.length===0) { list.innerHTML=`<div class="empty-box">${fi?"Ei betsejä vielä.":"No bets yet."}</div>`; return; }
+  if (myBets.length===0) { list.innerHTML=`<div class="empty-box">${fi?"Ei betsejä vielä.":"No bets yet."}</div>`; refreshDebugInfoIfOpen(); return; }
   list.innerHTML=myBets.map(b=>{
     const pl=b.result==="won"?b.stake*(b.odds-1):b.result==="lost"?-b.stake:null;
     const plStr=pl!==null?(pl>0?`+${pl.toFixed(2)}€`:`${pl.toFixed(2)}€`):"—";
@@ -1233,6 +1233,7 @@ function renderMyBets() {
     const safeId=JSON.stringify(String(b.id));
     return `<div class="mybet-card ${b.result}"><div><div class="mybet-match">${b.date} · ${b.book||"—"}</div><div class="mybet-target">${b.target}</div><div class="mybet-book">${b.match}</div></div><div class="mybet-cell"><div class="mybet-lbl">${fi?"Kerroin":"Odds"}</div><div class="mybet-val">${b.odds.toFixed(2)}</div></div><div class="mybet-cell"><div class="mybet-lbl">${fi?"Panos":"Stake"}</div><div class="mybet-val">${b.stake}€</div></div><div class="mybet-cell"><div class="mybet-lbl">EV</div><div class="mybet-val">+${b.ev}%</div></div><div class="mybet-cell"><div class="mybet-lbl">${fi?"Tulos €":"P&L €"}</div><div class="mybet-val" style="color:${plColor}">${plStr}</div></div><select class="result-select" onchange='updateResult(${safeId},this.value)'><option value="pending" ${b.result==="pending"?"selected":""}>${fi?"Odottaa":"Pending"}</option><option value="won" ${b.result==="won"?"selected":""}>${fi?"Voitto":"Won"}</option><option value="lost" ${b.result==="lost"?"selected":""}>${fi?"Tappio":"Lost"}</option></select><button class="btn-delete" onclick='deleteBet(${safeId})'>${fi?"Poista":"Delete"}</button></div>`;
   }).join("");
+  refreshDebugInfoIfOpen();
 }
 
 function renderAnalytics() {
@@ -1339,6 +1340,11 @@ function clearLocalCacheForCurrentUser() {
     msg.className = "profile-msg success";
     setTimeout(() => { msg.textContent = ""; msg.className = "profile-msg"; }, 4000);
   }
+}
+
+function refreshDebugInfoIfOpen() {
+  const overlay = document.getElementById("profile-modal-overlay");
+  if (overlay?.classList.contains("open")) renderDebugInfo();
 }
 
 // ===== /DEBUG PANEL =====
