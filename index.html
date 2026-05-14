@@ -983,7 +983,7 @@ function placeBet(idx) {
   const newBr=parseFloat((currentBr-stake).toFixed(2));
   setCurrentBankroll(newBr);
 
-  const newBet = {id:Date.now(),date:new Date().toLocaleDateString("fi-FI"),match:b.ottelu,target:b.kohde,book:b.kirja,odds:b.kerroin,stake,ev:b.ev,pinn:parseFloat((b.pinnProb||"0").replace(",",".").replace("%",""))||0,result:"pending",settled:false,returnedAmount:0,market:b.markkina.replace(/_/g," "),potential:pot,sourceBetId:sid};
+  const newBet = {id:Date.now(),date:b.alkaa||new Date().toLocaleDateString("fi-FI"),match:b.ottelu,target:b.kohde,book:b.kirja,odds:b.kerroin,stake,ev:b.ev,pinn:parseFloat((b.pinnProb||"0").replace(",",".").replace("%",""))||0,result:"pending",settled:false,returnedAmount:0,market:b.markkina.replace(/_/g," "),potential:pot,sourceBetId:sid};
   myBets.unshift(newBet);
   upsertBetToDb(newBet).then(ok => {
     if (ok) {
