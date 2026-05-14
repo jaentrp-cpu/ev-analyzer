@@ -8,218 +8,799 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
 :root, [data-theme="dark"] {
-  --bg:#000000; --bg2:#080f1e; --bg3:#0c1628; --bg4:#111f35;
-  --blue:#1a4fc4; --blue-lt:#2d6ae0; --blue-dim:rgba(26,79,196,0.14); --blue-dim2:rgba(26,79,196,0.22);
-  --border:rgba(30,70,160,0.22); --border2:rgba(30,70,160,0.35);
-  --text:#ffffff; --text2:#b0c4de; --text3:#5a7090;
-  --green:#2ecc8e; --green-dim:rgba(46,204,142,0.1);
-  --red:#e03a52; --red-dim:rgba(224,58,82,0.1);
-  --amber:#d4921a; --amber-dim:rgba(212,146,26,0.1);
-  --radius:8px; --radius-sm:5px; --header-bg:rgba(0,0,0,0.94);
-  --grid-color:rgba(26,79,196,0.025); --tick-color:#3a4f6a;
+  --bg:#08090d;
+  --bg2:#0e1016;
+  --bg3:#13161e;
+  --bg4:#1a1d27;
+  --surface:#11141b;
+  --surface-2:#171b24;
+  --surface-3:#1e2330;
+  --blue:#2457b8;
+  --blue-lt:#3a78e0;
+  --blue-deep:#1f4f8f;
+  --blue-soft:rgba(36,87,184,0.14);
+  --blue-border:rgba(58,120,224,0.32);
+  --blue-dim:rgba(36,87,184,0.10);
+  --blue-dim2:rgba(36,87,184,0.20);
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.10);
+  --border3:rgba(255,255,255,0.16);
+  --text:#f5f7fa;
+  --text2:#aab2c0;
+  --text3:#6b7383;
+  --text4:#4a5161;
+  --green:#3a8a5c;
+  --green-lt:#4a9e6e;
+  --green-dim:rgba(58,138,92,0.10);
+  --red:#a04444;
+  --red-dim:rgba(160,68,68,0.10);
+  --amber:#b88a3a;
+  --amber-dim:rgba(184,138,58,0.10);
+  --radius:10px;
+  --radius-sm:6px;
+  --radius-lg:14px;
+  --header-bg:rgba(8,9,13,0.85);
+  --grid-color:transparent;
+  --tick-color:#4a5161;
+  --shadow-soft:0 1px 0 rgba(255,255,255,0.04) inset, 0 1px 2px rgba(0,0,0,0.4);
+  --font-ui:'Inter','Barlow',system-ui,-apple-system,sans-serif;
+  --font-num:'Inter',system-ui,sans-serif;
+  --font-brand:'Barlow Condensed','Barlow',sans-serif;
 }
 [data-theme="light"] {
-  --bg:#ffffff; --bg2:#f4f7fc; --bg3:#e8edf6; --bg4:#dce5f4;
-  --blue:#1a4fc4; --blue-lt:#2d6ae0; --blue-dim:rgba(26,79,196,0.08); --blue-dim2:rgba(26,79,196,0.14);
-  --border:rgba(26,79,196,0.15); --border2:rgba(26,79,196,0.25);
-  --text:#000000; --text2:#2a3a52; --text3:#6080a8;
-  --green:#1a9962; --green-dim:rgba(26,153,98,0.1);
-  --red:#c02030; --red-dim:rgba(192,32,48,0.1);
-  --amber:#b07010; --amber-dim:rgba(176,112,16,0.1);
-  --radius:8px; --radius-sm:5px; --header-bg:rgba(255,255,255,0.96);
-  --grid-color:rgba(26,79,196,0.04); --tick-color:#6080a8;
+  --bg:#f6f7f4;
+  --bg2:#ffffff;
+  --bg3:#f1f2ee;
+  --bg4:#e9eae5;
+  --surface:#ffffff;
+  --surface-2:#f3f4f0;
+  --surface-3:#eceee8;
+  --blue:#2457b8;
+  --blue-lt:#1d4ed8;
+  --blue-deep:#1f4f8f;
+  --blue-soft:#eaf1fb;
+  --blue-border:#c8d8f2;
+  --blue-dim:rgba(36,87,184,0.07);
+  --blue-dim2:rgba(36,87,184,0.14);
+  --border:rgba(15,23,42,0.07);
+  --border2:rgba(15,23,42,0.11);
+  --border3:rgba(15,23,42,0.16);
+  --text:#0f172a;
+  --text2:#475569;
+  --text3:#6b7280;
+  --text4:#9ca3af;
+  --green:#247a4d;
+  --green-lt:#2c8a59;
+  --green-dim:rgba(36,122,77,0.08);
+  --red:#a04444;
+  --red-dim:rgba(160,68,68,0.08);
+  --amber:#a06b1e;
+  --amber-dim:rgba(160,107,30,0.08);
+  --header-bg:rgba(246,247,244,0.88);
+  --tick-color:#6b7280;
+  --shadow-soft:0 1px 2px rgba(15,23,42,0.04);
 }
-html { scroll-behavior: smooth; }
-body { background:var(--bg); color:var(--text); font-family:'Barlow',sans-serif; min-height:100vh; overflow-x:hidden; transition:background 0.2s,color 0.2s; }
-[data-theme="dark"] body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(var(--grid-color) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color) 1px,transparent 1px); background-size:52px 52px; pointer-events:none; z-index:0; }
-#auth-overlay { position:fixed; inset:0; z-index:999; background:var(--bg); display:flex; align-items:center; justify-content:center; }
-[data-theme="dark"] #auth-overlay::before { content:''; position:fixed; inset:0; background-image:linear-gradient(var(--grid-color) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color) 1px,transparent 1px); background-size:52px 52px; pointer-events:none; z-index:0; }
-.auth-box { position:relative; z-index:2; background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:2.5rem 2rem; width:100%; max-width:380px; animation:fadeUp 0.3s ease; }
-.auth-logo { display:flex; align-items:center; gap:12px; margin-bottom:2rem; justify-content:center; }
-.auth-logo-name { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:1.8rem; letter-spacing:0.06em; color:var(--text); }
+
+html { scroll-behavior:smooth; }
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-ui);
+  font-size:14px;
+  line-height:1.5;
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  font-feature-settings:"cv11","ss01","ss03";
+  transition:background 0.2s, color 0.2s;
+}
+
+/* ===== AUTH OVERLAY ===== */
+#auth-overlay { position:fixed; inset:0; z-index:999; background:var(--bg); display:flex; align-items:center; justify-content:center; padding:1rem; }
+.auth-box { position:relative; z-index:2; background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius-lg); padding:2.25rem 1.75rem; width:100%; max-width:380px; box-shadow:0 20px 60px rgba(0,0,0,0.4); animation:fadeUp 0.3s ease; }
+.auth-logo { display:flex; align-items:center; gap:10px; margin-bottom:1.75rem; justify-content:center; }
+.auth-logo-name { font-family:var(--font-brand); font-weight:800; font-size:1.6rem; letter-spacing:0.04em; color:var(--text); }
 .auth-logo-name span { color:var(--blue-lt); }
-.auth-tabs { display:flex; background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:3px; margin-bottom:1.5rem; }
-.auth-tab { flex:1; background:none; border:none; color:var(--text3); font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:7px; border-radius:4px; cursor:pointer; transition:all 0.18s; }
-.auth-tab.active { background:var(--blue-lt); color:#fff; }
-.auth-field { display:flex; flex-direction:column; gap:5px; margin-bottom:1rem; }
-.auth-field label { font-family:'Barlow Condensed',sans-serif; font-size:0.6rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); }
-.auth-field input { background:var(--bg); border:1px solid var(--border2); color:var(--text); font-family:'Barlow',sans-serif; font-size:0.9rem; padding:10px 12px; border-radius:var(--radius-sm); outline:none; transition:border-color 0.18s; width:100%; }
-.auth-field input:focus { border-color:var(--blue-lt); }
-.auth-field select { background:var(--bg); border:1px solid var(--border2); color:var(--text); font-family:'Barlow',sans-serif; font-size:0.9rem; padding:10px 12px; border-radius:var(--radius-sm); outline:none; transition:border-color 0.18s; width:100%; }
-.auth-field select:focus { border-color:var(--blue-lt); }
-.auth-btn { width:100%; background:var(--blue); border:none; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:0.9rem; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:11px; border-radius:var(--radius-sm); cursor:pointer; transition:background 0.18s; margin-top:0.5rem; }
+.auth-tabs { display:flex; background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:3px; margin-bottom:1.5rem; }
+.auth-tab { flex:1; background:none; border:none; color:var(--text3); font-family:var(--font-ui); font-size:0.82rem; font-weight:600; letter-spacing:0.02em; padding:8px; border-radius:6px; cursor:pointer; transition:all 0.18s; }
+.auth-tab.active { background:var(--blue); color:#fff; }
+.auth-field { display:flex; flex-direction:column; gap:6px; margin-bottom:0.9rem; }
+.auth-field label { font-family:var(--font-ui); font-size:0.7rem; font-weight:600; letter-spacing:0.04em; color:var(--text3); text-transform:none; }
+.auth-field input,.auth-field select { background:var(--bg); border:1px solid var(--border2); color:var(--text); font-family:var(--font-ui); font-size:0.88rem; padding:9px 11px; border-radius:var(--radius-sm); outline:none; transition:border-color 0.15s; width:100%; }
+.auth-field input:focus,.auth-field select:focus { border-color:var(--blue); }
+.auth-btn { width:100%; background:var(--blue); border:none; color:#fff; font-family:var(--font-ui); font-size:0.88rem; font-weight:600; letter-spacing:0.01em; padding:11px; border-radius:var(--radius-sm); cursor:pointer; transition:background 0.18s; margin-top:0.5rem; }
 .auth-btn:hover { background:var(--blue-lt); }
 .auth-btn:disabled { opacity:0.5; cursor:not-allowed; }
-.auth-msg { margin-top:0.75rem; font-size:0.78rem; text-align:center; min-height:1.2em; border-radius:5px; padding:0 4px; }
+.auth-msg { margin-top:0.75rem; font-size:0.78rem; text-align:center; min-height:1.2em; padding:0 4px; }
 .auth-box,.auth-box * { pointer-events:auto; }
-#auth-overlay::before,body::before { pointer-events:none !important; }
-header { position:sticky; top:0; z-index:200; background:var(--header-bg); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:0 2rem; height:64px; display:flex; align-items:center; justify-content:space-between; }
-.logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
-.logo-icon { width:36px; height:36px; }
+
+/* ===== HEADER ===== */
+header {
+  position:sticky; top:0; z-index:200;
+  background:var(--header-bg);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:0 1.5rem; height:56px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+.logo-icon { width:28px; height:28px; }
 .logo-text-wrap { line-height:1; }
-.logo-name { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:1.5rem; letter-spacing:0.06em; color:var(--text); }
+.logo-name { font-family:var(--font-brand); font-weight:800; font-size:1.25rem; letter-spacing:0.04em; color:var(--text); }
 .logo-name span { color:var(--blue-lt); }
-.logo-tagline { font-family:'Barlow Condensed',sans-serif; font-size:0.5rem; letter-spacing:0.22em; color:var(--text3); text-transform:uppercase; margin-top:1px; display:block; }
-nav { display:flex; gap:2px; background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:3px; }
-.nav-btn { background:none; border:none; color:var(--text3); font-family:'Barlow Condensed',sans-serif; font-size:0.88rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:7px 18px; border-radius:5px; cursor:pointer; transition:all 0.18s; white-space:nowrap; }
-.nav-btn:hover { color:var(--text); background:var(--blue-dim); }
-.nav-btn.active { color:#fff; background:var(--blue-lt); }
-.header-right { display:flex; align-items:center; gap:8px; }
-.live-pill { display:flex; align-items:center; gap:6px; font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--green); background:var(--green-dim); border:1px solid rgba(46,204,142,0.2); padding:5px 12px; border-radius:20px; }
-.live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 1.8s infinite; }
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
-.user-pill { display:flex; align-items:center; gap:6px; font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:600; letter-spacing:0.06em; color:var(--text2); background:var(--bg3); border:1px solid var(--border2); padding:5px 10px; border-radius:20px; max-width:160px; overflow:hidden; }
+.logo-tagline { font-family:var(--font-ui); font-size:0.55rem; letter-spacing:0.18em; color:var(--text4); text-transform:uppercase; margin-top:2px; display:block; font-weight:500; }
+
+nav {
+  display:flex; gap:0;
+  background:transparent; border:none;
+  border-radius:0; padding:0;
+  margin-left:1.25rem;
+}
+.nav-btn {
+  background:none; border:none;
+  color:var(--text3);
+  font-family:var(--font-ui); font-size:0.85rem; font-weight:500;
+  letter-spacing:0; text-transform:none;
+  padding:18px 14px;
+  border-radius:0; cursor:pointer;
+  transition:color 0.18s;
+  white-space:nowrap;
+  position:relative;
+}
+.nav-btn:hover { color:var(--text); background:transparent; }
+.nav-btn.active { color:var(--text); background:transparent; }
+.nav-btn.active::after {
+  content:''; position:absolute; left:14px; right:14px; bottom:-1px; height:3px;
+  background:var(--blue); border-radius:2px;
+}
+
+.header-right { display:flex; align-items:center; gap:10px; }
+.action-cluster {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:4px;
+  height:36px;
+}
+.action-cluster > * { height:28px; }
+.action-cluster .divider {
+  width:1px; height:18px; background:var(--border2); margin:0 2px;
+}
+
+.live-pill {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--font-ui); font-size:0.72rem; font-weight:500;
+  letter-spacing:0.02em; text-transform:none;
+  color:var(--text2);
+  background:transparent;
+  border:none;
+  padding:0 8px; border-radius:6px;
+}
+.live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 0 2px rgba(58,138,92,0.12); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+.user-pill { display:flex; align-items:center; gap:6px; font-family:var(--font-ui); font-size:0.78rem; font-weight:500; color:var(--text2); background:var(--surface-2); border:1px solid var(--border2); padding:5px 10px; border-radius:999px; max-width:180px; }
 .user-email { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.btn-logout { background:var(--bg3); border:1px solid var(--border2); color:var(--text3); font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:5px 10px; border-radius:5px; cursor:pointer; transition:all 0.18s; }
-.btn-logout:hover { color:var(--red); border-color:var(--red); }
-.lang-btn { background:var(--bg3); border:1px solid var(--border2); color:var(--text3); font-family:'Barlow Condensed',sans-serif; font-size:0.78rem; font-weight:600; letter-spacing:0.08em; padding:5px 12px; border-radius:5px; cursor:pointer; transition:all 0.18s; }
-.lang-btn:hover,.lang-btn.active { color:var(--blue-lt); border-color:var(--blue); }
-.theme-btn { background:var(--bg3); border:1px solid var(--border2); color:var(--text3); font-size:1rem; width:34px; height:34px; border-radius:5px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.18s; flex-shrink:0; }
-.theme-btn:hover { border-color:var(--blue-lt); }
-main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; margin:0 auto; width:100%; }
+
+.btn-logout, .lang-btn, .theme-btn {
+  background:transparent;
+  border:1px solid transparent;
+  color:var(--text3);
+  font-family:var(--font-ui); font-size:0.75rem; font-weight:500;
+  letter-spacing:0.02em;
+  padding:0 10px; border-radius:6px;
+  cursor:pointer;
+  transition:all 0.15s;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.theme-btn { width:28px; padding:0; font-size:0.9rem; }
+.btn-logout:hover { color:var(--red); }
+.lang-seg { display:inline-flex; background:var(--bg3); border-radius:6px; padding:2px; gap:0; }
+.lang-seg .lang-btn { padding:0 9px; height:24px; font-size:0.72rem; border-radius:4px; color:var(--text3); }
+.lang-seg .lang-btn:hover { color:var(--text); }
+.lang-seg .lang-btn.active { color:var(--blue-deep); background:var(--blue-soft); box-shadow:inset 0 0 0 1px var(--blue-border); font-weight:600; }
+.theme-btn:hover { color:var(--text); background:var(--surface-2); }
+/* override outer pill border on login button when standalone */
+#btn-login-header { border:1px solid var(--blue) !important; padding:0 12px; height:28px; border-radius:6px; }
+
+/* ===== MAIN ===== */
+main {
+  position:relative; z-index:1;
+  padding:1.25rem 1.5rem 4rem;
+  max-width:1440px; margin:0 auto; width:100%;
+}
 .page { display:none; }
-.page.active { display:block; animation:fadeUp 0.3s ease; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
-.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:1.25rem; }
-.stat-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1rem 1.25rem; position:relative; overflow:hidden; transition:border-color 0.2s,transform 0.2s; }
-.stat-card:hover { border-color:var(--border2); transform:translateY(-1px); }
-.stat-lbl { font-family:'Barlow',sans-serif; font-size:0.6rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); margin-bottom:8px; }
-.stat-val { font-family:'Barlow Condensed',sans-serif; font-size:1.9rem; font-weight:700; line-height:1; color:var(--blue-lt); }
-.toolbar { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-bottom:1rem; padding:1rem 1.25rem; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); }
+.page.active { display:block; animation:fadeUp 0.25s ease; }
+@keyframes fadeUp { from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+
+/* ===== KPI SUMMARY STRIP ===== */
+.stats-row {
+  display:flex;
+  align-items:stretch;
+  gap:0;
+  margin-bottom:0.85rem;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:0;
+  overflow:hidden;
+}
+.stat-card {
+  flex:1;
+  background:transparent;
+  border:none;
+  border-right:1px solid var(--border);
+  border-radius:0;
+  padding:0.65rem 1rem;
+  position:relative;
+  display:flex; flex-direction:column; justify-content:center;
+  min-height:54px;
+}
+.stat-card:last-child { border-right:none; }
+.stat-card:hover { background:var(--surface-2); }
+.stat-lbl {
+  font-family:var(--font-ui);
+  font-size:0.6rem; font-weight:600;
+  letter-spacing:0.1em;
+  color:var(--text3);
+  margin-bottom:3px;
+  text-transform:uppercase;
+}
+.stat-val {
+  font-family:var(--font-num);
+  font-size:1.05rem; font-weight:700;
+  line-height:1.1;
+  color:var(--text);
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-0.01em;
+}
+#s-bestev, #s-avgev, #an-avgev { color:var(--green); }
+#an-profit { color:var(--text); }
+.stat-fresh { font-size:0.78rem; font-weight:500; color:var(--text2); }
+.stat-fresh::before { content:''; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--green); margin-right:6px; vertical-align:1px; }
+
+/* ===== FILTER TOOLBAR ===== */
+.toolbar {
+  display:flex; gap:8px;
+  align-items:flex-end;
+  flex-wrap:wrap;
+  margin-bottom:0.75rem;
+  padding:0.6rem 0.85rem;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+}
 .fg { display:flex; flex-direction:column; gap:4px; }
-.fg label { font-family:'Barlow Condensed',sans-serif; font-size:0.58rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); }
-.fg input,.fg select { background:var(--bg); border:1px solid var(--border2); color:var(--text); font-family:'Barlow',sans-serif; font-size:0.82rem; padding:7px 10px; border-radius:var(--radius-sm); width:130px; outline:none; transition:border-color 0.18s; }
-.fg input:focus,.fg select:focus { border-color:var(--blue-lt); }
-.fg select option { background:var(--bg2); }
-.btn-reset { background:var(--blue-dim2); border:1px solid var(--border2); color:var(--blue-lt); font-family:'Barlow Condensed',sans-serif; font-size:0.75rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:7px 16px; border-radius:var(--radius-sm); cursor:pointer; align-self:flex-end; transition:all 0.18s; }
-.btn-reset:hover { background:var(--blue); color:#fff; }
-.filter-info { align-self:flex-end; padding-bottom:7px; font-size:0.7rem; color:var(--text3); margin-left:auto; }
-.filter-info strong { color:var(--blue-lt); }
-.filter-info .skipped-note { color:var(--amber); margin-left:6px; font-size:0.65rem; }
-.bet-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:8px; overflow:hidden; position:relative; transition:border-color 0.18s; }
-.bet-main { padding:0.85rem 1.25rem 0.85rem 1.5rem; display:grid; grid-template-columns:1fr 90px 110px 180px; gap:1.5rem; align-items:center; }
-.match-top { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
-.badge { font-family:'Barlow Condensed',sans-serif; font-size:0.65rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:3px 9px; border-radius:3px; }
-.badge-sport { background:var(--blue-dim2); color:var(--blue-lt); border:1px solid var(--border2); font-size:0.7rem; }
-.badge-mkt { background:var(--bg3); color:var(--text3); border:1px solid var(--border); font-weight:500; letter-spacing:0.04em; }
-.match-name { font-size:0.75rem; color:var(--text3); letter-spacing:0.01em; margin-bottom:5px; font-weight:400; }
-.bet-target { font-family:'Barlow Condensed',sans-serif; font-size:1.05rem; font-weight:600; color:var(--blue-lt); letter-spacing:0.01em; margin-bottom:5px; }
-.meta-tag { font-size:0.72rem; color:var(--text2); background:var(--bg3); padding:3px 9px; border-radius:3px; border:1px solid var(--border); font-family:'Barlow',sans-serif; font-weight:400; letter-spacing:0.01em; }
-.cell-lbl { font-family:'Barlow',sans-serif; font-size:0.6rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--text3); margin-bottom:4px; }
-.cell-val { font-family:'Barlow Condensed',sans-serif; font-size:1.2rem; font-weight:700; color:var(--blue-lt); line-height:1; }
-.cell-sub { font-size:0.62rem; color:var(--text3); margin-top:3px; font-weight:400; }
-.stake-lbl { font-size:0.6rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-family:'Barlow',sans-serif; font-weight:500; }
-.stake-input { width:100%; background:var(--bg); border:1px solid var(--border2); color:var(--blue-lt); font-family:'Barlow Condensed',sans-serif; font-size:1.1rem; font-weight:700; text-align:center; padding:5px 6px; border-radius:4px; outline:none; margin-bottom:6px; transition:border-color 0.15s; }
-.stake-input:focus { border-color:var(--blue-lt); }
-.bet-meta { display:flex; gap:6px; flex-wrap:wrap; }
-.cell { text-align:center; }
-.stake-box { background:var(--bg3); border:1px solid var(--border2); border-radius:8px; padding:10px 12px; text-align:center; }
-.stake-btns { display:flex; gap:5px; }
-.btn-placed { flex:1; background:var(--blue-dim2); border:1px solid var(--border2); color:var(--blue-lt); font-family:'Barlow Condensed',sans-serif; font-size:0.65rem; font-weight:500; letter-spacing:0.05em; padding:5px 4px; border-radius:4px; cursor:pointer; transition:all 0.15s; }
-.btn-placed:hover { background:var(--blue); color:#fff; border-color:var(--blue); }
-.btn-skip { flex:1; background:var(--blue-dim2); border:1px solid var(--border2); color:var(--blue-lt); font-family:'Barlow Condensed',sans-serif; font-size:0.65rem; font-weight:500; letter-spacing:0.05em; padding:5px 4px; border-radius:4px; cursor:pointer; transition:all 0.15s; }
-.btn-skip:hover { background:var(--blue-dim); color:var(--text2); }
-.add-bet-btn { background:var(--blue-dim2); border:1px solid var(--border2); color:var(--blue-lt); font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:9px 20px; border-radius:var(--radius-sm); cursor:pointer; margin-bottom:1rem; transition:all 0.18s; }
-.add-bet-btn:hover { background:var(--blue); color:#fff; }
-.add-form { display:none; background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius); padding:1.5rem; margin-bottom:1rem; animation:fadeUp 0.2s ease; }
+.fg label {
+  font-family:var(--font-ui);
+  font-size:0.62rem; font-weight:500;
+  letter-spacing:0.06em;
+  color:var(--text3);
+  text-transform:uppercase;
+}
+.fg input, .fg select {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-family:var(--font-ui);
+  font-size:0.8rem;
+  padding:6px 9px;
+  border-radius:var(--radius-sm);
+  width:120px;
+  outline:none;
+  transition:border-color 0.15s;
+  font-variant-numeric:tabular-nums;
+}
+.fg input:focus, .fg select:focus { border-color:var(--blue); }
+.fg select option { background:var(--surface); }
+
+.btn-reset {
+  background:transparent;
+  border:1px solid var(--border2);
+  color:var(--text2);
+  font-family:var(--font-ui);
+  font-size:0.75rem; font-weight:500;
+  letter-spacing:0;
+  text-transform:none;
+  padding:6px 12px;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  align-self:flex-end;
+  transition:all 0.15s;
+}
+.btn-reset:hover { background:var(--surface-2); color:var(--text); border-color:var(--border3); }
+
+.filter-info {
+  align-self:flex-end;
+  padding-bottom:6px;
+  font-size:0.72rem;
+  color:var(--text3);
+  margin-left:auto;
+  font-variant-numeric:tabular-nums;
+  display:flex; align-items:center; gap:14px;
+}
+.filter-info strong { color:var(--text); font-weight:600; }
+.filter-info .skipped-note { color:var(--text4); margin-left:6px; font-size:0.7rem; }
+.filter-info .freshness { color:var(--text3); font-size:0.7rem; letter-spacing:0.02em; }
+.filter-info .freshness::before { content:''; display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--green); margin-right:5px; vertical-align:1px; opacity:0.75; }
+
+/* ===== BET ROW ===== */
+.bet-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  margin-bottom:5px;
+  overflow:hidden;
+  transition:border-color 0.15s, background 0.15s;
+}
+.bet-card:hover { border-color:var(--blue-border); background:var(--blue-soft); }
+.bet-card:hover .bet-match { color:var(--blue-deep); }
+.bet-card.high, .bet-card.top { border-left:1px solid var(--border); }
+
+.bet-row {
+  display:grid;
+  grid-template-columns: 32px minmax(0,1fr) 70px 100px 70px 110px auto;
+  gap:14px;
+  align-items:center;
+  padding:0.55rem 0.9rem;
+  min-height:58px;
+}
+
+.bet-sport {
+  width:32px; height:32px;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:7px;
+  font-family:var(--font-ui);
+  font-size:0.62rem; font-weight:700;
+  letter-spacing:0.05em;
+  color:var(--text2);
+  flex-shrink:0;
+  text-transform:uppercase;
+}
+
+/* ===== COLUMN HEADER ===== */
+.bets-header {
+  display:grid;
+  grid-template-columns: 32px minmax(0,1fr) 70px 100px 70px 110px auto;
+  gap:14px;
+  align-items:center;
+  padding:0.45rem 0.9rem;
+  margin-bottom:6px;
+  border-bottom:1px solid var(--blue-border);
+  background:var(--blue-soft);
+  border-radius:var(--radius-sm);
+}
+.bets-header-cell {
+  font-family:var(--font-ui);
+  font-size:0.58rem; font-weight:700;
+  color:var(--text3);
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+}
+.bets-header-cell.center { text-align:center; }
+.bets-header-cell.right { text-align:right; }
+.bets-header-actions { width:170px; text-align:right; }
+@media (max-width:900px) { .bets-header { display:none; } }
+
+.bet-info { min-width:0; }
+.bet-info-top {
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:2px;
+  flex-wrap:wrap;
+}
+.bet-league {
+  font-size:0.6rem; font-weight:600;
+  color:var(--text3);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  background:var(--surface-2);
+  padding:2px 7px;
+  border-radius:3px;
+}
+.bet-time {
+  font-size:0.7rem;
+  color:var(--text3);
+  font-variant-numeric:tabular-nums;
+}
+.bet-time.soon {
+  color:var(--amber);
+  background:var(--amber-dim);
+  padding:1px 6px; border-radius:3px;
+  font-weight:600;
+  font-size:0.62rem;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+}
+.bet-match {
+  font-size:0.95rem; font-weight:600;
+  color:var(--text);
+  margin-bottom:1px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  letter-spacing:-0.005em;
+}
+.bet-target {
+  font-size:0.78rem;
+  color:var(--text2);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+.bet-cell { text-align:left; }
+.bet-cell.center { text-align:center; }
+.bet-cell.right { text-align:right; }
+.bet-cell-lbl {
+  font-size:0.58rem; font-weight:600;
+  color:var(--text4);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  margin-bottom:3px;
+  display:none;
+}
+@media (max-width:900px) { .bet-cell-lbl { display:block; } }
+.bet-cell-val {
+  font-family:var(--font-num);
+  font-size:0.95rem; font-weight:600;
+  color:var(--text);
+  font-variant-numeric:tabular-nums;
+  line-height:1.1;
+}
+.bet-cell-sub {
+  font-size:0.68rem;
+  color:var(--text3);
+  margin-top:2px;
+}
+.bet-edge {
+  font-family:var(--font-num);
+  font-size:1rem; font-weight:700;
+  color:var(--green);
+  font-variant-numeric:tabular-nums;
+  line-height:1.1;
+}
+
+.bet-stake {
+  display:flex; flex-direction:column; gap:3px;
+}
+.bet-stake-row { display:flex; align-items:center; gap:5px; }
+.stake-input {
+  width:78px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-family:var(--font-num);
+  font-size:0.85rem; font-weight:600;
+  text-align:right;
+  padding:5px 7px;
+  border-radius:var(--radius-sm);
+  outline:none;
+  font-variant-numeric:tabular-nums;
+  transition:border-color 0.15s;
+}
+.stake-input:focus { border-color:var(--blue); }
+.stake-currency { font-size:0.75rem; color:var(--text3); }
+.bet-potential { font-size:0.66rem; color:var(--text3); }
+.bet-potential strong { color:var(--text2); font-weight:600; }
+
+.bet-actions { display:flex; gap:5px; }
+.btn-placed {
+  background:var(--blue);
+  border:1px solid var(--blue);
+  color:#fff;
+  font-family:var(--font-ui);
+  font-size:0.76rem; font-weight:600;
+  letter-spacing:0;
+  text-transform:none;
+  padding:6px 13px;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.15s;
+  white-space:nowrap;
+  height:30px;
+}
+.btn-placed:hover { background:var(--blue-lt); border-color:var(--blue-lt); }
+.btn-skip {
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text3);
+  font-family:var(--font-ui);
+  font-size:0.74rem; font-weight:500;
+  letter-spacing:0;
+  text-transform:none;
+  padding:6px 11px;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.15s;
+  white-space:nowrap;
+  height:30px;
+}
+.btn-skip:hover { color:var(--text); border-color:var(--border2); background:var(--surface-2); }
+
+/* old grid styles kept as no-op aliases for safety */
+.bet-main { display:contents; }
+.match-top, .match-name, .bet-meta, .meta-tag, .badge, .badge-sport, .badge-mkt,
+.cell, .cell-lbl, .cell-val, .cell-sub,
+.stake-box, .stake-lbl, .stake-btns { all:unset; display:revert; }
+
+/* ===== MY BETS ===== */
+.add-bet-btn {
+  background:var(--blue);
+  border:1px solid var(--blue);
+  color:#fff;
+  font-family:var(--font-ui);
+  font-size:0.78rem; font-weight:600;
+  letter-spacing:0;
+  text-transform:none;
+  padding:7px 14px;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.15s;
+  white-space:nowrap;
+}
+.add-bet-btn:hover { background:var(--blue-lt); border-color:var(--blue-lt); }
+.mybets-toolbar {
+  display:flex; align-items:flex-end; justify-content:space-between;
+  gap:1rem; margin-bottom:1rem;
+}
+.mybets-toolbar .page-title {
+  font-family:var(--font-brand); font-size:1.4rem; font-weight:700;
+  letter-spacing:0.01em; color:var(--text); margin:0;
+}
+.mybets-toolbar .page-sub {
+  font-size:0.82rem; color:var(--text3); margin:3px 0 0;
+}
+.low-data-note {
+  margin-top:10px;
+  padding:12px 16px;
+  background:var(--blue-soft);
+  border:1px solid var(--blue-border);
+  border-left:3px solid var(--blue);
+  border-radius:var(--radius-sm);
+  font-size:0.82rem; color:var(--text2);
+  text-align:left;
+}
+
+.add-form {
+  display:none;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:var(--radius);
+  padding:1.25rem;
+  margin-bottom:1rem;
+  animation:fadeUp 0.2s ease;
+}
 .form-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:1rem; }
 .form-group { display:flex; flex-direction:column; gap:5px; }
-.form-group label { font-family:'Barlow Condensed',sans-serif; font-size:0.6rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); }
-.form-group input,.form-group select { background:var(--bg); border:1px solid var(--border2); color:var(--text); font-family:'Barlow',sans-serif; font-size:0.85rem; padding:8px 12px; border-radius:var(--radius-sm); outline:none; transition:border-color 0.18s; }
-.form-group input:focus,.form-group select:focus { border-color:var(--blue-lt); }
+.form-group label {
+  font-family:var(--font-ui);
+  font-size:0.7rem; font-weight:500;
+  letter-spacing:0.02em;
+  color:var(--text3);
+  text-transform:none;
+}
+.form-group input, .form-group select {
+  background:var(--bg);
+  border:1px solid var(--border2);
+  color:var(--text);
+  font-family:var(--font-ui);
+  font-size:0.85rem;
+  padding:8px 11px;
+  border-radius:var(--radius-sm);
+  outline:none;
+  transition:border-color 0.15s;
+}
+.form-group input:focus, .form-group select:focus { border-color:var(--blue); }
 .form-actions { display:flex; gap:10px; }
-.btn-primary { background:var(--blue); border:none; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:0.82rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; padding:9px 22px; border-radius:var(--radius-sm); cursor:pointer; transition:background 0.18s; }
+.btn-primary {
+  background:var(--blue);
+  border:1px solid var(--blue);
+  color:#fff;
+  font-family:var(--font-ui);
+  font-size:0.85rem; font-weight:600;
+  letter-spacing:0;
+  text-transform:none;
+  padding:9px 20px;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.15s;
+}
 .btn-primary:hover { background:var(--blue-lt); }
-.btn-secondary { background:none; border:1px solid var(--border2); color:var(--text2); font-family:'Barlow Condensed',sans-serif; font-size:0.82rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:9px 22px; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.18s; }
-.btn-secondary:hover { color:var(--text); border-color:var(--text2); }
-.mybet-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:0.9rem 1.25rem; margin-bottom:8px; display:grid; grid-template-columns:1fr 80px 80px 90px 110px 100px 90px; gap:1rem; align-items:center; transition:border-color 0.18s; }
-.mybet-card:hover { border-color:var(--border2); }
-.mybet-card.won { border-left:3px solid var(--green); }
-.mybet-card.lost { border-left:3px solid var(--red); }
-.mybet-card.pending { border-left:3px solid var(--amber); }
-.mybet-match { font-size:0.6rem; color:var(--text3); margin-bottom:2px; }
-.mybet-target { font-family:'Barlow Condensed',sans-serif; font-size:0.95rem; font-weight:700; color:var(--text); }
-.mybet-book { font-size:0.6rem; color:var(--text3); margin-top:2px; }
+.btn-secondary {
+  background:transparent;
+  border:1px solid var(--border2);
+  color:var(--text2);
+  font-family:var(--font-ui);
+  font-size:0.85rem; font-weight:500;
+  letter-spacing:0;
+  text-transform:none;
+  padding:9px 20px;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.15s;
+}
+.btn-secondary:hover { color:var(--text); border-color:var(--border3); }
+
+.mybet-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:0.85rem 1.1rem;
+  margin-bottom:6px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 70px 70px 80px 110px 110px 70px;
+  gap:1rem;
+  align-items:center;
+  transition:border-color 0.15s, background 0.15s;
+  position:relative;
+}
+.mybet-card:hover { border-color:var(--blue-border); background:var(--blue-soft); }
+.mybet-card::before, .mybet-card::after { content:none !important; display:none !important; background:none !important; border:0 !important; }
+.mybet-card.won, .mybet-card.lost, .mybet-card.pending { border-left:1px solid var(--border) !important; }
+.mybet-match { font-size:0.7rem; color:var(--text3); margin-bottom:3px; }
+.mybet-target { font-family:var(--font-ui); font-size:0.92rem; font-weight:600; color:var(--text); }
+.mybet-book { font-size:0.7rem; color:var(--text3); margin-top:2px; }
 .mybet-cell { text-align:center; }
-.mybet-lbl { font-size:0.55rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:3px; }
-.mybet-val { font-family:'Barlow Condensed',sans-serif; font-size:0.95rem; font-weight:700; color:var(--text2); }
-.result-select { background:var(--bg); border:1px solid var(--border2); color:var(--text); font-family:'Barlow',sans-serif; font-size:0.75rem; padding:5px 8px; border-radius:var(--radius-sm); outline:none; cursor:pointer; width:100%; }
-.btn-delete { background:var(--red-dim); border:1px solid rgba(224,58,82,0.2); color:var(--red); font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:600; letter-spacing:0.05em; padding:5px 12px; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.18s; width:100%; }
-.btn-delete:hover { background:rgba(224,58,82,0.2); }
-.analytics-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:1.25rem; }
-.chart-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; }
-.chart-title { font-family:'Barlow Condensed',sans-serif; font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); margin-bottom:1rem; }
-.empty-box,.loading-box { text-align:center; padding:4rem 2rem; color:var(--text3); font-size:0.85rem; }
-.spinner { width:32px; height:32px; border:2px solid var(--border2); border-top-color:var(--blue-lt); border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto 1rem; }
-@keyframes spin { to{transform:rotate(360deg)} }
-::-webkit-scrollbar { width:6px; }
-::-webkit-scrollbar-track { background:var(--bg); }
-::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
-.profile-btn { display:flex; align-items:center; gap:8px; background:var(--bg3); border:1px solid var(--border2); color:var(--text2); font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:600; letter-spacing:0.06em; padding:5px 10px; border-radius:20px; cursor:pointer; transition:all 0.18s; max-width:180px; overflow:hidden; }
-.profile-btn:hover { border-color:var(--blue-lt); }
-.profile-avatar { width:26px; height:26px; border-radius:50%; background:var(--blue); color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:0.8rem; font-weight:700; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; }
-.profile-avatar img { width:100%; height:100%; object-fit:cover; }
+.mybet-lbl { font-size:0.62rem; color:var(--text4); letter-spacing:0.04em; margin-bottom:3px; text-transform:uppercase; }
+.mybet-val { font-family:var(--font-num); font-size:0.92rem; font-weight:600; color:var(--text2); font-variant-numeric:tabular-nums; }
+.result-select {
+  background:var(--surface-2);
+  border:1px solid var(--border2);
+  color:var(--text2);
+  font-family:var(--font-ui);
+  font-size:0.74rem; font-weight:500;
+  padding:6px 24px 6px 10px;
+  border-radius:var(--radius-sm);
+  outline:none;
+  cursor:pointer;
+  width:100%;
+  appearance:none; -webkit-appearance:none;
+  background-image:linear-gradient(45deg, transparent 50%, var(--text3) 50%), linear-gradient(135deg, var(--text3) 50%, transparent 50%);
+  background-position:calc(100% - 12px) 50%, calc(100% - 8px) 50%;
+  background-size:4px 4px, 4px 4px;
+  background-repeat:no-repeat;
+  transition:border-color 0.15s, color 0.15s;
+}
+.result-select:hover { color:var(--text); border-color:var(--border3); }
+.result-select:focus { border-color:var(--blue); }
+.btn-delete {
+  background:transparent;
+  border:none;
+  color:var(--text4);
+  font-family:var(--font-ui);
+  font-size:0.72rem; font-weight:500;
+  padding:6px 8px;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.15s;
+  width:100%;
+}
+.btn-delete:hover { color:var(--red); background:var(--red-dim); }
+
+/* ===== ANALYTICS ===== */
+.analytics-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:1.25rem; }
+.chart-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.1rem 1.25rem; }
+.chart-title { font-family:var(--font-ui); font-size:0.78rem; font-weight:600; letter-spacing:0; color:var(--text2); margin-bottom:1rem; text-transform:none; }
+
+/* ===== EMPTY / LOADING ===== */
+.empty-box, .loading-box {
+  text-align:center;
+  padding:3.5rem 1.5rem;
+  color:var(--text3);
+  font-size:0.88rem;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+}
+.empty-box .empty-title { color:var(--text); font-size:0.95rem; font-weight:600; margin-bottom:6px; }
+.empty-box .empty-hint { color:var(--text3); font-size:0.82rem; }
+.spinner { width:28px; height:28px; border:2px solid var(--border2); border-top-color:var(--blue-lt); border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto 0.85rem; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width:8px; height:8px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border3); border-radius:4px; }
+::-webkit-scrollbar-thumb:hover { background:var(--text4); }
+
+/* ===== PROFILE ===== */
+.profile-btn { display:flex; align-items:center; gap:8px; background:transparent; border:none; color:var(--text2); font-family:var(--font-ui); font-size:0.78rem; font-weight:500; padding:0 10px 0 4px; border-radius:6px; cursor:pointer; transition:all 0.15s; max-width:180px; overflow:hidden; }
+.profile-btn:hover { background:var(--surface-2); color:var(--text); }
+.profile-avatar { width:24px; height:24px; border-radius:50%; background:#1f2a44; color:#fff; font-family:var(--font-ui); font-size:0.66rem; font-weight:600; letter-spacing:0.02em; display:inline-flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; border:1px solid rgba(255,255,255,0.06); }
+.profile-avatar img { display:none; }
+.profile-avatar span { line-height:1; }
 .profile-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.profile-modal-overlay { position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; }
+
+.profile-modal-overlay { position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; padding:1rem; }
 .profile-modal-overlay.open { display:flex; }
-.profile-modal { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:2rem; width:100%; max-width:360px; animation:fadeUp 0.2s ease; position:relative; max-height:90vh; overflow-y:auto; }
-.profile-modal h3 { font-family:'Barlow Condensed',sans-serif; font-size:1.1rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text); margin-bottom:1.25rem; }
-.profile-modal .auth-field { margin-bottom:0.9rem; }
-.profile-avatar-preview { width:64px; height:64px; border-radius:50%; background:var(--blue); color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:1.6rem; font-weight:700; display:flex; align-items:center; justify-content:center; overflow:hidden; margin:0 auto 1rem; border:2px solid var(--border2); }
+.profile-modal { background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius-lg); padding:1.75rem; width:100%; max-width:380px; animation:fadeUp 0.2s ease; position:relative; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.4); }
+.profile-modal h3 { font-family:var(--font-ui); font-size:1rem; font-weight:600; letter-spacing:0; color:var(--text); margin-bottom:1.25rem; text-transform:none; }
+.profile-modal .auth-field { margin-bottom:0.85rem; }
+.profile-avatar-preview { width:60px; height:60px; border-radius:50%; background:var(--blue); color:#fff; font-family:var(--font-ui); font-size:1.4rem; font-weight:600; display:flex; align-items:center; justify-content:center; overflow:hidden; margin:0 auto 1rem; border:2px solid var(--border2); }
 .profile-avatar-preview img { width:100%; height:100%; object-fit:cover; }
 .profile-modal-actions { display:flex; flex-direction:column; gap:8px; margin-top:1.25rem; }
-.btn-profile-save { background:var(--blue); border:none; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:10px; border-radius:var(--radius-sm); cursor:pointer; transition:background 0.18s; }
+.btn-profile-save { background:var(--blue); border:none; color:#fff; font-family:var(--font-ui); font-size:0.88rem; font-weight:600; padding:10px; border-radius:var(--radius-sm); cursor:pointer; transition:background 0.18s; }
 .btn-profile-save:hover { background:var(--blue-lt); }
 .btn-profile-save:disabled { opacity:0.55; cursor:not-allowed; }
-.btn-profile-logout { background:none; border:1px solid rgba(224,58,82,0.3); color:var(--red); font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:10px; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.18s; }
-.btn-profile-logout:hover { background:var(--red-dim); }
+.btn-profile-logout { background:transparent; border:1px solid var(--border2); color:var(--text2); font-family:var(--font-ui); font-size:0.88rem; font-weight:500; padding:10px; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.18s; }
+.btn-profile-logout:hover { color:var(--red); border-color:var(--red); }
 .btn-profile-close { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text3); font-size:1.2rem; cursor:pointer; line-height:1; }
 .btn-profile-close:hover { color:var(--text); }
-.profile-msg { min-height:1.1em; margin-top:0.75rem; font-size:0.76rem; text-align:center; color:var(--text3); }
+.profile-msg { min-height:1.1em; margin-top:0.75rem; font-size:0.78rem; text-align:center; color:var(--text3); }
 .profile-msg.success { color:var(--green); }
 .profile-msg.error { color:var(--red); }
 
-/* ===== DEBUG PANEL ===== */
-.debug-panel { margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid var(--border); }
-.debug-panel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem; cursor:pointer; }
-.debug-panel-title { font-family:'Barlow Condensed',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--text3); }
-.debug-panel-toggle { font-size:0.65rem; color:var(--text3); }
-.debug-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px 10px; margin-bottom:0.75rem; }
-.debug-row { display:flex; flex-direction:column; gap:1px; }
-.debug-lbl { font-family:'Barlow Condensed',sans-serif; font-size:0.55rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); }
-.debug-val { font-family:'Barlow Condensed',sans-serif; font-size:0.8rem; font-weight:600; color:var(--text2); word-break:break-all; }
-.debug-val.ok { color:var(--green); }
-.debug-val.err { color:var(--red); }
-.debug-val.warn { color:var(--amber); }
-.btn-debug-clear { width:100%; background:var(--bg3); border:1px solid var(--border2); color:var(--text3); font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:7px; border-radius:var(--radius-sm); cursor:pointer; transition:all 0.18s; }
-.btn-debug-clear:hover { color:var(--amber); border-color:var(--amber); }
-/* ===== /DEBUG PANEL ===== */
-
-.info-modal-overlay { position:fixed; inset:0; z-index:1200; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; padding:1rem; }
+/* ===== INFO MODAL ===== */
+.info-modal-overlay { position:fixed; inset:0; z-index:1200; background:rgba(0,0,0,0.65); display:none; align-items:center; justify-content:center; padding:1rem; }
 .info-modal-overlay.open { display:flex; }
-.info-modal { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:2rem; width:100%; max-width:560px; max-height:85vh; overflow-y:auto; animation:fadeUp 0.2s ease; position:relative; }
-.info-modal h2 { font-family:'Barlow Condensed',sans-serif; font-size:1.2rem; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--text); margin-bottom:1.25rem; padding-right:2rem; }
-.info-modal h3 { font-family:'Barlow Condensed',sans-serif; font-size:0.8rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--blue-lt); margin:1.1rem 0 0.4rem; }
-.info-modal p { font-size:0.82rem; color:var(--text2); line-height:1.65; margin-bottom:0.5rem; }
+.info-modal { background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius-lg); padding:1.75rem; width:100%; max-width:560px; max-height:85vh; overflow-y:auto; animation:fadeUp 0.2s ease; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.4); }
+.info-modal h2 { font-family:var(--font-ui); font-size:1.15rem; font-weight:700; letter-spacing:-0.01em; color:var(--text); margin-bottom:1rem; padding-right:2rem; text-transform:none; }
+.info-modal h3 { font-family:var(--font-ui); font-size:0.88rem; font-weight:600; letter-spacing:0; color:var(--text); margin:1.1rem 0 0.4rem; text-transform:none; }
+.info-modal p { font-size:0.85rem; color:var(--text2); line-height:1.6; margin-bottom:0.5rem; }
 .info-modal ul { padding-left:1.1rem; margin-bottom:0.5rem; }
-.info-modal ul li { font-size:0.82rem; color:var(--text2); line-height:1.65; }
-.info-modal .disclaimer-box { background:var(--red-dim); border:1px solid rgba(224,58,82,0.2); border-radius:6px; padding:0.75rem 1rem; margin-bottom:1rem; font-size:0.8rem; color:var(--text2); line-height:1.6; }
+.info-modal ul li { font-size:0.85rem; color:var(--text2); line-height:1.6; }
+.info-modal .disclaimer-box { background:var(--amber-dim); border:1px solid rgba(245,158,11,0.2); border-radius:var(--radius-sm); padding:0.75rem 1rem; margin-bottom:1rem; font-size:0.82rem; color:var(--text2); line-height:1.55; }
 .btn-info-close { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text3); font-size:1.2rem; cursor:pointer; line-height:1; }
 .btn-info-close:hover { color:var(--text); }
-.legal-links { display:flex; justify-content:center; gap:12px; margin-top:0.75rem; flex-wrap:wrap; }
-.legal-link { background:none; border:none; color:var(--text3); font-family:'Barlow',sans-serif; font-size:0.68rem; cursor:pointer; text-decoration:underline; text-underline-offset:2px; padding:0; transition:color 0.15s; }
-.legal-link:hover { color:var(--text2); }
+.legal-links { display:flex; justify-content:center; gap:14px; margin-top:0.85rem; flex-wrap:wrap; }
+.legal-link { background:none; border:none; color:var(--text3); font-family:var(--font-ui); font-size:0.72rem; cursor:pointer; text-decoration:none; padding:0; transition:color 0.15s; }
+.legal-link:hover { color:var(--text); text-decoration:underline; text-underline-offset:3px; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:1100px) {
+  .bet-row {
+    grid-template-columns: 32px minmax(0,1fr) 60px 88px 60px 100px auto;
+    gap:10px;
+  }
+}
 @media (max-width:900px) {
-  .stats-row { grid-template-columns:repeat(2,1fr); }
-  .bet-main { grid-template-columns:1fr 1fr; }
-  .stake-box { grid-column:span 2; }
-  .analytics-grid { grid-template-columns:1fr; }
-  .mybet-card { grid-template-columns:1fr 1fr 1fr; }
-  main { padding:1rem; }
-  header { padding:0 1rem; }
+  header { padding:0 1rem; height:52px; }
   nav { display:none; }
+  main { padding:1rem 1rem 3rem; }
+  .stats-row { grid-template-columns:repeat(2,1fr); }
+  .toolbar { padding:0.75rem; }
+  .fg input, .fg select { width:100%; }
+  .filter-info { width:100%; padding-bottom:0; padding-top:4px; margin-left:0; text-align:left; }
+
+  .bet-row {
+    grid-template-columns: 28px 1fr;
+    grid-template-areas:
+      "sport info"
+      "stats stats"
+      "stake stake"
+      "actions actions";
+    row-gap:10px;
+    padding:0.85rem;
+  }
+  .bet-sport { grid-area:sport; }
+  .bet-info { grid-area:info; }
+  .bet-row > .bet-cell-odds { grid-area:stats; }
+  .bet-stats-mobile {
+    grid-area:stats;
+    display:flex; gap:18px;
+    padding-top:8px;
+    border-top:1px solid var(--border);
+  }
+  .bet-stake { grid-area:stake; flex-direction:row; align-items:center; justify-content:space-between; }
+  .bet-actions { grid-area:actions; }
+  .btn-placed, .btn-skip { flex:1; }
+
+  .mybet-card {
+    grid-template-columns:1fr 1fr;
+    grid-auto-flow:row;
+  }
+  .mybet-card > div:first-child { grid-column:1/-1; }
+  .analytics-grid { grid-template-columns:1fr; }
+  .form-grid { grid-template-columns:1fr 1fr; }
+}
+@media (max-width:540px) {
+  .stats-row { grid-template-columns:1fr 1fr; gap:8px; }
+  .stat-val { font-size:1.2rem; }
+  .header-right .lang-btn, .header-right .theme-btn { padding:6px 8px; }
+  .live-pill { display:none; }
 }
 </style>
 </head>
@@ -289,15 +870,20 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
     <button class="nav-btn" onclick="showPage('analytics',this)" data-fi="Analytiikka" data-en="Analytics">Analytiikka</button>
   </nav>
   <div class="header-right">
-    <div class="live-pill"><span class="live-dot"></span><span id="live-txt">LIVE</span></div>
-    <button class="profile-btn" id="profile-btn" style="display:none" onclick="openProfileModal()">
-      <div class="profile-avatar" id="header-avatar"><span id="header-avatar-initial">?</span></div>
-      <span class="profile-name" id="header-profile-name"></span>
-    </button>
-    <button class="btn-logout" id="btn-login-header" onclick="showAuthModal()" style="color:var(--blue-lt);border-color:var(--blue)">Kirjaudu</button>
-    <button class="theme-btn" onclick="toggleTheme()" id="theme-icon" title="Toggle theme">☀️</button>
-    <button class="lang-btn active" onclick="setLang('fi')" id="btn-fi">FI</button>
-    <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+    <button class="btn-logout" id="btn-login-header" onclick="showAuthModal()" style="color:var(--blue-lt)">Kirjaudu</button>
+    <div class="action-cluster">
+      <div class="live-pill"><span class="live-dot"></span><span id="live-txt">Live</span></div>
+      <span class="divider"></span>
+      <button class="profile-btn" id="profile-btn" style="display:none" onclick="openProfileModal()">
+        <div class="profile-avatar" id="header-avatar"><span id="header-avatar-initial">?</span></div>
+        <span class="profile-name" id="header-profile-name"></span>
+      </button>
+      <button class="theme-btn" onclick="toggleTheme()" id="theme-icon" title="Toggle theme">☀️</button>
+      <div class="lang-seg">
+        <button class="lang-btn active" onclick="setLang('fi')" id="btn-fi">FI</button>
+        <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -326,20 +912,6 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
       <button class="legal-link" onclick="openInfoModal('terms')">Käyttöehdot</button>
       <button class="legal-link" onclick="openInfoModal('privacy')">Tietosuoja</button>
       <button class="legal-link" onclick="openInfoModal('responsible')">Vastuullinen pelaaminen</button>
-    </div>
-
-    <!-- DEBUG PANEL — näkyy vain kirjautuneelle -->
-    <div class="debug-panel" id="debug-panel" style="display:none">
-      <div class="debug-panel-header" onclick="toggleDebugPanel()">
-        <span class="debug-panel-title">🛠 Debug / Admin</span>
-        <span class="debug-panel-toggle" id="debug-toggle-icon">▼</span>
-      </div>
-      <div id="debug-panel-body">
-        <div class="debug-grid" id="debug-grid">
-          <!-- renderDebugInfo() täyttää tämän -->
-        </div>
-        <button class="btn-debug-clear" onclick="clearLocalCacheForCurrentUser()">🗑 Clear local cache</button>
-      </div>
     </div>
   </div>
 </div>
@@ -444,12 +1016,13 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
   <div class="page active" id="page-bets">
     <div class="stats-row" id="bets-stats" style="display:none">
       <div class="stat-card"><div class="stat-lbl" data-fi="Kohteet" data-en="Opportunities">Kohteet</div><div class="stat-val" id="s-count">—</div></div>
-      <div class="stat-card"><div class="stat-lbl" data-fi="Paras EV" data-en="Best EV">Paras EV</div><div class="stat-val" id="s-bestev">—</div></div>
-      <div class="stat-card"><div class="stat-lbl" data-fi="Keskiarvo EV" data-en="Avg EV">Keskiarvo EV</div><div class="stat-val" id="s-avgev">—</div></div>
-      <div class="stat-card"><div class="stat-lbl" data-fi="Bankroll" data-en="Bankroll">Bankroll</div><div class="stat-val" id="s-bankroll">—</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Paras etu" data-en="Best edge">Paras etu</div><div class="stat-val" id="s-bestev">—</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Keskietu" data-en="Avg edge">Keskietu</div><div class="stat-val" id="s-avgev">—</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Kassa" data-en="Bankroll">Kassa</div><div class="stat-val" id="s-bankroll">—</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Päivitetty" data-en="Updated">Päivitetty</div><div class="stat-val stat-fresh" id="s-fresh">—</div></div>
     </div>
     <div class="toolbar">
-      <div class="fg"><label data-fi="Bankroll (€)" data-en="Bankroll (€)">Bankroll (€)</label><input type="number" id="bankroll" value="1000" min="10" step="100" oninput="onBankrollChange(this)"></div>
+      <div class="fg"><label data-fi="Kassa (€)" data-en="Bankroll (€)">Kassa (€)</label><input type="number" id="bankroll" value="1000" min="10" step="100" oninput="onBankrollChange(this)"></div>
       <div class="fg"><label data-fi="Varovaisuustaso" data-en="Risk Level">Varovaisuustaso</label>
         <select id="risk-level" onchange="onRiskLevelChange(this)">
           <option value="conservative">Varovainen 0.5%</option>
@@ -457,7 +1030,7 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
           <option value="aggressive">Rohkea 1.5%</option>
         </select>
       </div>
-      <div class="fg"><label data-fi="Min EV %" data-en="Min EV %">Min EV %</label><input type="number" id="f-ev-min" value="3" step="0.5" oninput="renderBets()"></div>
+      <div class="fg"><label data-fi="Min etu %" data-en="Min edge %">Min etu %</label><input type="number" id="f-ev-min" value="3" step="0.5" oninput="renderBets()"></div>
       <div class="fg"><label data-fi="Min kerroin" data-en="Min odds">Min kerroin</label><input type="number" id="f-odds-min" value="1.4" step="0.05" oninput="renderBets()"></div>
       <div class="fg"><label data-fi="Max kerroin" data-en="Max odds">Max kerroin</label><input type="number" id="f-odds-max" value="2.5" step="0.05" oninput="renderBets()"></div>
       <div class="fg"><label data-fi="Laji" data-en="Sport">Laji</label>
@@ -475,18 +1048,33 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
       <div class="filter-info" id="filter-info"></div>
     </div>
     <div class="loading-box" id="bets-loading"><div class="spinner"></div><span data-fi="Haetaan EV-kohteita..." data-en="Fetching EV opportunities...">Haetaan EV-kohteita...</span></div>
-    <div class="empty-box" id="bets-empty" style="display:none" data-fi="Ei plus-EV kohteita juuri nyt." data-en="No plus-EV opportunities right now.">Ei plus-EV kohteita juuri nyt.</div>
+    <div class="empty-box" id="bets-empty" style="display:none"><div class="empty-title" data-fi="Ei kohteita nykyisillä suodattimilla." data-en="No opportunities with current filters.">Ei kohteita nykyisillä suodattimilla.</div><div class="empty-hint" data-fi="Kokeile pienempää eturajaa tai laajenna kerroinväliä." data-en="Try a lower edge threshold or widen the odds range.">Kokeile pienempää eturajaa tai laajenna kerroinväliä.</div><button class="btn-reset" style="margin-top:14px" onclick="resetFilters()" data-fi="Nollaa suodattimet" data-en="Reset filters">Nollaa suodattimet</button></div>
+    <div class="bets-header" id="bets-header" style="display:none">
+      <div></div>
+      <div class="bets-header-cell" data-fi="Kohde" data-en="Pick">Kohde</div>
+      <div class="bets-header-cell center" data-fi="Kerroin" data-en="Odds">Kerroin</div>
+      <div class="bets-header-cell" data-fi="Bookkeri" data-en="Book">Bookkeri</div>
+      <div class="bets-header-cell center" data-fi="Etu" data-en="Edge">Etu</div>
+      <div class="bets-header-cell" data-fi="Suositeltu panos" data-en="Stake">Suositeltu panos</div>
+      <div class="bets-header-cell right bets-header-actions" data-fi="Toiminnot" data-en="Actions">Toiminnot</div>
+    </div>
     <div id="bets-list"></div>
   </div>
 
   <div class="page" id="page-mybets">
+    <div class="mybets-toolbar">
+      <div>
+        <h2 class="page-title" data-fi="Omat betsit" data-en="My bets">Omat betsit</h2>
+        <p class="page-sub" data-fi="Seuraa merkittyjä vetoja ja tuloksia." data-en="Track your placed bets and results.">Seuraa merkittyjä vetoja ja tuloksia.</p>
+      </div>
+      <button class="add-bet-btn" onclick="toggleAddForm()" id="add-btn" data-fi="+ Lisää betsi" data-en="+ Add bet">+ Lisää betsi</button>
+    </div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-lbl" data-fi="Betsit yhteensä" data-en="Total Bets">Betsit yhteensä</div><div class="stat-val" id="mb-total">0</div></div>
       <div class="stat-card"><div class="stat-lbl" data-fi="Voitettu" data-en="Won">Voitettu</div><div class="stat-val" id="mb-won">0</div></div>
       <div class="stat-card"><div class="stat-lbl" data-fi="Hävitty" data-en="Lost">Hävitty</div><div class="stat-val" id="mb-lost">0</div></div>
       <div class="stat-card"><div class="stat-lbl" data-fi="ROI" data-en="ROI">ROI</div><div class="stat-val" id="mb-roi">—</div></div>
     </div>
-    <button class="add-bet-btn" onclick="toggleAddForm()" id="add-btn" data-fi="+ Lisää betsi" data-en="+ Add bet">+ Lisää betsi</button>
     <div class="add-form" id="add-form">
       <div class="form-grid">
         <div class="form-group"><label data-fi="Ottelu" data-en="Match">Ottelu</label><input type="text" id="f-match" placeholder="esim. PSG vs Bayern"></div>
@@ -494,8 +1082,8 @@ main { position:relative; z-index:1; padding:1.5rem 2rem; max-width:1300px; marg
         <div class="form-group"><label data-fi="Kirja" data-en="Bookmaker">Kirja</label><input type="text" id="f-book" placeholder="esim. Unibet"></div>
         <div class="form-group"><label data-fi="Kerroin" data-en="Odds">Kerroin</label><input type="number" id="f-odds" step="0.01" placeholder="esim. 1.85"></div>
         <div class="form-group"><label data-fi="Panos (€)" data-en="Stake (€)">Panos (€)</label><input type="number" id="f-stake" placeholder="esim. 10"></div>
-        <div class="form-group"><label data-fi="EV %" data-en="EV %">EV %</label><input type="number" id="f-ev" step="0.1" placeholder="esim. 4.2"></div>
-        <div class="form-group"><label data-fi="Pinnacle %" data-en="Pinnacle %">Pinnacle %</label><input type="number" id="f-pinn" step="0.1" placeholder="esim. 55.4"></div>
+        <div class="form-group"><label data-fi="Etu %" data-en="Edge %">Etu %</label><input type="number" id="f-ev" step="0.1" placeholder="esim. 4.2"></div>
+        <div class="form-group"><label data-fi="Arvio %" data-en="Estimate %">Arvio %</label><input type="number" id="f-estimate" step="0.1" placeholder="esim. 55.4"></div>
         <div class="form-group"><label data-fi="Tulos" data-en="Result">Tulos</label>
           <select id="f-result">
             <option value="pending" data-fi="Odottaa" data-en="Pending">Odottaa</option>
@@ -547,8 +1135,6 @@ let selectedAvatarFile = null;
 let lastSupabaseError = "";
 let _bankrollDebounceTimer = null;
 let _bankrollSnapshotDebounceTimer = null;
-let _debugPanelOpen = true;
-
 // ===== AUTH =====
 function switchAuthTab(tab) {
   document.getElementById("tab-login").classList.toggle("active", tab==="login");
@@ -620,7 +1206,7 @@ function dbBetToLocal(row) {
     odds:           parseFloat(row.odds)           || 0,
     stake:          parseFloat(row.stake)          || 0,
     ev:             parseFloat(row.ev)             || 0,
-    pinn:           parseFloat(row.pinn)           || 0,
+    estimate:       parseFloat(row.pinn)           || 0,
     result:         row.result         || "pending",
     settled:        row.settled        || false,
     returnedAmount: parseFloat(row.returned_amount)|| 0,
@@ -641,7 +1227,7 @@ function localBetToDb(b, userId) {
     odds:           b.odds            || 0,
     stake:          b.stake           || 0,
     ev:             b.ev              || 0,
-    pinn:           b.pinn            || 0,
+    pinn:           b.estimate        || 0,
     result:         b.result          || "pending",
     settled:        b.settled         || false,
     returned_amount:b.returnedAmount  || 0,
@@ -885,9 +1471,9 @@ function showPage(p, btn) {
 // ===== FETCH =====
 async function fetchAll() {
   try {
-    const {data,error}=await sbClient.from('ev_bets').select('id,ottelu,alkaa,markkina,kohde,paras_kerroin,kirja,pinnacle_kerroin,pinnacle_prob,ev_pct,liiga,aalto').eq('aktiivinen',true).order('ev_pct',{ascending:false});
+    const {data,error}=await sbClient.from('ev_bets').select('id,ottelu,alkaa,markkina,kohde,paras_kerroin,kirja,ev_pct,liiga,aalto').eq('aktiivinen',true).order('ev_pct',{ascending:false});
     if (error) { lastSupabaseError = error.message; console.error('[Vedox] Supabase fetch error:',error.message); document.getElementById("bets-loading").style.display="none"; return; }
-    allBets=(data||[]).map(r=>({id:r.id,ottelu:r.ottelu,alkaa:r.alkaa?new Date(r.alkaa).toLocaleString("fi-FI",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"—",markkina:r.markkina||"",kohde:r.kohde,kerroin:parseFloat(r.paras_kerroin)||0,kirja:r.kirja||"",pinnacle:parseFloat(r.pinnacle_kerroin)||0,pinnProb:r.pinnacle_prob||"",ev:parseFloat(r.ev_pct)||0,liiga:r.liiga||"",aalto:r.aalto||""}));
+    allBets=(data||[]).map(r=>({id:r.id,ottelu:r.ottelu,alkaa:r.alkaa?new Date(r.alkaa).toLocaleString("fi-FI",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"—",markkina:r.markkina||"",kohde:r.kohde,kerroin:parseFloat(r.paras_kerroin)||0,kirja:r.kirja||"",ev:parseFloat(r.ev_pct)||0,liiga:r.liiga||"",aalto:r.aalto||""}));
   } catch(e) { lastSupabaseError = e.message || String(e); console.error('[Vedox] fetchAll poikkeus:',e.message||e); }
   renderBets();
   document.getElementById("bets-loading").style.display="none";
@@ -962,11 +1548,114 @@ function resetFilters() {
   renderBets();
 }
 
+
+// ===== LEAGUE LABEL MAPPER (frontend-only) =====
+const LEAGUE_LABELS = {
+  soccer_epl:"Premier League",
+  soccer_england_efl_champ:"EFL Championship",
+  soccer_spain_la_liga:"LaLiga",
+  soccer_spain_segunda_division:"LaLiga 2",
+  soccer_germany_bundesliga:"Bundesliga",
+  soccer_germany_bundesliga2:"2. Bundesliga",
+  soccer_italy_serie_a:"Serie A",
+  soccer_italy_serie_b:"Serie B",
+  soccer_france_ligue_one:"Ligue 1",
+  soccer_france_ligue_two:"Ligue 2",
+  soccer_netherlands_eredivisie:"Eredivisie",
+  soccer_portugal_primeira_liga:"Primeira Liga",
+  soccer_belgium_first_div:"Pro League",
+  soccer_switzerland_superleague:"Swiss Super League",
+  soccer_austria_bundesliga:"Austrian Bundesliga",
+  soccer_turkey_super_league:"Süper Lig",
+  soccer_greece_super_league:"Super League Greece",
+  soccer_denmark_superliga:"Superliga",
+  soccer_sweden_allsvenskan:"Allsvenskan",
+  soccer_norway_eliteserien:"Eliteserien",
+  soccer_finland_veikkausliiga:"Veikkausliiga",
+  soccer_uefa_champs_league:"Champions League",
+  soccer_uefa_europa_league:"Europa League",
+  soccer_uefa_europa_conference_league:"Conference League",
+  soccer_fifa_world_cup:"World Cup",
+  soccer_uefa_euro_qualification:"Euro Qualifying",
+  soccer_usa_mls:"MLS",
+  soccer_brazil_campeonato:"Brasileirão",
+  soccer_argentina_primera_division:"Primera División",
+  soccer_mexico_ligamx:"Liga MX",
+  soccer_japan_j_league:"J1 League",
+  soccer_korea_kleague1:"K League 1",
+  soccer_australia_aleague:"A-League",
+  basketball_nba:"NBA",
+  basketball_euroleague:"EuroLeague",
+  basketball_ncaab:"NCAAB",
+  basketball_wnba:"WNBA",
+  icehockey_nhl:"NHL",
+  icehockey_sweden_hockey_league:"SHL",
+  icehockey_sweden_allsvenskan:"HockeyAllsvenskan",
+  icehockey_finland_liiga:"Liiga",
+  icehockey_mestis:"Mestis",
+  icehockey_liiga:"Liiga",
+  baseball_mlb:"MLB",
+  baseball_npb:"NPB",
+  baseball_kbo:"KBO",
+  americanfootball_nfl:"NFL",
+  americanfootball_ncaaf:"NCAAF",
+  americanfootball_cfl:"CFL",
+  tennis_atp:"ATP",
+  tennis_wta:"WTA",
+  boxing_boxing:"Boxing",
+  mma_mixed_martial_arts:"MMA",
+  rugbyleague_nrl:"NRL",
+  rugbyunion_six_nations:"Six Nations",
+  cricket_ipl:"IPL",
+  cricket_test_match:"Test Cricket",
+  golf_pga_championship:"PGA",
+  golf_masters_tournament:"The Masters"
+};
+function formatLeague(liiga) {
+  if (!liiga) return "";
+  const key = String(liiga).toLowerCase().trim();
+  if (LEAGUE_LABELS[key]) return LEAGUE_LABELS[key];
+  // Try without prefix
+  const cleaned = key.replace(/^(soccer|basketball|icehockey|baseball|americanfootball|tennis|boxing|mma|rugbyleague|rugbyunion|cricket|golf)_/,"");
+  // country_competition -> "Competition"
+  const parts = cleaned.split("_").filter(Boolean);
+  if (parts.length === 0) return key.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase());
+  // Drop common country prefixes if a competition word follows
+  const COUNTRIES = new Set(["spain","france","germany","italy","england","netherlands","portugal","belgium","switzerland","austria","turkey","greece","denmark","sweden","norway","finland","usa","brazil","argentina","mexico","japan","korea","australia","russia","poland","czech","croatia","serbia","romania","hungary","scotland","ireland","wales","northern_ireland","saudi_arabia","qatar","uae","china","india","colombia","chile","peru","uruguay","ecuador","paraguay","bolivia","venezuela","south_africa","egypt","morocco","tunisia","algeria","nigeria","ghana","senegal"]);
+  let words = parts;
+  if (parts.length >= 2 && COUNTRIES.has(parts[0])) words = parts.slice(1);
+  return words.map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(" ");
+}
+
+// Detect "starts soon" (< 15 min) from finnish display "dd.mm. HH.MM" — best-effort, never throws
+function startsSoonInfo(alkaaText) {
+  try {
+    if (!alkaaText || alkaaText==="—") return { soon:false, started:false };
+    const m = String(alkaaText).match(/(\d{1,2})\.(\d{1,2})\.?\s+(\d{1,2})[.:](\d{2})/);
+    if (!m) return { soon:false, started:false };
+    const now = new Date();
+    let year = now.getFullYear();
+    const dt = new Date(year, parseInt(m[2],10)-1, parseInt(m[1],10), parseInt(m[3],10), parseInt(m[4],10));
+    if (dt.getTime() < now.getTime() - 86400000) dt.setFullYear(year+1);
+    const diffMin = (dt.getTime() - now.getTime()) / 60000;
+    return { soon: diffMin > 0 && diffMin <= 15, started: diffMin <= 0 && diffMin > -180, diffMin };
+  } catch(e) { return { soon:false, started:false }; }
+}
+
 function sportLabel(liiga) {
-  if(liiga.includes("soccer"))return "⚽"; if(liiga.includes("basketball"))return "🏀";
-  if(liiga.includes("icehockey"))return "🏒"; if(liiga.includes("tennis"))return "🎾";
-  if(liiga.includes("baseball"))return "⚾"; if(liiga.includes("rugby"))return "🏉";
-  return "🏆";
+  const s = String(liiga||"").toLowerCase();
+  if (s.includes("soccer")) return "FB";
+  if (s.includes("basketball")) return "BB";
+  if (s.includes("icehockey")) return "IH";
+  if (s.includes("tennis")) return "TN";
+  if (s.includes("baseball")) return "BS";
+  if (s.includes("americanfootball")) return "NF";
+  if (s.includes("mma")) return "MMA";
+  if (s.includes("boxing")) return "BX";
+  if (s.includes("rugby")) return "RG";
+  if (s.includes("cricket")) return "CR";
+  if (s.includes("golf")) return "GF";
+  return "—";
 }
 function evClass(ev) { if(ev>=7)return "top"; if(ev>=5)return "high"; return ""; }
 
@@ -983,7 +1672,7 @@ function placeBet(idx) {
   const newBr=parseFloat((currentBr-stake).toFixed(2));
   setCurrentBankroll(newBr);
 
-  const newBet = {id:Date.now(),date:b.alkaa||new Date().toLocaleDateString("fi-FI"),match:b.ottelu,target:b.kohde,book:b.kirja,odds:b.kerroin,stake,ev:b.ev,pinn:parseFloat((b.pinnProb||"0").replace(",",".").replace("%",""))||0,result:"pending",settled:false,returnedAmount:0,market:b.markkina.replace(/_/g," "),potential:pot,sourceBetId:sid};
+  const newBet = {id:Date.now(),date:b.alkaa||new Date().toLocaleDateString("fi-FI"),match:b.ottelu,target:b.kohde,book:b.kirja,odds:b.kerroin,stake,ev:b.ev,result:"pending",settled:false,returnedAmount:0,market:b.markkina.replace(/_/g," "),potential:pot,sourceBetId:sid};
   myBets.unshift(newBet);
   upsertBetToDb(newBet).then(ok => {
     if (ok) {
@@ -1002,7 +1691,7 @@ function placeBet(idx) {
       alert(lang==="fi" ? "Betsin tallennus epäonnistui. Yritä uudelleen." : "Saving bet failed. Please try again.");
     }
   });
-  evBetStates[sid] = "skipped";
+  evBetStates[sid] = "placed";
   skippedIds = Object.keys(evBetStates);
   if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`,JSON.stringify(skippedIds));
   renderBets(); renderMyBets();
@@ -1023,24 +1712,70 @@ function renderBets() {
   const brVal=parseFloat(document.getElementById("bankroll").value);
   const br=Number.isFinite(brVal)?brVal:1000;
   const stake=parseFloat((br*stakePct).toFixed(2));
-  const list=document.getElementById("bets-list"), empty=document.getElementById("bets-empty"), stats=document.getElementById("bets-stats");
+  const list=document.getElementById("bets-list"), empty=document.getElementById("bets-empty"), stats=document.getElementById("bets-stats"), header=document.getElementById("bets-header");
   const filtered=getFiltered(), fi=lang==="fi";
-  const skippedCount=skippedIds.length;
-  let infoHtml=`<strong>${filtered.length}</strong> / ${allBets.length} ${fi?"kohdetta filttereillä":"opportunities (filtered)"}`;
-  if (skippedCount>0) infoHtml+=`<span class="skipped-note">(+${skippedCount} ${fi?"ohitettu":"skipped"})</span>`;
+  let infoHtml=`<span><strong>${filtered.length}</strong> / ${allBets.length} ${fi?"kohdetta":"opportunities"}</span>`;
   document.getElementById("filter-info").innerHTML=infoHtml;
-  if (filtered.length===0) { empty.style.display="block"; list.innerHTML=""; stats.style.display="none"; return; }
-  empty.style.display="none"; stats.style.display="grid";
+  const now=new Date(); const hh=String(now.getHours()).padStart(2,"0"); const mm=String(now.getMinutes()).padStart(2,"0");
+  if (filtered.length===0) { empty.style.display="block"; list.innerHTML=""; stats.style.display="none"; if (header) header.style.display="none"; return; }
+  empty.style.display="none"; stats.style.display="flex"; if (header) header.style.display="grid";
   const avg=(filtered.reduce((a,b)=>a+b.ev,0)/filtered.length).toFixed(1);
   document.getElementById("s-count").textContent=filtered.length;
   document.getElementById("s-bestev").textContent="+"+filtered[0].ev.toFixed(1)+"%";
   document.getElementById("s-avgev").textContent="+"+avg+"%";
-  document.getElementById("s-bankroll").textContent=br.toLocaleString("fi-FI")+"€";
+  document.getElementById("s-bankroll").textContent=br.toLocaleString("fi-FI")+" €";
+  const sFresh=document.getElementById("s-fresh"); if (sFresh) sFresh.textContent=`${hh}:${mm}`;
   list.innerHTML=filtered.map((b,i)=>{
-    const ec=evClass(b.ev), icon=sportLabel(b.liiga), mktLabel=b.markkina.replace(/_/g," ").toUpperCase(), pot=(stake*b.kerroin).toFixed(0);
-    return `<div class="bet-card ${ec}"><div class="bet-main"><div><div class="match-top"><span class="badge badge-sport">${icon} ${b.liiga.split("_")[1]?.toUpperCase()||"SPT"}</span><span class="badge badge-mkt">${mktLabel}</span></div><div class="match-name">${b.ottelu} · ${b.alkaa}</div><div class="bet-target">${b.kohde}</div><div class="bet-meta"><span class="meta-tag">${b.kirja}</span><span class="meta-tag">${fi?"Voitto":"Win"}: ${pot}€</span></div></div><div class="cell"><div class="cell-lbl">${fi?"Kerroin":"Odds"}</div><div class="cell-val">${b.kerroin.toFixed(2)}</div><div class="cell-sub">${b.kirja}</div></div><div class="cell"><div class="cell-lbl">EV</div><div class="cell-val">+${b.ev.toFixed(1)}%</div><div class="cell-sub">&nbsp;</div></div><div class="stake-box"><div class="stake-lbl">${fi?"Suositeltu panos":"Recommended stake"}</div><input class="stake-input" id="stake-${i}" type="number" value="${stake.toFixed(2)}" min="0.01" step="0.01"><div class="stake-btns"><button class="btn-placed" onclick="placeBet(${i})">${fi?"Laitoin ✓":"Placed ✓"}</button><button class="btn-skip" onclick="skipBet(${i})">${fi?"Ohita ✗":"Skip ✗"}</button></div></div></div></div>`;
+    const ec=evClass(b.ev), icon=sportLabel(b.liiga);
+    const league=formatLeague(b.liiga) || (fi?"Muu":"Other");
+    const target = (b.kohde||"").toString();
+    const pot=(stake*b.kerroin).toFixed(0);
+    const t=startsSoonInfo(b.alkaa);
+    const timeHtml = t.soon
+      ? `<span class="bet-time soon">${fi?"Alkaa pian":"Starts soon"}</span>`
+      : `<span class="bet-time">${b.alkaa}</span>`;
+    return `<div class="bet-card ${ec}">
+      <div class="bet-row">
+        <div class="bet-sport" title="${escapeAttr(league)}">${icon}</div>
+        <div class="bet-info">
+          <div class="bet-info-top">
+            <span class="bet-league">${escapeHtmlSafe(league)}</span>
+            ${timeHtml}
+          </div>
+          <div class="bet-match">${escapeHtmlSafe(b.ottelu||"")}</div>
+          <div class="bet-target">${escapeHtmlSafe(target)}</div>
+        </div>
+        <div class="bet-cell center bet-cell-odds">
+          <div class="bet-cell-lbl">${fi?"Kerroin":"Odds"}</div>
+          <div class="bet-cell-val">${b.kerroin.toFixed(2)}</div>
+        </div>
+        <div class="bet-cell">
+          <div class="bet-cell-lbl">${fi?"Kirja":"Book"}</div>
+          <div class="bet-cell-val" style="font-size:0.88rem;font-weight:500;color:var(--text2)">${escapeHtmlSafe(b.kirja||"—")}</div>
+        </div>
+        <div class="bet-cell center">
+          <div class="bet-cell-lbl">${fi?"Etu":"Edge"}</div>
+          <div class="bet-edge">+${b.ev.toFixed(1)}%</div>
+        </div>
+        <div class="bet-stake">
+          <div class="bet-cell-lbl">${fi?"Suositeltu panos":"Recommended stake"}</div>
+          <div class="bet-stake-row">
+            <input class="stake-input" id="stake-${i}" type="number" value="${stake.toFixed(2)}" min="0.01" step="0.01">
+            <span class="stake-currency">€</span>
+          </div>
+          <div class="bet-potential">${fi?"Mahd. tuotto":"Potential return"}: <strong>${pot} €</strong></div>
+        </div>
+        <div class="bet-actions">
+          <button class="btn-placed" onclick="placeBet(${i})">${fi?"Laitoin":"Placed"}</button>
+          <button class="btn-skip" onclick="skipBet(${i})">${fi?"Ohita":"Skip"}</button>
+        </div>
+      </div>
+    </div>`;
   }).join("");
 }
+
+function escapeHtmlSafe(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
+function escapeAttr(s){return escapeHtmlSafe(s);}
 
 // ===== MY BETS — Supabase kirjoituspolut =====
 async function upsertBetToDb(bet) {
@@ -1098,7 +1833,7 @@ function saveBet() {
   let br=getCurrentBankroll();
   if (stake > br && result==="pending") { alert(lang==="fi"?"Panos ei voi olla suurempi kuin kassa.":"Stake cannot exceed bankroll."); return; }
   const returnedAmount=result==="won"?parseFloat((stake*odds).toFixed(2)):0;
-  const bet={id:Date.now(),date:new Date().toLocaleDateString("fi-FI"),match,target,book:document.getElementById("f-book").value,odds,stake,ev:parseFloat(document.getElementById("f-ev").value)||0,pinn:parseFloat(document.getElementById("f-pinn").value)||0,result,settled:result!=="pending",returnedAmount};
+  const bet={id:Date.now(),date:new Date().toLocaleDateString("fi-FI"),match,target,book:document.getElementById("f-book").value,odds,stake,ev:parseFloat(document.getElementById("f-ev").value)||0,estimate:parseFloat(document.getElementById("f-estimate").value)||0,result,settled:result!=="pending",returnedAmount};
   const newBr=parseFloat((br+getBetCashImpact(bet)).toFixed(2));
   if (newBr < 0) { alert(lang==="fi"?"Betsi veisi kassan miinukselle.":"Bet would make bankroll negative."); return; }
   myBets.unshift(bet);
@@ -1113,7 +1848,7 @@ function saveBet() {
   });
   setCurrentBankroll(newBr);
   renderMyBets(); toggleAddForm();
-  ["f-match","f-target","f-book","f-odds","f-stake","f-ev","f-pinn"].forEach(id=>document.getElementById(id).value="");
+  ["f-match","f-target","f-book","f-odds","f-stake","f-ev","f-estimate"].forEach(id=>document.getElementById(id).value="");
 }
 
 function getReturnAmount(b) {
@@ -1225,15 +1960,19 @@ function renderMyBets() {
   document.getElementById("mb-lost").textContent=lost;
   document.getElementById("mb-roi").textContent=roi!=="—"?roi+"%":"—";
   const list=document.getElementById("mybets-list");
-  if (myBets.length===0) { list.innerHTML=`<div class="empty-box">${fi?"Ei betsejä vielä.":"No bets yet."}</div>`; refreshDebugInfoIfOpen(); return; }
+  if (myBets.length===0) { list.innerHTML=`<div class="empty-box">${fi?"Ei betsejä vielä.":"No bets yet."}</div>`;  return; }
   list.innerHTML=myBets.map(b=>{
-    const pl=b.result==="won"?b.stake*(b.odds-1):b.result==="lost"?-b.stake:null;
+    const result=["pending","won","lost"].includes(b.result)?b.result:"pending";
+    const pl=result==="won"?b.stake*(b.odds-1):result==="lost"?-b.stake:null;
     const plStr=pl!==null?(pl>0?`+${pl.toFixed(2)}€`:`${pl.toFixed(2)}€`):"—";
     const plColor=pl>0?"var(--green)":pl<0?"var(--red)":"var(--text2)";
     const safeId=JSON.stringify(String(b.id));
-    return `<div class="mybet-card ${b.result}"><div><div class="mybet-match">${b.date} · ${b.book||"—"}</div><div class="mybet-target">${b.target}</div><div class="mybet-book">${b.match}</div></div><div class="mybet-cell"><div class="mybet-lbl">${fi?"Kerroin":"Odds"}</div><div class="mybet-val">${b.odds.toFixed(2)}</div></div><div class="mybet-cell"><div class="mybet-lbl">${fi?"Panos":"Stake"}</div><div class="mybet-val">${b.stake}€</div></div><div class="mybet-cell"><div class="mybet-lbl">EV</div><div class="mybet-val">+${b.ev}%</div></div><div class="mybet-cell"><div class="mybet-lbl">${fi?"Tulos €":"P&L €"}</div><div class="mybet-val" style="color:${plColor}">${plStr}</div></div><select class="result-select" onchange='updateResult(${safeId},this.value)'><option value="pending" ${b.result==="pending"?"selected":""}>${fi?"Odottaa":"Pending"}</option><option value="won" ${b.result==="won"?"selected":""}>${fi?"Voitto":"Won"}</option><option value="lost" ${b.result==="lost"?"selected":""}>${fi?"Tappio":"Lost"}</option></select><button class="btn-delete" onclick='deleteBet(${safeId})'>${fi?"Poista":"Delete"}</button></div>`;
+    return `<div class="mybet-card ${result}"><div><div class="mybet-match">${escapeHtmlSafe(b.date)} · ${escapeHtmlSafe(b.book||"—")}</div><div class="mybet-target">${escapeHtmlSafe(b.target)}</div><div class="mybet-book">${escapeHtmlSafe(b.match)}</div></div><div class="mybet-cell"><div class="mybet-lbl">${fi?"Kerroin":"Odds"}</div><div class="mybet-val">${b.odds.toFixed(2)}</div></div><div class="mybet-cell"><div class="mybet-lbl">${fi?"Panos":"Stake"}</div><div class="mybet-val">${b.stake}€</div></div><div class="mybet-cell"><div class="mybet-lbl">${fi?"Etu":"Edge"}</div><div class="mybet-val">+${b.ev}%</div></div><div class="mybet-cell"><div class="mybet-lbl">${fi?"Tulos €":"P&L €"}</div><div class="mybet-val" style="color:${plColor}">${plStr}</div></div><select class="result-select" onchange='updateResult(${safeId},this.value)'><option value="pending" ${result==="pending"?"selected":""}>${fi?"Odottaa":"Pending"}</option><option value="won" ${result==="won"?"selected":""}>${fi?"Voitto":"Won"}</option><option value="lost" ${result==="lost"?"selected":""}>${fi?"Tappio":"Lost"}</option></select><button class="btn-delete" onclick='deleteBet(${safeId})'>${fi?"Poista":"Delete"}</button></div>`;
   }).join("");
-  refreshDebugInfoIfOpen();
+  if (myBets.length>0 && myBets.length<5) {
+    list.innerHTML += `<div class="low-data-note">${fi?"Analyysi tarkentuu, kun betsejä kertyy enemmän.":"Analytics improve as you log more bets."}</div>`;
+  }
+  
 }
 
 function renderAnalytics() {
@@ -1268,87 +2007,6 @@ function renderAnalytics() {
   plChart=new Chart(document.getElementById("chart-pl"),{type:"bar",data:{labels:plLabels,datasets:[{data:plData,backgroundColor:plData.map(v=>v>=0?"rgba(45,106,224,0.55)":"rgba(45,106,224,0.25)"),borderRadius:4}]},options:chartOpts});
 }
 
-// ===== DEBUG PANEL =====
-
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-// Sama avainlista sekä laskennalle että poistamiselle
-function getDebugLsKeys(uid) {
-  const prefixes = [
-    `vedox_bets_${uid}`,
-    `vedox_skipped_${uid}`,
-    `vedox_bankroll_${uid}`,
-    `vedox_risk_level_${uid}`,
-    `vedox_stake_pct_${uid}`,
-    `vedox_profile_name_${uid}`,
-    `vedox_profile_avatar_${uid}`,
-    `vedox_disclaimer_${uid}`,
-  ];
-  return Object.keys(localStorage).filter(k => prefixes.some(p => k.startsWith(p)));
-}
-
-function renderDebugInfo() {
-  if (!currentUser) return;
-  const panel = document.getElementById("debug-panel");
-  if (!panel) return;
-  panel.style.display = "block";
-
-  const br = getCurrentBankroll();
-  const errVal = lastSupabaseError || "OK";
-  const errClass = lastSupabaseError ? "err" : "ok";
-  const lsKeys = getDebugLsKeys(currentUser.id);
-
-  const rows = [
-    { lbl: "User ID",     val: currentUser.id.slice(0, 8) + "…", cls: "" },
-    { lbl: "My Bets",     val: myBets.length,                     cls: "" },
-    { lbl: "EV States",   val: Object.keys(evBetStates).length,   cls: "" },
-    { lbl: "Skipped IDs", val: skippedIds.length,                 cls: "" },
-    { lbl: "Bankroll",    val: br.toLocaleString("fi-FI") + " €", cls: "" },
-    { lbl: "LS keys",     val: lsKeys.length,                     cls: lsKeys.length > 0 ? "warn" : "ok" },
-    { lbl: "Supabase",    val: errVal,                             cls: errClass },
-  ];
-
-  document.getElementById("debug-grid").innerHTML = rows.map(r =>
-    `<div class="debug-row"><span class="debug-lbl">${escapeHtml(r.lbl)}</span><span class="debug-val ${r.cls}">${escapeHtml(r.val)}</span></div>`
-  ).join("");
-}
-
-function toggleDebugPanel() {
-  _debugPanelOpen = !_debugPanelOpen;
-  const body = document.getElementById("debug-panel-body");
-  const icon = document.getElementById("debug-toggle-icon");
-  if (body) body.style.display = _debugPanelOpen ? "block" : "none";
-  if (icon) icon.textContent = _debugPanelOpen ? "▼" : "▶";
-}
-
-function clearLocalCacheForCurrentUser() {
-  if (!currentUser) return;
-  const keys = getDebugLsKeys(currentUser.id);
-  keys.forEach(k => localStorage.removeItem(k));
-  console.log(`[Vedox Debug] Cleared ${keys.length} localStorage keys for user ${currentUser.id.slice(0,8)}…`);
-  renderDebugInfo();
-  const msg = document.getElementById("profile-msg");
-  if (msg) {
-    msg.textContent = `✓ Poistettu ${keys.length} localStorage-avainta. Muisti ja Supabase-data ennallaan.`;
-    msg.className = "profile-msg success";
-    setTimeout(() => { msg.textContent = ""; msg.className = "profile-msg"; }, 4000);
-  }
-}
-
-function refreshDebugInfoIfOpen() {
-  const overlay = document.getElementById("profile-modal-overlay");
-  if (overlay?.classList.contains("open")) renderDebugInfo();
-}
-
-// ===== /DEBUG PANEL =====
-
 function openInfoModal(type) {
   const ids = { terms:'modal-terms', privacy:'modal-privacy', responsible:'modal-responsible' };
   const id = ids[type]; if (!id) return;
@@ -1369,14 +2027,16 @@ function setProfileMsg(msg, type) {
 }
 
 function updateHeaderProfile(name, avatarDataUrl) {
-  const initial = (name||"?")[0].toUpperCase();
+  const safeName = (name || "?").trim();
+  const parts = safeName.split(/[\s._-]+/).filter(Boolean);
+  const initials = (
+    parts.length >= 2
+      ? parts[0][0] + parts[1][0]
+      : safeName.slice(0, 2)
+  ).toUpperCase();
   document.getElementById("header-profile-name").textContent = name || "";
   const avatarEl = document.getElementById("header-avatar");
-  if (avatarDataUrl) {
-    avatarEl.innerHTML = `<img src="${avatarDataUrl}" alt="avatar">`;
-  } else {
-    avatarEl.innerHTML = `<span>${initial}</span>`;
-  }
+  avatarEl.innerHTML = `<span>${initials}</span>`;
 }
 
 async function loadProfile(user) {
@@ -1441,13 +2101,12 @@ async function openProfileModal() {
   const preview = document.getElementById("modal-avatar-preview");
   const initial = (profile.username || currentUser.email.split("@")[0] || "?")[0].toUpperCase();
   if (profile.avatar_url) {
-    preview.innerHTML = `<img src="${profile.avatar_url}" alt="avatar">`;
+    preview.innerHTML = `<img src="${escapeAttr(profile.avatar_url)}" alt="avatar">`;
   } else {
     preview.innerHTML = `<span>${initial}</span>`;
   }
   document.getElementById("profile-modal-overlay").classList.add("open");
-  // Päivitä debug-info kun modaali avataan
-  renderDebugInfo();
+    
 }
 
 let profileModalMouseDownOnOverlay = false;
@@ -1470,7 +2129,7 @@ function onAvatarSelected(input) {
   selectedAvatarFile = file;
   const reader = new FileReader();
   reader.onload = e => {
-    document.getElementById("modal-avatar-preview").innerHTML = `<img src="${e.target.result}" alt="avatar">`;
+    document.getElementById("modal-avatar-preview").innerHTML = `<img src="${escapeAttr(e.target.result)}" alt="avatar">`;
   };
   reader.readAsDataURL(file);
 }
@@ -1495,8 +2154,7 @@ async function saveProfile() {
     updateHeaderProfile(name, avatarUrl);
     selectedAvatarFile = null;
     setProfileMsg(lang==="fi" ? "Profiili tallennettu." : "Profile saved.", "success");
-    renderDebugInfo(); // Päivitä debug tallennuksen jälkeen
-    setTimeout(closeProfileModal, 500);
+         setTimeout(closeProfileModal, 500);
   } catch (e) {
     console.error("[Vedox] profile save failed:", e);
     lastSupabaseError = e.message || String(e);
@@ -1506,8 +2164,7 @@ async function saveProfile() {
         : "Profile save failed. Please try again in a moment.",
       "error"
     );
-    renderDebugInfo(); // Näytä virhe debugissa
-  } finally {
+       } finally {
     if (btn) { btn.disabled = false; btn.textContent = lang==="fi" ? "Tallenna" : "Save"; }
   }
 }
