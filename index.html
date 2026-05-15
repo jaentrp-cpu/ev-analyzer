@@ -205,7 +205,6 @@ nav {
 .lang-seg .lang-btn:hover { color:var(--text); }
 .lang-seg .lang-btn.active { color:var(--blue-deep); background:var(--blue-soft); box-shadow:inset 0 0 0 1px var(--blue-border); font-weight:600; }
 .theme-btn:hover { color:var(--text); background:var(--surface-2); }
-/* override outer pill border on login button when standalone */
 #btn-login-header { border:1px solid var(--blue) !important; padding:0 12px; height:28px; border-radius:6px; }
 
 /* ===== MAIN ===== */
@@ -520,7 +519,6 @@ main {
 }
 .btn-skip:hover { color:var(--text); border-color:var(--border2); background:var(--surface-2); }
 
-/* old grid styles kept as no-op aliases for safety */
 .bet-main { display:contents; }
 .match-top, .match-name, .bet-meta, .meta-tag, .badge, .badge-sport, .badge-mkt,
 .cell, .cell-lbl, .cell-val, .cell-sub,
@@ -710,7 +708,7 @@ main {
 .profile-btn { display:flex; align-items:center; gap:8px; background:transparent; border:none; color:var(--text2); font-family:var(--font-ui); font-size:0.78rem; font-weight:500; padding:0 10px 0 4px; border-radius:6px; cursor:pointer; transition:all 0.15s; max-width:180px; overflow:hidden; }
 .profile-btn:hover { background:var(--surface-2); color:var(--text); }
 .profile-avatar { width:24px; height:24px; border-radius:50%; background:#1f2a44; color:#fff; font-family:var(--font-ui); font-size:0.66rem; font-weight:600; letter-spacing:0.02em; display:inline-flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; border:1px solid rgba(255,255,255,0.06); }
-.profile-avatar img { display:none; }
+.profile-avatar img { display:block; width:100%; height:100%; object-fit:cover; }
 .profile-avatar span { line-height:1; }
 .profile-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
@@ -1135,6 +1133,7 @@ let selectedAvatarFile = null;
 let lastSupabaseError = "";
 let _bankrollDebounceTimer = null;
 let _bankrollSnapshotDebounceTimer = null;
+
 // ===== AUTH =====
 function switchAuthTab(tab) {
   document.getElementById("tab-login").classList.toggle("active", tab==="login");
@@ -1196,6 +1195,9 @@ async function doRegister() {
 async function doLogout() { await sbClient.auth.signOut(); }
 
 // ===== USER BETS — Supabase mapperit =====
+// User bet estimate DB field
+const USER_BET_ESTIMATE_COLUMN = "pinn";
+
 function dbBetToLocal(row) {
   return {
     id:             row.id,
@@ -1206,7 +1208,7 @@ function dbBetToLocal(row) {
     odds:           parseFloat(row.odds)           || 0,
     stake:          parseFloat(row.stake)          || 0,
     ev:             parseFloat(row.ev)             || 0,
-    estimate:       parseFloat(row.pinn)           || 0,
+    estimate:       parseFloat(row[USER_BET_ESTIMATE_COLUMN]) || 0,
     result:         row.result         || "pending",
     settled:        row.settled        || false,
     returnedAmount: parseFloat(row.returned_amount)|| 0,
@@ -1227,7 +1229,7 @@ function localBetToDb(b, userId) {
     odds:           b.odds            || 0,
     stake:          b.stake           || 0,
     ev:             b.ev              || 0,
-    pinn:           b.estimate        || 0,
+    [USER_BET_ESTIMATE_COLUMN]: b.estimate || 0,
     result:         b.result          || "pending",
     settled:        b.settled         || false,
     returned_amount:b.returnedAmount  || 0,
@@ -1471,16 +1473,18 @@ function showPage(p, btn) {
 // ===== FETCH =====
 async function fetchAll() {
   try {
-    const {data,error}=await sbClient.from('ev_bets').select('id,ottelu,alkaa,markkina,kohde,paras_kerroin,kirja,ev_pct,liiga,aalto').eq('aktiivinen',true).order('ev_pct',{ascending:false});
+    const {data,error}=await sbClient.from('ev_bets').select('id,ottelu,alkaa,markkina,kohde,paras_kerroin,kirja,ev_pct,liiga').eq('aktiivinen',true).order('ev_pct',{ascending:false});
     if (error) { lastSupabaseError = error.message; console.error('[Vedox] Supabase fetch error:',error.message); document.getElementById("bets-loading").style.display="none"; return; }
-    allBets=(data||[]).map(r=>({id:r.id,ottelu:r.ottelu,alkaa:r.alkaa?new Date(r.alkaa).toLocaleString("fi-FI",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"—",markkina:r.markkina||"",kohde:r.kohde,kerroin:parseFloat(r.paras_kerroin)||0,kirja:r.kirja||"",ev:parseFloat(r.ev_pct)||0,liiga:r.liiga||"",aalto:r.aalto||""}));
+    allBets=(data||[]).map(r=>({id:r.id,ottelu:r.ottelu,alkaa:r.alkaa?new Date(r.alkaa).toLocaleString("fi-FI",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"—",markkina:r.markkina||"",kohde:r.kohde,kerroin:parseFloat(r.paras_kerroin)||0,kirja:r.kirja||"",ev:parseFloat(r.ev_pct)||0,liiga:r.liiga||""}));
   } catch(e) { lastSupabaseError = e.message || String(e); console.error('[Vedox] fetchAll poikkeus:',e.message||e); }
   renderBets();
   document.getElementById("bets-loading").style.display="none";
   countdown=REFRESH;
 }
 
-function betId(b) { return b.id || `${b.ottelu}|${b.kohde}|${b.aalto}`; }
+function betId(b) {
+  return String(b.id || `${b.ottelu}|${b.kohde}|${b.markkina}|${b.kirja}|${b.alkaa}`);
+}
 
 // ===== FILTERS =====
 function getFiltered() {
@@ -1548,7 +1552,6 @@ function resetFilters() {
   renderBets();
 }
 
-
 // ===== LEAGUE LABEL MAPPER (frontend-only) =====
 const LEAGUE_LABELS = {
   soccer_epl:"Premier League",
@@ -1615,19 +1618,15 @@ function formatLeague(liiga) {
   if (!liiga) return "";
   const key = String(liiga).toLowerCase().trim();
   if (LEAGUE_LABELS[key]) return LEAGUE_LABELS[key];
-  // Try without prefix
   const cleaned = key.replace(/^(soccer|basketball|icehockey|baseball|americanfootball|tennis|boxing|mma|rugbyleague|rugbyunion|cricket|golf)_/,"");
-  // country_competition -> "Competition"
   const parts = cleaned.split("_").filter(Boolean);
   if (parts.length === 0) return key.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase());
-  // Drop common country prefixes if a competition word follows
   const COUNTRIES = new Set(["spain","france","germany","italy","england","netherlands","portugal","belgium","switzerland","austria","turkey","greece","denmark","sweden","norway","finland","usa","brazil","argentina","mexico","japan","korea","australia","russia","poland","czech","croatia","serbia","romania","hungary","scotland","ireland","wales","northern_ireland","saudi_arabia","qatar","uae","china","india","colombia","chile","peru","uruguay","ecuador","paraguay","bolivia","venezuela","south_africa","egypt","morocco","tunisia","algeria","nigeria","ghana","senegal"]);
   let words = parts;
   if (parts.length >= 2 && COUNTRIES.has(parts[0])) words = parts.slice(1);
   return words.map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(" ");
 }
 
-// Detect "starts soon" (< 15 min) from finnish display "dd.mm. HH.MM" — best-effort, never throws
 function startsSoonInfo(alkaaText) {
   try {
     if (!alkaaText || alkaaText==="—") return { soon:false, started:false };
@@ -1659,6 +1658,27 @@ function sportLabel(liiga) {
 }
 function evClass(ev) { if(ev>=7)return "top"; if(ev>=5)return "high"; return ""; }
 
+// ===== ROLLBACK HELPERS =====
+function rollbackManualBet(bet, previousBankroll) {
+  myBets = myBets.filter(x => x !== bet);
+  setCurrentBankroll(previousBankroll);
+  saveBets();
+  renderMyBets();
+  alert(lang==="fi" ? "Betsin tallennus epäonnistui. Yritä uudelleen." : "Saving bet failed. Please try again.");
+}
+
+function rollbackPlacedBet(newBet, sid, previousBankroll) {
+  myBets = myBets.filter(x => x !== newBet);
+  setCurrentBankroll(previousBankroll);
+  delete evBetStates[sid];
+  skippedIds = Object.keys(evBetStates);
+  if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`, JSON.stringify(skippedIds));
+  saveBets();
+  renderBets();
+  renderMyBets();
+  alert(lang==="fi" ? "Betsin tallennus epäonnistui. Yritä uudelleen." : "Saving bet failed. Please try again.");
+}
+
 // ===== PLACE BET =====
 function placeBet(idx) {
   const filtered=getFiltered(), b=filtered[idx]; if(!b) return;
@@ -1674,6 +1694,13 @@ function placeBet(idx) {
 
   const newBet = {id:Date.now(),date:b.alkaa||new Date().toLocaleDateString("fi-FI"),match:b.ottelu,target:b.kohde,book:b.kirja,odds:b.kerroin,stake,ev:b.ev,result:"pending",settled:false,returnedAmount:0,market:b.markkina.replace(/_/g," "),potential:pot,sourceBetId:sid};
   myBets.unshift(newBet);
+
+  // Optimistic UI update — rollback handles both false and exception paths
+  evBetStates[sid] = "placed";
+  skippedIds = Object.keys(evBetStates);
+  if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`,JSON.stringify(skippedIds));
+  renderBets(); renderMyBets();
+
   upsertBetToDb(newBet).then(ok => {
     if (ok) {
       saveBets();
@@ -1682,19 +1709,13 @@ function placeBet(idx) {
       addBankrollSnapshot(newBr, "bet_placed");
       renderMyBets();
     } else {
-      myBets = myBets.filter(x => x !== newBet);
-      setCurrentBankroll(currentBr);
-      delete evBetStates[sid];
-      skippedIds = Object.keys(evBetStates);
-      if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`, JSON.stringify(skippedIds));
-      saveBets(); renderBets(); renderMyBets();
-      alert(lang==="fi" ? "Betsin tallennus epäonnistui. Yritä uudelleen." : "Saving bet failed. Please try again.");
+      rollbackPlacedBet(newBet, sid, currentBr);
     }
+  }).catch(e => {
+    console.warn("[Vedox] bet insert exception:", e.message || e);
+    lastSupabaseError = e.message || String(e);
+    rollbackPlacedBet(newBet, sid, currentBr);
   });
-  evBetStates[sid] = "placed";
-  skippedIds = Object.keys(evBetStates);
-  if (currentUser) localStorage.setItem(`vedox_skipped_${currentUser.id}`,JSON.stringify(skippedIds));
-  renderBets(); renderMyBets();
 }
 
 // ===== SKIP BET =====
@@ -1776,6 +1797,12 @@ function renderBets() {
 
 function escapeHtmlSafe(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
 function escapeAttr(s){return escapeHtmlSafe(s);}
+function safeImageUrl(url) {
+  const s = String(url || "").trim();
+  if (!s) return "";
+  if (s.startsWith("https://") || s.startsWith("data:image/")) return s;
+  return "";
+}
 
 // ===== MY BETS — Supabase kirjoituspolut =====
 async function upsertBetToDb(bet) {
@@ -1839,12 +1866,11 @@ function saveBet() {
   myBets.unshift(bet);
   upsertBetToDb(bet).then(ok => {
     if (ok) { saveBets(); addBankrollSnapshot(newBr, "manual_bet_saved"); renderMyBets(); }
-    else {
-      myBets = myBets.filter(x => x !== bet);
-      setCurrentBankroll(br);
-      saveBets(); renderMyBets();
-      alert(lang==="fi" ? "Betsin tallennus epäonnistui. Yritä uudelleen." : "Saving bet failed. Please try again.");
-    }
+    else { rollbackManualBet(bet, br); }
+  }).catch(e => {
+    console.warn("[Vedox] manual bet insert exception:", e.message || e);
+    lastSupabaseError = e.message || String(e);
+    rollbackManualBet(bet, br);
   });
   setCurrentBankroll(newBr);
   renderMyBets(); toggleAddForm();
@@ -1916,6 +1942,15 @@ function updateResult(id, val) {
       renderMyBets();
       alert(lang==="fi" ? "Tuloksen tallennus epäonnistui. Yritä uudelleen." : "Saving result failed. Please try again.");
     }
+  }).catch(e => {
+    console.warn("[Vedox] result update exception:", e.message || e);
+    lastSupabaseError = e.message || String(e);
+    b.result=oldResult;
+    b.returnedAmount=oldReturnedAmount;
+    b.settled=oldSettled;
+    setCurrentBankroll(originalBr);
+    renderMyBets();
+    alert(lang==="fi" ? "Tuloksen tallennus epäonnistui. Yritä uudelleen." : "Saving result failed. Please try again.");
   });
   renderMyBets();
 }
@@ -1960,7 +1995,7 @@ function renderMyBets() {
   document.getElementById("mb-lost").textContent=lost;
   document.getElementById("mb-roi").textContent=roi!=="—"?roi+"%":"—";
   const list=document.getElementById("mybets-list");
-  if (myBets.length===0) { list.innerHTML=`<div class="empty-box">${fi?"Ei betsejä vielä.":"No bets yet."}</div>`;  return; }
+  if (myBets.length===0) { list.innerHTML=`<div class="empty-box">${fi?"Ei betsejä vielä.":"No bets yet."}</div>`; return; }
   list.innerHTML=myBets.map(b=>{
     const result=["pending","won","lost"].includes(b.result)?b.result:"pending";
     const pl=result==="won"?b.stake*(b.odds-1):result==="lost"?-b.stake:null;
@@ -1972,7 +2007,6 @@ function renderMyBets() {
   if (myBets.length>0 && myBets.length<5) {
     list.innerHTML += `<div class="low-data-note">${fi?"Analyysi tarkentuu, kun betsejä kertyy enemmän.":"Analytics improve as you log more bets."}</div>`;
   }
-  
 }
 
 function renderAnalytics() {
@@ -2033,10 +2067,15 @@ function updateHeaderProfile(name, avatarDataUrl) {
     parts.length >= 2
       ? parts[0][0] + parts[1][0]
       : safeName.slice(0, 2)
-  ).toUpperCase();
+  ).toUpperCase() || "?";
   document.getElementById("header-profile-name").textContent = name || "";
   const avatarEl = document.getElementById("header-avatar");
-  avatarEl.innerHTML = `<span>${initials}</span>`;
+  const safeAvatarUrl = safeImageUrl(avatarDataUrl);
+  if (safeAvatarUrl) {
+    avatarEl.innerHTML = `<img src="${escapeAttr(safeAvatarUrl)}" alt="avatar">`;
+  } else {
+    avatarEl.innerHTML = `<span>${escapeHtmlSafe(initials)}</span>`;
+  }
 }
 
 async function loadProfile(user) {
@@ -2100,13 +2139,13 @@ async function openProfileModal() {
   document.getElementById("profile-name-input").value = profile.username || "";
   const preview = document.getElementById("modal-avatar-preview");
   const initial = (profile.username || currentUser.email.split("@")[0] || "?")[0].toUpperCase();
-  if (profile.avatar_url) {
-    preview.innerHTML = `<img src="${escapeAttr(profile.avatar_url)}" alt="avatar">`;
+  const safeAvatarUrl = safeImageUrl(profile.avatar_url);
+  if (safeAvatarUrl) {
+    preview.innerHTML = `<img src="${escapeAttr(safeAvatarUrl)}" alt="avatar">`;
   } else {
-    preview.innerHTML = `<span>${initial}</span>`;
+    preview.innerHTML = `<span>${escapeHtmlSafe(initial)}</span>`;
   }
   document.getElementById("profile-modal-overlay").classList.add("open");
-    
 }
 
 let profileModalMouseDownOnOverlay = false;
@@ -2154,7 +2193,7 @@ async function saveProfile() {
     updateHeaderProfile(name, avatarUrl);
     selectedAvatarFile = null;
     setProfileMsg(lang==="fi" ? "Profiili tallennettu." : "Profile saved.", "success");
-         setTimeout(closeProfileModal, 500);
+    setTimeout(closeProfileModal, 500);
   } catch (e) {
     console.error("[Vedox] profile save failed:", e);
     lastSupabaseError = e.message || String(e);
@@ -2164,7 +2203,7 @@ async function saveProfile() {
         : "Profile save failed. Please try again in a moment.",
       "error"
     );
-       } finally {
+  } finally {
     if (btn) { btn.disabled = false; btn.textContent = lang==="fi" ? "Tallenna" : "Save"; }
   }
 }
