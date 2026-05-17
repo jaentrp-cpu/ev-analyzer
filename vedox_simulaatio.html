@@ -1226,11 +1226,13 @@ function renderHitPie() {
 function roiBars(items, containerId, maxAbs = 80) {
   const fi = lang === "fi";
   document.getElementById(containerId).innerHTML = items.length ? items.map(item => {
-    const roiNum = parseFloat(item.roi);
-    const barW   = Math.min(Math.abs(roiNum) / maxAbs * 100, 100);
+    const roiNum   = parseFloat(item.roi);
+    const barW     = Math.min(Math.abs(roiNum) / maxAbs * 100, 100);
+    const safeLabel = escapeHtml(item.label);
+    const safeExtra = item.extra ? escapeHtml(item.extra) : "";
     return `<div class="roi-bar-wrap">
       <div class="roi-bar-header">
-        <span class="roi-bar-label">${item.label} <span class="roi-bar-count">(${item.count}${item.extra||""})</span></span>
+        <span class="roi-bar-label">${safeLabel} <span class="roi-bar-count">(${item.count}${safeExtra})</span></span>
         <span class="roi-bar-val">${roiNum >= 0 ? "+" : ""}${item.roi}%</span>
       </div>
       <div class="roi-bar-bg"><div class="roi-bar-fill" style="width:${barW}%"></div></div>
