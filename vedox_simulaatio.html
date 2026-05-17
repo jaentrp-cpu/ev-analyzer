@@ -1029,8 +1029,11 @@ function openMerkitse(betId) {
   selectedResult = null;
 
   document.getElementById("modal-match").textContent = bet.ottelu;
+  const safeKohde    = escapeHtml(bet.kohde);
+  const safeMarkkina = escapeHtml(bet.markkina).toUpperCase();
+  const safeAalto    = escapeHtml(bet.aalto);
   document.getElementById("modal-sub").innerHTML =
-    `<span>${bet.kohde}</span> · ${bet.markkina.toUpperCase()} · ${bet.aalto} · kerroin <span>${bet.kerroin.toFixed(2)}</span> · panos ${bet.panos.toFixed(2)}€`;
+    `<span>${safeKohde}</span> · ${safeMarkkina} · ${safeAalto} · kerroin <span>${bet.kerroin.toFixed(2)}</span> · panos ${bet.panos.toFixed(2)}€`;
 
   const canHalf = HALF_MARKETS.some(m => bet.markkina.includes(m)) || bet.markkina.includes('total');
   const btnsEl = document.getElementById("result-btns");
