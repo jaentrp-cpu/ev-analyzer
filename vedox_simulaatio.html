@@ -691,6 +691,33 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
       </div>
     </div>
 
+    <!-- ===== ARBITRAGE-LÖYDÖT ===== -->
+    <div id="sim-arb-section" style="margin-top:1.25rem;display:none">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title" data-fi="Arbitrage-löydöt" data-en="Arbitrage Finds">💎 Arbitrage-löydöt</div>
+          <div id="sim-arb-count" style="font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;color:var(--text3)"></div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="sim-table">
+            <thead>
+              <tr>
+                <th data-fi="Ottelu" data-en="Match">Ottelu</th>
+                <th data-fi="Markkina" data-en="Market">Markkina</th>
+                <th data-fi="Alkaa" data-en="Starts">Alkaa</th>
+                <th data-fi="Implied" data-en="Implied">Implied</th>
+                <th data-fi="Tuotto %" data-en="Profit %">Tuotto %</th>
+                <th data-fi="Panos" data-en="Stake">Panos</th>
+                <th data-fi="Payout" data-en="Payout">Payout</th>
+                <th data-fi="Kohteet" data-en="Outcomes">Kohteet</th>
+              </tr>
+            </thead>
+            <tbody id="sim-arb-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 </main>
 
@@ -701,11 +728,11 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
     <div class="modal-match" id="modal-match">—</div>
     <div class="modal-sub" id="modal-sub">—</div>
     <div class="result-btns" id="result-btns">
-      <button class="result-btn" onclick="selectResult('Voitto')">✅ Voitto</button>
-      <button class="result-btn" onclick="selectResult('Tappio')">❌ Tappio</button>
-      <button class="result-btn" onclick="selectResult('Push')">↔️ Push</button>
-      <button class="result-btn half-only" onclick="selectResult('Half Win')">½ Half Win</button>
-      <button class="result-btn half-only" onclick="selectResult('Half Loss')">½ Half Loss</button>
+      <button class="result-btn" onclick="selectResult(event, 'Voitto')">✅ Voitto</button>
+      <button class="result-btn" onclick="selectResult(event, 'Tappio')">❌ Tappio</button>
+      <button class="result-btn" onclick="selectResult(event, 'Push')">↔️ Push</button>
+      <button class="result-btn half-only" onclick="selectResult(event, 'Half Win')">½ Half Win</button>
+      <button class="result-btn half-only" onclick="selectResult(event, 'Half Loss')">½ Half Loss</button>
     </div>
     <div id="modal-preview" style="font-size:0.72rem;color:var(--text3);min-height:20px;margin-bottom:0.75rem;"></div>
     <hr class="modal-divider">
@@ -731,6 +758,7 @@ const MERKITSE_URL   = "https://vedox-bot-production.up.railway.app/merkitse";
 const HALF_MARKETS   = ['totals','spreads','asian_handicap','draw_no_bet'];
 
 let allBets = [];
+let allArbitrages = [];
 let lang = localStorage.getItem("vedox_lang") || "fi";
 let activeResultFilters = new Set();
 let activeWaveFilters = new Set();
@@ -779,13 +807,18 @@ function showApp(user) {
   document.getElementById("logout-btn").style.display   = "block";
   document.getElementById("user-email-display").textContent = user.email;
   fetchSimData();
+  fetchSimArbitrages();
   clearInterval(simTimer);
-  simTimer = setInterval(fetchSimData, 5 * 60 * 1000);
+  simTimer = setInterval(() => {
+    fetchSimData();
+    fetchSimArbitrages();
+  }, 5 * 60 * 1000);
 }
 
 function hideApp() {
   currentUser = null;
   allBets = [];
+  allArbitrages = [];
   clearInterval(simTimer);
   simTimer = null;
   document.getElementById("auth-overlay").style.display = "flex";
@@ -793,6 +826,8 @@ function hideApp() {
   document.getElementById("logout-btn").style.display   = "none";
   document.getElementById("content").style.display      = "none";
   document.getElementById("loading").style.display      = "none";
+  const arbSection = document.getElementById("sim-arb-section");
+  if (arbSection) { arbSection.style.display = "none"; document.getElementById("sim-arb-tbody").innerHTML = ""; document.getElementById("sim-arb-count").textContent = ""; }
 }
 
 sbClient.auth.onAuthStateChange((_event, session) => {
@@ -823,7 +858,8 @@ function setLang(l) {
     const txt = el.getAttribute(`data-${l}`);
     if (txt && !["INPUT","SELECT","OPTION"].includes(el.tagName)) el.textContent = txt;
   });
-  renderAll();
+  if (currentUser && allBets.length > 0) renderAll();
+  renderSimArbitrages(allArbitrages);
 }
 
 // ===== FETCH DATA =====
@@ -1051,12 +1087,12 @@ function openMerkitse(betId) {
   document.body.style.overflow = "hidden";
 }
 
-function selectResult(tulos) {
+function selectResult(e, tulos) {
   selectedResult = tulos;
   document.querySelectorAll(".result-btn").forEach(b => {
     b.classList.remove("sel","sel-voitto","sel-tappio","sel-push","sel-half-win","sel-half-loss");
   });
-  event.currentTarget.classList.add("sel", "sel-" + tulos.toLowerCase().replace(" ","-"));
+  e.currentTarget.classList.add("sel", "sel-" + tulos.toLowerCase().replace(" ","-"));
 
   if (modalBet) {
     const k = modalBet.kerroin, p = modalBet.panos;
@@ -1492,8 +1528,9 @@ function renderSportLeagueBars() {
     const stakePct = (d.stake / totalStake * 100).toFixed(1);
     const betsPct  = (d.bets / totalBets * 100).toFixed(1);
     const roi = d.stake > 0 ? (d.profit / d.stake * 100).toFixed(1) : "0.0";
+    const safeSport = escapeHtml(sport);
     return `<button class="sl-sport-btn ${sport===activeSport?"active":""}" onclick="selectSportByIdx(${idx})">
-      <div class="sl-sport-name">${sport}</div>
+      <div class="sl-sport-name">${safeSport}</div>
       <div class="sl-sport-meta">
         <span>${d.bets} ${fi?"bettiä":"bets"} <span style="color:var(--text3)">(${betsPct}%)</span></span>
         <span>·</span>
@@ -1528,9 +1565,10 @@ function renderLeagueDetail(sports, totalStake, totalBets) {
     const roi      = ld.stake > 0 ? (ld.profit / ld.stake * 100).toFixed(1) : "0.0";
     const barW     = Math.min(ld.bets / d.bets * 100, 100);
     const roiColor = parseFloat(roi) >= 0 ? "var(--blue-lt)" : "var(--red)";
+    const safeLeague = escapeHtml(league);
     return `<div class="sl-league-row">
       <div>
-        <div class="sl-league-name">${league}</div>
+        <div class="sl-league-name">${safeLeague}</div>
         <div class="sl-league-bar"><div class="sl-league-bar-fill" style="width:${barW}%"></div></div>
       </div>
       <div class="sl-league-val">${ld.bets}</div>
@@ -1540,9 +1578,10 @@ function renderLeagueDetail(sports, totalStake, totalBets) {
     </div>`;
   }).join("");
 
+  const safeActiveSport = escapeHtml(activeSport);
   document.getElementById("sl-detail").innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--text)">${activeSport}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--text)">${safeActiveSport}</div>
       <div style="display:flex;gap:16px;font-size:0.72rem;flex-wrap:wrap">
         <span style="color:var(--text3)">${fi?"Betsit":"Bets"}: <span style="color:var(--text2);font-weight:700">${d.bets} (${sportBetsPct}%)</span></span>
         <span style="color:var(--text3)">${fi?"Panokset":"Staked"}: <span style="color:var(--text2);font-weight:700">${d.stake.toFixed(0)}€</span></span>
@@ -1669,6 +1708,61 @@ function renderTable() {
 
 applyTheme(currentTheme);
 setLang(lang);
+
+// ===== ARBITRAGE-LÖYDÖT (simulaatiosivu) =====
+async function fetchSimArbitrages() {
+  try {
+    const { data, error } = await sbClient
+      .from('arbitrages')
+      .select('*')
+      .eq('aktiivinen', true)
+      .order('profit_pct', { ascending: false });
+    if (error) { console.warn('[Vedox] sim arbitrages load failed:', error.message); return; }
+    allArbitrages = data || [];
+    renderSimArbitrages(allArbitrages);
+  } catch(e) { console.warn('[Vedox] sim arbitrages exception:', e.message); }
+}
+
+function renderSimArbitrages(arbs) {
+  const fi = lang === 'fi';
+  const section = document.getElementById('sim-arb-section');
+  const tbody   = document.getElementById('sim-arb-tbody');
+  const count   = document.getElementById('sim-arb-count');
+  if (!section || !tbody) return;
+  if (!arbs.length) {
+    section.style.display = 'none';
+    tbody.innerHTML = '';
+    if (count) count.textContent = '';
+    return;
+  }
+  section.style.display = 'block';
+  count.textContent = `(${arbs.length})`;
+
+  tbody.innerHTML = arbs.map(a => {
+    let outcomes = [];
+    if (Array.isArray(a.outcomes_json)) {
+      outcomes = a.outcomes_json;
+    } else if (typeof a.outcomes_json === 'string') {
+      try { outcomes = JSON.parse(a.outcomes_json); } catch(e) { outcomes = []; }
+    }
+    const alkaaStr = a.alkaa ? new Date(a.alkaa).toLocaleString('fi-FI', { timeZone: 'Europe/Helsinki', day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '—';
+    const outcomeSummary = outcomes.length
+      ? outcomes.map(o =>
+          `${escapeHtml(String(o.side??''))} @ ${Number(o.odds??0).toFixed(2)} (${escapeHtml(String(o.book??''))}) ${Number(o.stake??0).toFixed(2)}€`
+        ).join(' · ')
+      : (fi ? 'Panosjakoa ei saatavilla' : 'Stake split unavailable');
+    return `<tr>
+      <td style="color:var(--text2);font-weight:600">${escapeHtml(String(a.ottelu??''))}</td>
+      <td><span style="font-size:0.65rem;background:var(--bg3);padding:2px 6px;border-radius:3px;border:1px solid var(--border)">${escapeHtml(String(a.line??''))}</span></td>
+      <td style="font-size:0.7rem;color:var(--text3)">${alkaaStr}</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--text2)">${(Number(a.implied_sum??1)*100).toFixed(2)}%</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--amber)">+${Number(a.profit_pct??0).toFixed(3)}%</td>
+      <td style="color:var(--blue-lt)">${Number(a.total_stake??0).toFixed(2)}€</td>
+      <td style="color:var(--green)">${Number(a.payout??0).toFixed(2)}€</td>
+      <td style="font-size:0.68rem;color:var(--text3);max-width:300px;white-space:normal">${outcomeSummary}</td>
+    </tr>`;
+  }).join('');
+}
 </script>
 </body>
 </html>
