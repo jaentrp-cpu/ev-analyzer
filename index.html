@@ -2276,6 +2276,8 @@ function renderArbitrages(arbs) {
   count.textContent = `(${arbs.length})`;
 
   list.innerHTML = arbs.map(a => {
+    const profitPct = Number(a.profit_pct ?? 0);
+    const returnPct = a.return_pct != null ? Number(a.return_pct) : 100 + profitPct;
     let outcomes = [];
     if (Array.isArray(a.outcomes_json)) {
       outcomes = a.outcomes_json;
@@ -2288,8 +2290,7 @@ function renderArbitrages(arbs) {
         <span style="flex:1;color:var(--text2);font-weight:600">${escapeHtmlSafe(String(o.side??''))}</span>
         <span style="color:var(--text);font-family:var(--font-num);font-weight:700">${Number(o.odds??0).toFixed(2)}</span>
         <span style="color:var(--text3)">${escapeHtmlSafe(String(o.book??''))}</span>
-        <span style="color:var(--amber);font-family:var(--font-num)">${Number(o.stake??0).toFixed(2)}€</span>
-        <span style="color:var(--green-lt);font-family:var(--font-num)">→ ${Number(o.payout??0).toFixed(2)}€</span>
+        <span style="color:var(--amber);font-family:var(--font-num)">${Number(o.stake_pct ?? o.stake ?? 0).toFixed(2)}%</span>
       </div>`).join('');
     const outcomeSection = outcomes.length
       ? outcomeRows
@@ -2303,15 +2304,15 @@ function renderArbitrages(arbs) {
         <div style="display:flex;gap:12px;flex-shrink:0;align-items:center">
           <div style="text-align:right">
             <div style="font-size:0.58rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:2px">${fi?'Lukittu tuotto':'Locked profit'}</div>
-            <div style="font-family:var(--font-num);font-size:1.1rem;font-weight:700;color:var(--amber)">+${Number(a.profit_pct??0).toFixed(3)}%</div>
+            <div style="font-family:var(--font-num);font-size:1.1rem;font-weight:700;color:var(--amber)">+${profitPct.toFixed(3)}%</div>
           </div>
           <div style="text-align:right">
             <div style="font-size:0.58rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:2px">Implied</div>
             <div style="font-family:var(--font-num);font-size:0.88rem;font-weight:600;color:var(--text2)">${(Number(a.implied_sum??1)*100).toFixed(2)}%</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:0.58rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:2px">${fi?'Panos':'Stake'}</div>
-            <div style="font-family:var(--font-num);font-size:0.88rem;font-weight:600;color:var(--text2)">${Number(a.total_stake??0).toFixed(2)}€</div>
+            <div style="font-size:0.58rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:2px">${fi?'Palautus':'Return'}</div>
+            <div style="font-family:var(--font-num);font-size:0.88rem;font-weight:600;color:var(--text2)">${returnPct.toFixed(3)}%</div>
           </div>
         </div>
       </div>
