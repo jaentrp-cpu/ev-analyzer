@@ -827,13 +827,35 @@ async function fetchSimData() {
     const text = await res.text();
     allBets = parseSimCSV(text);
 
-    // Väliaikainen tarkistus — voi poistaa deploy-versiosta testauksen jälkeen
+    // Väliaikainen debug — poista kun KBO/NPB-kesken-näkyvyys on varmistettu
+    const baseballPendingDebug = allBets
+      .filter(b =>
+        b.tulos === "kesken" &&
+        (b.liiga === "baseball_kbo" || b.liiga === "baseball_npb")
+      )
+      .map(b => ({
+        id: b.id,
+        aika: b.aika,
+        alkaa: b.alkaa,
+        ottelu: b.ottelu,
+        kohde: b.kohde,
+        markkina: b.markkina,
+        aalto: b.aalto,
+        tulos: b.tulos,
+        liiga: b.liiga
+      }));
+
     console.table({
+      total_rows: allBets.length,
+      kesken_total: allBets.filter(b => b.tulos === "kesken").length,
       kbo_total:   allBets.filter(b => b.liiga === "baseball_kbo").length,
       kbo_pending: allBets.filter(b => b.liiga === "baseball_kbo" && b.tulos === "kesken").length,
       npb_total:   allBets.filter(b => b.liiga === "baseball_npb").length,
       npb_pending: allBets.filter(b => b.liiga === "baseball_npb" && b.tulos === "kesken").length,
+      baseball_pending_visible_candidates: baseballPendingDebug.length,
     });
+
+    console.table(baseballPendingDebug);
 
     document.getElementById("loading").style.display = "none";
     document.getElementById("content").style.display = "block";
