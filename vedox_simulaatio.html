@@ -707,8 +707,7 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
                 <th data-fi="Alkaa" data-en="Starts">Alkaa</th>
                 <th data-fi="Implied" data-en="Implied">Implied</th>
                 <th data-fi="Tuotto %" data-en="Profit %">Tuotto %</th>
-                <th data-fi="Panos" data-en="Stake">Panos</th>
-                <th data-fi="Payout" data-en="Payout">Payout</th>
+                <th data-fi="Palautus %" data-en="Return %">Palautus %</th>
                 <th data-fi="Kohteet" data-en="Outcomes">Kohteet</th>
               </tr>
             </thead>
@@ -1739,6 +1738,8 @@ function renderSimArbitrages(arbs) {
   count.textContent = `(${arbs.length})`;
 
   tbody.innerHTML = arbs.map(a => {
+    const profitPct = Number(a.profit_pct ?? 0);
+    const returnPct = 100 + profitPct;
     let outcomes = [];
     if (Array.isArray(a.outcomes_json)) {
       outcomes = a.outcomes_json;
@@ -1748,7 +1749,7 @@ function renderSimArbitrages(arbs) {
     const alkaaStr = a.alkaa ? new Date(a.alkaa).toLocaleString('fi-FI', { timeZone: 'Europe/Helsinki', day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '—';
     const outcomeSummary = outcomes.length
       ? outcomes.map(o =>
-          `${escapeHtml(String(o.side??''))} @ ${Number(o.odds??0).toFixed(2)} (${escapeHtml(String(o.book??''))}) ${Number(o.stake??0).toFixed(2)}€`
+          `${escapeHtml(String(o.side??''))} @ ${Number(o.odds??0).toFixed(2)} (${escapeHtml(String(o.book??''))}) ${Number(o.stake_pct ?? o.stake ?? 0).toFixed(2)}%`
         ).join(' · ')
       : (fi ? 'Panosjakoa ei saatavilla' : 'Stake split unavailable');
     return `<tr>
@@ -1756,9 +1757,8 @@ function renderSimArbitrages(arbs) {
       <td><span style="font-size:0.65rem;background:var(--bg3);padding:2px 6px;border-radius:3px;border:1px solid var(--border)">${escapeHtml(String(a.line??''))}</span></td>
       <td style="font-size:0.7rem;color:var(--text3)">${alkaaStr}</td>
       <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--text2)">${(Number(a.implied_sum??1)*100).toFixed(2)}%</td>
-      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--amber)">+${Number(a.profit_pct??0).toFixed(3)}%</td>
-      <td style="color:var(--blue-lt)">${Number(a.total_stake??0).toFixed(2)}€</td>
-      <td style="color:var(--green)">${Number(a.payout??0).toFixed(2)}€</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--amber)">+${profitPct.toFixed(3)}%</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--green)">${returnPct.toFixed(3)}%</td>
       <td style="font-size:0.68rem;color:var(--text3);max-width:300px;white-space:normal">${outcomeSummary}</td>
     </tr>`;
   }).join('');
