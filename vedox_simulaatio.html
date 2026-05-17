@@ -732,8 +732,8 @@ const HALF_MARKETS   = ['totals','spreads','asian_handicap','draw_no_bet'];
 
 let allBets = [];
 let lang = localStorage.getItem("vedox_lang") || "fi";
-let activeFilter = "all";
-let activeWaveFilter = null;
+let activeResultFilters = new Set();
+let activeWaveFilters = new Set();
 let starFilterActive = false;
 let brRange = "all";
 let charts = {};
@@ -1525,18 +1525,48 @@ function renderLeagueDetail(sports, totalStake, totalBets) {
 }
 
 function filterBets(filter, btn) {
-  activeFilter = filter;
-  activeWaveFilter = null;
-  document.querySelectorAll(".tfilter:not(#star-filter-btn)").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
+  if (filter === "all") {
+    activeResultFilters.clear();
+  } else {
+    if (activeResultFilters.has(filter)) {
+      activeResultFilters.delete(filter);
+    } else {
+      activeResultFilters.add(filter);
+    }
+  }
+
+  document.querySelectorAll(".table-filters .tfilter").forEach(b => {
+    const onclick = b.getAttribute("onclick") || "";
+    if (onclick.includes("filterBets(")) b.classList.remove("active");
+  });
+
+  if (activeResultFilters.size === 0) {
+    document.querySelector(`button[onclick*="filterBets('all'"]`)?.classList.add("active");
+  } else {
+    activeResultFilters.forEach(f => {
+      document.querySelector(`button[onclick*="filterBets('${f}'"]`)?.classList.add("active");
+    });
+  }
+
   renderTable();
 }
 
 function filterByWave(wave, btn) {
-  activeWaveFilter = wave;
-  activeFilter = "all";
-  document.querySelectorAll(".tfilter:not(#star-filter-btn)").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
+  if (activeWaveFilters.has(wave)) {
+    activeWaveFilters.delete(wave);
+  } else {
+    activeWaveFilters.add(wave);
+  }
+
+  document.querySelectorAll(".table-filters .tfilter").forEach(b => {
+    const onclick = b.getAttribute("onclick") || "";
+    if (onclick.includes("filterByWave(")) b.classList.remove("active");
+  });
+
+  activeWaveFilters.forEach(w => {
+    document.querySelector(`button[onclick*="filterByWave('${w}'"]`)?.classList.add("active");
+  });
+
   renderTable();
 }
 
@@ -1545,8 +1575,15 @@ function renderTable() {
   const dateFrom = document.getElementById("date-from").value;
   const dateTo   = document.getElementById("date-to").value;
 
-  let filtered = activeFilter === "all" ? allBets : allBets.filter(b => b.tulos === activeFilter);
-  if (activeWaveFilter) filtered = filtered.filter(b => b.aalto === activeWaveFilter);
+  let filtered = allBets;
+
+  if (activeResultFilters.size > 0) {
+    filtered = filtered.filter(b => activeResultFilters.has(b.tulos));
+  }
+
+  if (activeWaveFilters.size > 0) {
+    filtered = filtered.filter(b => activeWaveFilters.has(b.aalto));
+  }
   if (starFilterActive) filtered = filtered.filter(b => starredIds.includes(b.id));
   if (dateFrom) { const from = new Date(dateFrom); filtered = filtered.filter(b => { const d=parseDate(b.alkaa); return d&&d>=from; }); }
   if (dateTo)   { const to = new Date(dateTo); to.setHours(23,59,59); filtered = filtered.filter(b => { const d=parseDate(b.alkaa); return d&&d<=to; }); }
