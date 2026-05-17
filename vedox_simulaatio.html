@@ -827,35 +827,48 @@ async function fetchSimData() {
     const text = await res.text();
     allBets = parseSimCSV(text);
 
-    // Väliaikainen debug — poista kun KBO/NPB-kesken-näkyvyys on varmistettu
-    const baseballPendingDebug = allBets
-      .filter(b =>
-        b.tulos === "kesken" &&
-        (b.liiga === "baseball_kbo" || b.liiga === "baseball_npb")
-      )
-      .map(b => ({
-        id: b.id,
-        aika: b.aika,
-        alkaa: b.alkaa,
-        ottelu: b.ottelu,
-        kohde: b.kohde,
-        markkina: b.markkina,
-        aalto: b.aalto,
-        tulos: b.tulos,
-        liiga: b.liiga
-      }));
+    // Väliaikainen bankroll/ROI sanity debug — poista testauksen jälkeen
+    const settledDebug = allBets.filter(b =>
+      ["voitto","tappio","half win","half loss","push"].includes(b.tulos)
+    );
+
+    const totalStakeDebug = settledDebug.reduce((sum, b) => sum + b.panos, 0);
+    const totalProfitFromTuottoDebug = settledDebug.reduce((sum, b) => sum + b.tuotto, 0);
+    const settledWithBankrollDebug = allBets.filter(b => b.bankrollJlk > 0);
+    const lastBankrollDebug = settledWithBankrollDebug.length > 0
+      ? settledWithBankrollDebug[settledWithBankrollDebug.length - 1].bankrollJlk
+      : START_BANKROLL;
+
+    const bankrollProfitDebug = lastBankrollDebug - START_BANKROLL;
 
     console.table({
       total_rows: allBets.length,
-      kesken_total: allBets.filter(b => b.tulos === "kesken").length,
-      kbo_total:   allBets.filter(b => b.liiga === "baseball_kbo").length,
-      kbo_pending: allBets.filter(b => b.liiga === "baseball_kbo" && b.tulos === "kesken").length,
-      npb_total:   allBets.filter(b => b.liiga === "baseball_npb").length,
-      npb_pending: allBets.filter(b => b.liiga === "baseball_npb" && b.tulos === "kesken").length,
-      baseball_pending_visible_candidates: baseballPendingDebug.length,
+      settled_count: settledDebug.length,
+      pending_count: allBets.filter(b => b.tulos === "kesken").length,
+      total_stake: Number(totalStakeDebug.toFixed(2)),
+      total_profit_from_tuotto: Number(totalProfitFromTuottoDebug.toFixed(2)),
+      bankroll_profit: Number(bankrollProfitDebug.toFixed(2)),
+      difference_profit_vs_bankroll: Number((totalProfitFromTuottoDebug - bankrollProfitDebug).toFixed(2)),
+      roi_from_tuotto_pct: totalStakeDebug > 0 ? Number((totalProfitFromTuottoDebug / totalStakeDebug * 100).toFixed(2)) : null,
+      roi_from_bankroll_pct: totalStakeDebug > 0 ? Number((bankrollProfitDebug / totalStakeDebug * 100).toFixed(2)) : null,
+      last_bankroll: Number(lastBankrollDebug.toFixed(2)),
     });
 
-    console.table(baseballPendingDebug);
+    console.table(
+      settledDebug.slice(-10).map(b => ({
+        id: b.id,
+        aika: b.aika,
+        ottelu: b.ottelu,
+        kohde: b.kohde,
+        tulos: b.tulos,
+        kerroin: b.kerroin,
+        panos: b.panos,
+        tuotto: b.tuotto,
+        bankrollEnn: b.bankrollEnn,
+        bankrollJlk: b.bankrollJlk,
+        impliedBankrollChange: Number((b.bankrollJlk - b.bankrollEnn).toFixed(2))
+      }))
+    );
 
     document.getElementById("loading").style.display = "none";
     document.getElementById("content").style.display = "block";
