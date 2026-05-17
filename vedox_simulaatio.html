@@ -614,6 +614,12 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
         <div class="chart-title"><span data-fi="CLV tuloksen mukaan" data-en="CLV by result">CLV tuloksen mukaan</span></div>
         <div id="clv-result-bars"></div>
       </div>
+      <div class="chart-card">
+        <div class="chart-title">
+          <span data-fi="CLV yhteenveto" data-en="CLV Summary">CLV yhteenveto</span>
+        </div>
+        <div id="clv-summary-box"></div>
+      </div>
       <div class="chart-card full">
         <div class="chart-title">
           <span data-fi="Laji &amp; liiga -analyysi" data-en="Sport &amp; league analysis">Laji &amp; liiga -analyysi</span>
@@ -1110,6 +1116,7 @@ function renderAll() {
   renderOddsRangeBars();
   renderCLVChart();
   renderCLVByResultBars();
+  renderCLVSummaryBox();
   renderSportLeagueBars();
   renderTable();
 }
@@ -1310,12 +1317,9 @@ function renderCLVByResultBars() {
   const fi = lang === "fi";
 
   const groups = [
-    { key: "voitto",    label: fi ? "Voitot"    : "Won" },
-    { key: "tappio",    label: fi ? "Tappiot"   : "Lost" },
-    { key: "half win",  label: "Half Win" },
-    { key: "half loss", label: "Half Loss" },
-    { key: "push",      label: "Push" },
-    { key: "kesken",    label: fi ? "Kesken" : "Pending" },
+    { key: "voitto", label: fi ? "Voitot" : "Won" },
+    { key: "tappio", label: fi ? "Tappiot" : "Lost" },
+    { key: "kesken", label: fi ? "Kesken" : "Pending" },
   ];
 
   const rows = groups.map(g => {
@@ -1338,6 +1342,58 @@ function renderCLVByResultBars() {
   }).filter(row => row.count > 0);
 
   roiBars(rows, "clv-result-bars", 8);
+}
+
+function renderCLVSummaryBox() {
+  const fi = lang === "fi";
+  const clvBets = allBets.filter(b => b.clvKerroin > 0);
+  const avg = bets => bets.length > 0
+    ? bets.reduce((sum, b) => sum + b.clvPct, 0) / bets.length
+    : 0;
+  const clvPlus = bets => bets.length > 0
+    ? bets.filter(b => b.clvPct > 0).length / bets.length * 100
+    : 0;
+  const lost    = clvBets.filter(b => b.tulos === "tappio");
+  const pending = clvBets.filter(b => b.tulos === "kesken");
+
+  const avgAll     = avg(clvBets);
+  const avgLost    = avg(lost);
+  const avgPending = avg(pending);
+  const clvPlusAll = clvPlus(clvBets);
+
+  const items = [
+    {
+      label: "Avg CLV",
+      value: `${avgAll >= 0 ? "+" : ""}${avgAll.toFixed(2)}%`,
+      sub: `${clvBets.length} ${fi ? "vetoa" : "bets"}`
+    },
+    {
+      label: "CLV+",
+      value: `${clvPlusAll.toFixed(0)}%`,
+      sub: fi ? "positiivinen CLV" : "positive CLV"
+    },
+    {
+      label: fi ? "Tappioiden CLV" : "Lost CLV",
+      value: `${avgLost >= 0 ? "+" : ""}${avgLost.toFixed(2)}%`,
+      sub: `${lost.length} ${fi ? "vetoa" : "bets"}`
+    },
+    {
+      label: fi ? "Kesken CLV" : "Pending CLV",
+      value: `${avgPending >= 0 ? "+" : ""}${avgPending.toFixed(2)}%`,
+      sub: `${pending.length} ${fi ? "vetoa" : "bets"}`
+    },
+  ];
+  document.getElementById("clv-summary-box").innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      ${items.map(item => `
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">${item.label}</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.25rem;font-weight:800;color:var(--blue-lt);line-height:1">${item.value}</div>
+          <div style="font-size:0.65rem;color:var(--text3);margin-top:4px">${item.sub}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 // Muutos: getSportName varmistaa lowercase ennen vertailua
