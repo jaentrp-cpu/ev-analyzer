@@ -912,6 +912,15 @@ function parseSimCSV(text) {
   return rows;
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function getTickColor() { return currentTheme === "dark" ? "#3a4f6a" : "#6080a8"; }
 function getGridColor() { return currentTheme === "dark" ? "rgba(26,79,196,0.06)" : "rgba(26,79,196,0.08)"; }
 
@@ -1617,14 +1626,19 @@ function renderTable() {
     const brStr = b.bankrollJlk > 0 ? b.bankrollJlk.toFixed(2)+"€" : "—";
     const isStarred = starredIds.includes(b.id);
     const isKesken = b.tulos === "kesken";
+    const idArg      = escapeHtml(JSON.stringify(b.id));
+    const safeOttelu  = escapeHtml(b.ottelu);
+    const safeKohde   = escapeHtml(b.kohde);
+    const safeMarkkina = escapeHtml(b.markkina);
+    const safeAalto   = escapeHtml(b.aalto);
 
     return `<tr>
-      <td><button class="star-btn ${isStarred?"starred":""}" onclick="toggleStar('${b.id}',this)">⭐</button></td>
+      <td><button class="star-btn ${isStarred?"starred":""}" onclick='toggleStar(${idArg},this)'>⭐</button></td>
       <td style="font-size:0.7rem;color:var(--text3)">${formatFiDateDisplay(b.alkaa)}</td>
-      <td style="color:var(--text2)">${b.ottelu}</td>
-      <td style="color:var(--text2);font-weight:600">${b.kohde}</td>
-      <td><span style="font-size:0.65rem;background:var(--bg3);padding:2px 6px;border-radius:3px;border:1px solid var(--border)">${b.markkina}</span></td>
-      <td style="color:var(--blue-lt)">${b.aalto}</td>
+      <td style="color:var(--text2)">${safeOttelu}</td>
+      <td style="color:var(--text2);font-weight:600">${safeKohde}</td>
+      <td><span style="font-size:0.65rem;background:var(--bg3);padding:2px 6px;border-radius:3px;border:1px solid var(--border)">${safeMarkkina}</span></td>
+      <td style="color:var(--blue-lt)">${safeAalto}</td>
       <td style="color:var(--blue-lt);font-family:'Barlow Condensed',sans-serif;font-weight:700">+${b.ev.toFixed(1)}%</td>
       <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--text2)">${b.kerroin.toFixed(2)}</td>
       <td style="color:var(--text2)">${clvStr}</td>
@@ -1633,7 +1647,7 @@ function renderTable() {
       <td><span class="result-badge ${tulosClass}">${tulosLabel}</span></td>
       <td style="color:${isPos?"var(--green)":b.tuotto<0?"var(--red)":"var(--text3)"};font-family:'Barlow Condensed',sans-serif;font-weight:700">${tuottoStr}</td>
       <td style="color:var(--text2)">${brStr}</td>
-      <td>${isKesken ? `<button class="merkitse-btn" onclick="openMerkitse('${b.id}')">✏️ ${fi?"Merkitse":"Mark"}</button>` : ""}</td>
+      <td>${isKesken ? `<button class="merkitse-btn" onclick='openMerkitse(${idArg})'>✏️ ${fi?"Merkitse":"Mark"}</button>` : ""}</td>
     </tr>`;
   }).join("");
 }
