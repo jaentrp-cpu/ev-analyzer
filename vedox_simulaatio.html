@@ -898,23 +898,38 @@ function parseSimCSV(text) {
 function getTickColor() { return currentTheme === "dark" ? "#3a4f6a" : "#6080a8"; }
 function getGridColor() { return currentTheme === "dark" ? "rgba(26,79,196,0.06)" : "rgba(26,79,196,0.08)"; }
 
-// ===== ROI HELPERS — käyttävät bankroll-deltaa tuotto-sarakkeen sijaan =====
-function getBankrollDelta(b) {
-  const before = parseFloat(b.bankrollEnn);
-  const after  = parseFloat(b.bankrollJlk);
-  if (Number.isFinite(before) && Number.isFinite(after) && before > 0 && after > 0) {
-    return parseFloat((after - before).toFixed(2));
-  }
-  return 0;
-}
-
+// ===== ROI HELPERS =====
 function getSettledBets() {
   return allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
 }
 
-function getRoiFromBankrollDelta(bets) {
+function getNetProfit(b) {
+  const stake = parseFloat(b.panos) || 0;
+  const odds  = parseFloat(b.kerroin) || 0;
+
+  if (!stake) return 0;
+
+  if (b.tulos === "voitto") {
+    return odds > 1 ? parseFloat((stake * (odds - 1)).toFixed(2)) : 0;
+  }
+  if (b.tulos === "tappio") {
+    return -stake;
+  }
+  if (b.tulos === "half win") {
+    return odds > 1 ? parseFloat(((stake / 2) * (odds - 1)).toFixed(2)) : 0;
+  }
+  if (b.tulos === "half loss") {
+    return -parseFloat((stake / 2).toFixed(2));
+  }
+  if (b.tulos === "push") {
+    return 0;
+  }
+  return 0;
+}
+
+function getRoiFromNetProfit(bets) {
   const stake  = bets.reduce((sum, b) => sum + (parseFloat(b.panos) || 0), 0);
-  const profit = bets.reduce((sum, b) => sum + getBankrollDelta(b), 0);
+  const profit = bets.reduce((sum, b) => sum + getNetProfit(b), 0);
   return {
     stake,
     profit,
@@ -1186,7 +1201,7 @@ function renderEVRangeBars() {
   roiBars(ranges.map(r => {
     const inRange = settled.filter(b => b.ev >= r.min && b.ev < r.max);
     const won = inRange.filter(b => b.tulos==="voitto"||b.tulos==="half win");
-    const { stake, profit, roi } = getRoiFromBankrollDelta(inRange);
+    const { stake, profit, roi } = getRoiFromNetProfit(inRange);
     return {label:r.label,count:inRange.length,roi:roi.toFixed(1),extra:`, ${inRange.length>0?(won.length/inRange.length*100).toFixed(0):0}% ${fi?"osui":"hit"}`};
   }), "ev-range-bars");
 }
@@ -1235,7 +1250,7 @@ function renderBankrollChart() {
 function renderMarketBars() {
   const settled = getSettledBets();
   const map = {};
-  settled.forEach(b => { const m=b.markkina||"other"; if (!map[m]) map[m]={stake:0,profit:0,count:0}; map[m].stake+=b.panos; map[m].profit+=getBankrollDelta(b); map[m].count++; });
+  settled.forEach(b => { const m=b.markkina||"other"; if (!map[m]) map[m]={stake:0,profit:0,count:0}; map[m].stake+=b.panos; map[m].profit+=getNetProfit(b); map[m].count++; });
   roiBars(Object.entries(map).sort((a,b)=>b[1].count-a[1].count).map(([mkt,d]) => ({
     label:mkt.replace(/_/g," ").toUpperCase(), count:d.count, roi:d.stake>0?(d.profit/d.stake*100).toFixed(1):"0.0",
   })), "market-bars");
@@ -1244,7 +1259,7 @@ function renderMarketBars() {
 function renderWaveBars() {
   const settled = getSettledBets();
   const map = {};
-  settled.forEach(b => { const w=b.aalto||"?"; if (!map[w]) map[w]={stake:0,profit:0,count:0}; map[w].stake+=b.panos; map[w].profit+=getBankrollDelta(b); map[w].count++; });
+  settled.forEach(b => { const w=b.aalto||"?"; if (!map[w]) map[w]={stake:0,profit:0,count:0}; map[w].stake+=b.panos; map[w].profit+=getNetProfit(b); map[w].count++; });
   roiBars(Object.entries(map).sort().map(([wave,d]) => ({
     label:wave, count:d.count, roi:d.stake>0?(d.profit/d.stake*100).toFixed(1):"0.0",
   })), "wave-bars");
@@ -1257,7 +1272,7 @@ function renderOddsRangeBars() {
   roiBars(ranges.map(r => {
     const inRange = settled.filter(b => b.kerroin >= r.min && b.kerroin < r.max);
     const won = inRange.filter(b => b.tulos==="voitto"||b.tulos==="half win");
-    const { stake, profit, roi } = getRoiFromBankrollDelta(inRange);
+    const { stake, profit, roi } = getRoiFromNetProfit(inRange);
     return {label:r.label,count:inRange.length,roi:roi.toFixed(1),extra:`, ${inRange.length>0?(won.length/inRange.length*100).toFixed(0):0}% ${fi?"osui":"hit"}`};
   }), "odds-range-bars");
 }
@@ -1322,11 +1337,11 @@ function renderSportLeagueBars() {
   settled.forEach(b => {
     const sport  = getSportName(b.liiga);
     const league = getLeagueName(b.liiga);
-    const delta  = getBankrollDelta(b);
+    const profit = getNetProfit(b);
     if (!sports[sport]) sports[sport] = { bets:0, stake:0, profit:0, leagues:{} };
-    sports[sport].bets++; sports[sport].stake+=b.panos; sports[sport].profit+=delta;
+    sports[sport].bets++; sports[sport].stake+=b.panos; sports[sport].profit+=profit;
     if (!sports[sport].leagues[league]) sports[sport].leagues[league]={bets:0,stake:0,profit:0};
-    sports[sport].leagues[league].bets++; sports[sport].leagues[league].stake+=b.panos; sports[sport].leagues[league].profit+=delta;
+    sports[sport].leagues[league].bets++; sports[sport].leagues[league].stake+=b.panos; sports[sport].leagues[league].profit+=profit;
   });
 
   const sorted = Object.entries(sports).sort((a,b) => b[1].stake - a[1].stake);
