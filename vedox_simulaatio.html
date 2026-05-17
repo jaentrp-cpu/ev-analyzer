@@ -1214,13 +1214,19 @@ function renderHitPie() {
     { label: "Half Loss",            val: halfLoss, pct: settled>0?(halfLoss/settled*100).toFixed(1):0, color:"#a02030" },
     { label: "Push",                 val: push,     pct: settled>0?(push/settled*100).toFixed(1):0,     color:"#2d6ae0" },
     { label: fi?"Kesken":"Pending", val: pend,     pct:"",                                             color:"#d4921a" },
-  ].map(item => `
+  ].map(item => {
+    const safeLabel = escapeHtml(item.label);
+    const safeVal   = escapeHtml(String(item.val));
+    const safePct   = item.pct !== "" ? escapeHtml(String(item.pct)) : "";
+    const safeColor = escapeHtml(item.color);
+    return `
     <div class="legend-item">
-      <div class="legend-dot" style="background:${item.color}"></div>
-      <span class="legend-label">${item.label}</span>
-      <span class="legend-val">${item.val}${item.pct !== "" ? ` <span style="color:var(--text3);font-size:0.68rem">(${item.pct}%)</span>` : ""}</span>
+      <div class="legend-dot" style="background:${safeColor}"></div>
+      <span class="legend-label">${safeLabel}</span>
+      <span class="legend-val">${safeVal}${safePct !== "" ? ` <span style="color:var(--text3);font-size:0.68rem">(${safePct}%)</span>` : ""}</span>
     </div>
-  `).join("");
+  `;
+  }).join("");
 }
 
 function roiBars(items, containerId, maxAbs = 80) {
