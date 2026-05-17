@@ -708,7 +708,7 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
 </div>
 
 <script>
-// ===== SUPABASE CONFIG — sama kuin index.html (vain publishable key) =====
+// ===== SUPABASE CONFIG =====
 const SUPABASE_URL_FE = "https://gvywnucdwikkeblcorfj.supabase.co";
 const SUPABASE_KEY_FE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eXdudWNkd2lra2VibGNvcmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MzMyMTIsImV4cCI6MjA5NDAwOTIxMn0.PPFn6lutvI4mlZ8gBZT1bKA50h_96GZSPHDf6-Wl_Tc";
 const sbClient = window.supabase.createClient(SUPABASE_URL_FE, SUPABASE_KEY_FE);
@@ -826,6 +826,15 @@ async function fetchSimData() {
     if (!res.ok) throw new Error("Sheet ei vastaa");
     const text = await res.text();
     allBets = parseSimCSV(text);
+
+    // Väliaikainen tarkistus — voi poistaa deploy-versiosta testauksen jälkeen
+    console.table({
+      kbo_total:   allBets.filter(b => b.liiga === "baseball_kbo").length,
+      kbo_pending: allBets.filter(b => b.liiga === "baseball_kbo" && b.tulos === "kesken").length,
+      npb_total:   allBets.filter(b => b.liiga === "baseball_npb").length,
+      npb_pending: allBets.filter(b => b.liiga === "baseball_npb" && b.tulos === "kesken").length,
+    });
+
     document.getElementById("loading").style.display = "none";
     document.getElementById("content").style.display = "block";
     renderAll();
@@ -834,12 +843,37 @@ async function fetchSimData() {
   }
 }
 
+// ===== CELL NORMALISATION HELPERS =====
+function cleanCell(value) {
+  return String(value ?? "")
+    .replace(/\r/g, "")
+    .replace(/\u00a0/g, " ")
+    .trim();
+}
+
+function normalizeResult(value) {
+  const s = cleanCell(value).toLowerCase();
+  if (!s) return "kesken";
+  if (["kesken", "pending", "open", "avoin"].includes(s)) return "kesken";
+  if (["voitto", "won", "win"].includes(s)) return "voitto";
+  if (["tappio", "lost", "loss"].includes(s)) return "tappio";
+  if (["half win", "half-win", "halfwin"].includes(s)) return "half win";
+  if (["half loss", "half-loss", "halfloss"].includes(s)) return "half loss";
+  if (["push", "void", "palautus"].includes(s)) return "push";
+  return s;
+}
+
+function normalizeLeague(value) {
+  return cleanCell(value).toLowerCase();
+}
+
 function parseSimCSV(text) {
   const lines = text.trim().split("\n");
   if (lines.length < 2) return [];
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split("\t");
+    // Muutos: kaikki solut cleanCell-suodatuksen läpi heti
+    const cols = lines[i].split("\t").map(cleanCell);
     if (cols.length < 16 || !cols[0]) continue;
     const toNum = s => {
       if (!s) return 0;
@@ -854,12 +888,16 @@ function parseSimCSV(text) {
     };
     rows.push({
       id: cols[0], aika: cols[1], ottelu: cols[2], kohde: cols[3],
-      markkina: (cols[4]||"").trim().toLowerCase(), aalto: cols[5],
+      // Muutos: markkina ja aalto cleanCell:n kautta
+      markkina: cleanCell(cols[4]).toLowerCase(), aalto: cleanCell(cols[5]),
       ev: toNum(cols[6]), kerroin: toNum(cols[7]), pinnacle: toNum(cols[8]),
       pinnProb: cols[9], panos: toNum(cols[10]), bankrollEnn: toNum(cols[11]),
       clvKerroin: toNum(cols[12]), clvPct: toNum(cols[13]), alkaa: cols[14],
-      tulos: (cols[15]||"Kesken").trim().toLowerCase(),
-      tuotto: toNum(cols[16]), bankrollJlk: toNum(cols[17]), liiga: cols[18] || "",
+      // Muutos: tulos normalizeResult:n kautta
+      tulos: normalizeResult(cols[15]),
+      tuotto: toNum(cols[16]), bankrollJlk: toNum(cols[17]),
+      // Muutos: liiga normalizeLeague:n kautta
+      liiga: normalizeLeague(cols[18]),
     });
   }
   return rows;
@@ -962,7 +1000,7 @@ function selectResult(tulos) {
   document.getElementById("modal-confirm-btn").disabled = false;
 }
 
-// ===== MERKITSE — JWT Authorization header =====
+// ===== MERKITSE =====
 async function confirmMerkitse() {
   if (!modalBet || !selectedResult) return;
   const btn = document.getElementById("modal-confirm-btn");
@@ -972,7 +1010,6 @@ async function confirmMerkitse() {
   fb.innerHTML = '<span class="modal-spinner"></span>Lähetetään...';
 
   try {
-    // Hae tuore session token
     const { data: { session } } = await sbClient.auth.getSession();
     if (!session?.access_token) {
       throw new Error("Ei aktiivista sessiota — kirjaudu uudelleen sisään.");
@@ -984,7 +1021,6 @@ async function confirmMerkitse() {
         "Content-Type":  "application/json",
         "Authorization": `Bearer ${session.access_token}`,
       },
-      // Ei secret-kenttää enää
       body: JSON.stringify({ id: modalBet.id, tulos: selectedResult }),
     });
 
@@ -1236,14 +1272,16 @@ function renderCLVChart() {
   });
 }
 
+// Muutos: getSportName varmistaa lowercase ennen vertailua
 function getSportName(liiga) {
-  if (!liiga) return "Muu";
-  if (liiga.includes("soccer"))     return "⚽ Jalkapallo";
-  if (liiga.includes("basketball")) return "🏀 Koripallo";
-  if (liiga.includes("icehockey"))  return "🏒 Jääkiekko";
-  if (liiga.includes("tennis"))     return "🎾 Tennis";
-  if (liiga.includes("baseball"))   return "⚾ Baseball";
-  if (liiga.includes("rugby"))      return "🏉 Rugby";
+  const l = String(liiga || "").toLowerCase();
+  if (!l) return "Muu";
+  if (l.includes("soccer"))     return "⚽ Jalkapallo";
+  if (l.includes("basketball")) return "🏀 Koripallo";
+  if (l.includes("icehockey"))  return "🏒 Jääkiekko";
+  if (l.includes("tennis"))     return "🎾 Tennis";
+  if (l.includes("baseball"))   return "⚾ Baseball";
+  if (l.includes("rugby"))      return "🏉 Rugby";
   return "🏆 Muu";
 }
 
@@ -1420,7 +1458,6 @@ function renderTable() {
 
 applyTheme(currentTheme);
 setLang(lang);
-// fetchSimData ja simTimer käynnistyvät vasta showApp():ssa kirjautumisen jälkeen
 </script>
 </body>
 </html>
