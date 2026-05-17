@@ -927,7 +927,7 @@ function getGridColor() { return currentTheme === "dark" ? "rgba(26,79,196,0.06)
 function formatFiDateDisplay(str) {
   if (!str) return "";
   const m = String(str).trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+klo\s+(\d{1,2})\.(\d{1,2}))?/);
-  if (!m) return str;
+  if (!m) return escapeHtml(str);
   const dd = String(Number(m[1])).padStart(2, "0");
   const mm = String(Number(m[2])).padStart(2, "0");
   const yyyy = m[3];
