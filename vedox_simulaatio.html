@@ -915,6 +915,19 @@ function parseSimCSV(text) {
 function getTickColor() { return currentTheme === "dark" ? "#3a4f6a" : "#6080a8"; }
 function getGridColor() { return currentTheme === "dark" ? "rgba(26,79,196,0.06)" : "rgba(26,79,196,0.08)"; }
 
+function formatFiDateDisplay(str) {
+  if (!str) return "";
+  const m = String(str).trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+klo\s+(\d{1,2})\.(\d{1,2}))?/);
+  if (!m) return str;
+  const dd = String(Number(m[1])).padStart(2, "0");
+  const mm = String(Number(m[2])).padStart(2, "0");
+  const yyyy = m[3];
+  if (!m[4]) return `${dd}.${mm}.${yyyy}`;
+  const hh = String(Number(m[4])).padStart(2, "0");
+  const min = String(Number(m[5] || 0)).padStart(2, "0");
+  return `${dd}.${mm}.${yyyy} klo ${hh}.${min}`;
+}
+
 // ===== ROI HELPERS =====
 function getSettledBets() {
   return allBets.filter(b => ["voitto","tappio","half win","half loss","push"].includes(b.tulos));
@@ -1607,7 +1620,7 @@ function renderTable() {
 
     return `<tr>
       <td><button class="star-btn ${isStarred?"starred":""}" onclick="toggleStar('${b.id}',this)">⭐</button></td>
-      <td style="font-size:0.7rem;color:var(--text3)">${b.alkaa}</td>
+      <td style="font-size:0.7rem;color:var(--text3)">${formatFiDateDisplay(b.alkaa)}</td>
       <td style="color:var(--text2)">${b.ottelu}</td>
       <td style="color:var(--text2);font-weight:600">${b.kohde}</td>
       <td><span style="font-size:0.65rem;background:var(--bg3);padding:2px 6px;border-radius:3px;border:1px solid var(--border)">${b.markkina}</span></td>
