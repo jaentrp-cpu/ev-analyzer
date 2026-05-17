@@ -610,6 +610,10 @@ main { position: relative; z-index: 1; padding: 1.5rem 2rem; max-width: 1300px; 
         <div class="chart-title"><span data-fi="CLV-jakauma" data-en="CLV Distribution">CLV-jakauma</span></div>
         <canvas id="chart-clv" height="180"></canvas>
       </div>
+      <div class="chart-card">
+        <div class="chart-title"><span data-fi="CLV tuloksen mukaan" data-en="CLV by result">CLV tuloksen mukaan</span></div>
+        <div id="clv-result-bars"></div>
+      </div>
       <div class="chart-card full">
         <div class="chart-title">
           <span data-fi="Laji &amp; liiga -analyysi" data-en="Sport &amp; league analysis">Laji &amp; liiga -analyysi</span>
@@ -1105,6 +1109,7 @@ function renderAll() {
   renderWaveBars();
   renderOddsRangeBars();
   renderCLVChart();
+  renderCLVByResultBars();
   renderSportLeagueBars();
   renderTable();
 }
@@ -1299,6 +1304,40 @@ function renderCLVChart() {
       }
     }
   });
+}
+
+function renderCLVByResultBars() {
+  const fi = lang === "fi";
+
+  const groups = [
+    { key: "voitto",    label: fi ? "Voitot"    : "Won" },
+    { key: "tappio",    label: fi ? "Tappiot"   : "Lost" },
+    { key: "half win",  label: "Half Win" },
+    { key: "half loss", label: "Half Loss" },
+    { key: "push",      label: "Push" },
+    { key: "kesken",    label: fi ? "Kesken" : "Pending" },
+  ];
+
+  const rows = groups.map(g => {
+    const bets = allBets.filter(b => b.tulos === g.key && b.clvKerroin > 0);
+    const count = bets.length;
+    const avg = count > 0
+      ? bets.reduce((sum, b) => sum + b.clvPct, 0) / count
+      : 0;
+    const clvPositive = count > 0
+      ? bets.filter(b => b.clvPct > 0).length / count * 100
+      : 0;
+
+    // roiBars käyttää "roi"-kenttää arvon näyttämiseen; tässä arvo on avg CLV %.
+    return {
+      label: g.label,
+      count,
+      roi: avg.toFixed(2),
+      extra: count > 0 ? `, ${clvPositive.toFixed(0)}% CLV+` : ""
+    };
+  }).filter(row => row.count > 0);
+
+  roiBars(rows, "clv-result-bars", 8);
 }
 
 // Muutos: getSportName varmistaa lowercase ennen vertailua
