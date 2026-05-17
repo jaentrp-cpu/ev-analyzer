@@ -828,8 +828,13 @@ function setLang(l) {
 
 // ===== FETCH DATA =====
 async function fetchSimData() {
-  document.getElementById("loading").style.display = "block";
-  document.getElementById("content").style.display = "none";
+  const hasExistingData = allBets.length > 0;
+
+  if (!hasExistingData) {
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("content").style.display = "none";
+  }
+
   try {
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=tsv&gid=${SIM_GID}&t=${Date.now()}`;
     const res = await fetch(url);
@@ -841,7 +846,9 @@ async function fetchSimData() {
     document.getElementById("content").style.display = "block";
     renderAll();
   } catch(e) {
-    document.getElementById("loading-txt").textContent = "Virhe: " + e.message;
+    if (!hasExistingData) {
+      document.getElementById("loading-txt").textContent = "Virhe: " + e.message;
+    }
   }
 }
 
@@ -1541,8 +1548,8 @@ function renderTable() {
   let filtered = activeFilter === "all" ? allBets : allBets.filter(b => b.tulos === activeFilter);
   if (activeWaveFilter) filtered = filtered.filter(b => b.aalto === activeWaveFilter);
   if (starFilterActive) filtered = filtered.filter(b => starredIds.includes(b.id));
-  if (dateFrom) { const from = new Date(dateFrom); filtered = filtered.filter(b => { const d=parseDate(b.aika); return d&&d>=from; }); }
-  if (dateTo)   { const to = new Date(dateTo); to.setHours(23,59,59); filtered = filtered.filter(b => { const d=parseDate(b.aika); return d&&d<=to; }); }
+  if (dateFrom) { const from = new Date(dateFrom); filtered = filtered.filter(b => { const d=parseDate(b.alkaa); return d&&d>=from; }); }
+  if (dateTo)   { const to = new Date(dateTo); to.setHours(23,59,59); filtered = filtered.filter(b => { const d=parseDate(b.alkaa); return d&&d<=to; }); }
 
   const tbody = document.getElementById("bets-tbody");
   if (!filtered.length) {
