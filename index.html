@@ -1057,6 +1057,15 @@ main {
       <div class="bets-header-cell right bets-header-actions" data-fi="Toiminnot" data-en="Actions">Toiminnot</div>
     </div>
     <div id="bets-list"></div>
+
+    <!-- ===== ARBITRAGE ALERTS ===== -->
+    <div id="arb-section" style="margin-top:1.25rem;display:none">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.65rem">
+        <div style="font-family:var(--font-ui);font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)">💎 <span data-fi="Arbitrage-hälytykset" data-en="Arbitrage Alerts">Arbitrage-hälytykset</span></div>
+        <div id="arb-count" style="font-family:var(--font-ui);font-size:0.68rem;color:var(--text3)"></div>
+      </div>
+      <div id="arb-list"></div>
+    </div>
   </div>
 
   <div class="page" id="page-mybets">
@@ -1119,6 +1128,7 @@ const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const REFRESH = 120;
 
 let allBets = [];
+let allArbitrages = [];
 let myBets  = [];
 let skippedIds = [];
 let evBetStates = {};
@@ -1375,6 +1385,7 @@ function showApp(user) {
   }
   if (!isSameUser || allBets.length === 0) fetchAll();
   if (!isSameUser) startTimer();
+  fetchArbitrages();
 
   renderMyBets();
 }
@@ -1391,6 +1402,7 @@ function hideApp() {
   myBets     = [];
   skippedIds = [];
   evBetStates = {};
+  allArbitrages = [];
   document.getElementById("auth-overlay").style.display = "flex";
   document.getElementById("profile-btn").style.display  = "none";
   document.getElementById("btn-login-header").style.display = "block";
@@ -1400,6 +1412,8 @@ function hideApp() {
   document.getElementById("bets-empty").style.display = "none";
   document.getElementById("risk-level").value = "normal";
   document.getElementById("bankroll").value = "1000";
+  const arbSection = document.getElementById("arb-section");
+  if (arbSection) { arbSection.style.display = "none"; document.getElementById("arb-list").innerHTML = ""; document.getElementById("arb-count").textContent = ""; }
   renderMyBets();
 }
 
@@ -1459,6 +1473,7 @@ function setLang(l) {
   document.documentElement.lang=l;
   if (currentUser) saveUserSettings({ lang: l });
   renderBets(); renderMyBets();
+  renderArbitrages(allArbitrages);
 }
 
 function showPage(p, btn) {
@@ -1480,6 +1495,7 @@ async function fetchAll() {
   renderBets();
   document.getElementById("bets-loading").style.display="none";
   countdown=REFRESH;
+  fetchArbitrages();
 }
 
 function betId(b) {
@@ -2229,6 +2245,80 @@ applyTheme(currentTheme);
 setLang(lang);
 syncAuthLangBtns();
 initAuthControls();
+
+// ===== ARBITRAGE ALERTS (pääsivu) =====
+async function fetchArbitrages() {
+  try {
+    const { data, error } = await sbClient
+      .from('arbitrages')
+      .select('*')
+      .eq('aktiivinen', true)
+      .order('profit_pct', { ascending: false });
+    if (error) { console.warn('[Vedox] arbitrages load failed:', error.message); return; }
+    allArbitrages = data || [];
+    renderArbitrages(allArbitrages);
+  } catch(e) { console.warn('[Vedox] arbitrages exception:', e.message); }
+}
+
+function renderArbitrages(arbs) {
+  const fi = lang === 'fi';
+  const section = document.getElementById('arb-section');
+  const list    = document.getElementById('arb-list');
+  const count   = document.getElementById('arb-count');
+  if (!section || !list) return;
+  if (!arbs.length) {
+    section.style.display = 'none';
+    list.innerHTML = '';
+    if (count) count.textContent = '';
+    return;
+  }
+  section.style.display = 'block';
+  count.textContent = `(${arbs.length})`;
+
+  list.innerHTML = arbs.map(a => {
+    let outcomes = [];
+    if (Array.isArray(a.outcomes_json)) {
+      outcomes = a.outcomes_json;
+    } else if (typeof a.outcomes_json === 'string') {
+      try { outcomes = JSON.parse(a.outcomes_json); } catch(e) { outcomes = []; }
+    }
+    const alkaaStr = a.alkaa ? new Date(a.alkaa).toLocaleString('fi-FI', { timeZone: 'Europe/Helsinki', day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '—';
+    const outcomeRows = outcomes.map(o => `
+      <div style="display:flex;gap:12px;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);font-size:0.75rem">
+        <span style="flex:1;color:var(--text2);font-weight:600">${escapeHtmlSafe(String(o.side??''))}</span>
+        <span style="color:var(--text);font-family:var(--font-num);font-weight:700">${Number(o.odds??0).toFixed(2)}</span>
+        <span style="color:var(--text3)">${escapeHtmlSafe(String(o.book??''))}</span>
+        <span style="color:var(--amber);font-family:var(--font-num)">${Number(o.stake??0).toFixed(2)}€</span>
+        <span style="color:var(--green-lt);font-family:var(--font-num)">→ ${Number(o.payout??0).toFixed(2)}€</span>
+      </div>`).join('');
+    const outcomeSection = outcomes.length
+      ? outcomeRows
+      : `<div style="font-size:0.75rem;color:var(--text3);padding-top:4px">${fi ? 'Panosjakoa ei saatavilla' : 'Stake split unavailable'}</div>`;
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:var(--radius);padding:0.85rem 1rem;margin-bottom:6px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:0.95rem;font-weight:600;color:var(--text)">${escapeHtmlSafe(String(a.ottelu??''))}</div>
+          <div style="font-size:0.7rem;color:var(--text3);margin-top:2px">${escapeHtmlSafe(String(a.line??''))} · ${alkaaStr}</div>
+        </div>
+        <div style="display:flex;gap:12px;flex-shrink:0;align-items:center">
+          <div style="text-align:right">
+            <div style="font-size:0.58rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:2px">${fi?'Lukittu tuotto':'Locked profit'}</div>
+            <div style="font-family:var(--font-num);font-size:1.1rem;font-weight:700;color:var(--amber)">+${Number(a.profit_pct??0).toFixed(3)}%</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:0.58rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:2px">Implied</div>
+            <div style="font-family:var(--font-num);font-size:0.88rem;font-weight:600;color:var(--text2)">${(Number(a.implied_sum??1)*100).toFixed(2)}%</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:0.58rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:2px">${fi?'Panos':'Stake'}</div>
+            <div style="font-family:var(--font-num);font-size:0.88rem;font-weight:600;color:var(--text2)">${Number(a.total_stake??0).toFixed(2)}€</div>
+          </div>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:8px">${outcomeSection}</div>
+    </div>`;
+  }).join('');
+}
 </script>
 </body>
 </html>
