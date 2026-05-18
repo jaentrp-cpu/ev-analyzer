@@ -239,6 +239,62 @@ nav {
 .lang-seg .lang-btn.active { color:var(--blue-deep); background:var(--blue-soft); box-shadow:inset 0 0 0 1px var(--blue-border); font-weight:600; }
 .theme-btn:hover { color:var(--text); background:var(--surface-2); }
 #btn-login-header { border:1px solid var(--blue) !important; padding:0 12px; height:28px; border-radius:6px; }
+.settings-menu-wrap { position:relative; height:28px; }
+.settings-trigger {
+  width:30px;
+  height:28px;
+  border:1px solid transparent;
+  border-radius:6px;
+  background:transparent;
+  color:var(--text3);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:all 0.15s;
+  font-size:0.92rem;
+}
+.settings-trigger:hover,
+.settings-trigger.open { color:var(--text); background:var(--surface-2); border-color:var(--border2); }
+.settings-dropdown {
+  position:absolute;
+  top:calc(100% + 8px);
+  right:0;
+  width:210px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:var(--radius);
+  box-shadow:0 18px 44px rgba(0,0,0,0.24);
+  padding:0.65rem;
+  display:none;
+  z-index:350;
+}
+.settings-dropdown.open { display:block; animation:fadeUp 0.16s ease; }
+.settings-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:0.35rem 0.25rem;
+}
+.settings-label {
+  color:var(--text3);
+  font-size:0.72rem;
+  font-weight:600;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+}
+.settings-toggle {
+  border:1px solid var(--border2);
+  background:var(--surface-2);
+  color:var(--text2);
+  border-radius:var(--radius-sm);
+  padding:6px 9px;
+  cursor:pointer;
+  font-size:0.8rem;
+  transition:all 0.15s;
+}
+.settings-toggle:hover { color:var(--text); border-color:var(--border3); }
 
 /* ===== MAIN ===== */
 main {
@@ -354,6 +410,15 @@ main {
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:0.9rem;
+  cursor:pointer;
+  transition:all 0.15s;
+}
+.home-explain-card:hover,
+.home-about:hover,
+.home-news:hover {
+  border-color:var(--blue-border);
+  background:var(--blue-soft);
+  transform:translateY(-1px);
 }
 .home-explain-card h3 {
   font-size:0.9rem;
@@ -371,22 +436,96 @@ main {
   gap:0.9rem;
   flex-wrap:wrap;
 }
-.home-login-btn {
-  background:var(--blue);
-  border:1px solid var(--blue);
-  color:#fff;
-  font-family:var(--font-ui);
-  font-size:0.86rem;
-  font-weight:700;
-  padding:0.7rem 1rem;
-  border-radius:var(--radius-sm);
-  cursor:pointer;
-  transition:all 0.15s;
-}
-.home-login-btn:hover { background:var(--blue-lt); border-color:var(--blue-lt); }
 .home-beta {
   color:var(--text3);
   font-size:0.78rem;
+}
+.home-news {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1rem 1.1rem;
+  box-shadow:var(--shadow-soft);
+  cursor:pointer;
+  transition:all 0.15s;
+}
+.home-news h2 {
+  color:var(--text);
+  font-size:0.95rem;
+  font-weight:700;
+  margin-bottom:0.45rem;
+}
+.home-news-list {
+  display:grid;
+  gap:0.4rem;
+  color:var(--text2);
+  font-size:0.82rem;
+  line-height:1.55;
+}
+.home-news-list span::before {
+  content:'';
+  display:inline-block;
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:var(--green);
+  margin-right:7px;
+  vertical-align:1px;
+}
+.content-page {
+  max-width:980px;
+  margin:0 auto;
+}
+.content-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0.85rem;
+}
+.content-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1rem 1.1rem;
+}
+.content-card h3 {
+  color:var(--text);
+  font-size:0.95rem;
+  margin-bottom:0.45rem;
+}
+.content-card p,
+.content-card li {
+  color:var(--text2);
+  font-size:0.84rem;
+  line-height:1.65;
+}
+.content-card ul { padding-left:1.05rem; }
+.news-list {
+  display:grid;
+  gap:0.8rem;
+}
+.news-item {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1rem 1.1rem;
+}
+.news-date {
+  color:var(--text3);
+  font-size:0.68rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  margin-bottom:0.3rem;
+}
+.news-item h3 {
+  color:var(--text);
+  font-size:0.98rem;
+  margin-bottom:0.35rem;
+}
+.news-item p {
+  color:var(--text2);
+  font-size:0.84rem;
+  line-height:1.65;
 }
 
 .page-heading {
@@ -1101,6 +1240,7 @@ main {
   }
   .home-copy-card { min-height:auto; }
   .home-explain-grid { grid-template-columns:1fr; }
+  .content-grid { grid-template-columns:1fr; }
   .home-brand .logo-image { height:38px; max-width:155px; }
   .home-image-card,
   .home-image-card img { min-height:220px; }
@@ -1160,10 +1300,10 @@ main {
   .home-image-card,
   .home-image-card img { min-height:185px; }
   .home-actions { align-items:flex-start; flex-direction:column; }
-  .home-login-btn { width:100%; }
   .action-cluster { height:32px; gap:3px; padding:3px; }
   .profile-name { display:none; }
   .header-right .lang-btn, .header-right .theme-btn { padding:6px 8px; }
+  .settings-dropdown { right:-2px; width:205px; }
   .live-pill { display:none; }
   .toolbar { grid-template-columns:1fr; }
   .page-heading, .mybets-toolbar { align-items:flex-start; flex-direction:column; }
@@ -1251,6 +1391,8 @@ main {
     <button class="nav-btn" onclick="showPage('arb',this)" data-fi="Varmavedot" data-en="Sure Bets">Varmavedot</button>
     <button class="nav-btn" onclick="showPage('mybets',this)" data-fi="Omat vedot" data-en="My Bets">Omat vedot</button>
     <button class="nav-btn" onclick="showPage('analytics',this)" data-fi="Analytiikka" data-en="Analytics">Analytiikka</button>
+    <button class="nav-btn" onclick="showPage('guides',this)" data-fi="Ohjeet ja määritelmät" data-en="Guides">Ohjeet ja määritelmät</button>
+    <button class="nav-btn" onclick="showPage('news',this)" data-fi="Ajankohtaista" data-en="Updates">Ajankohtaista</button>
   </nav>
   <div class="header-right">
     <button class="btn-logout" id="btn-login-header" onclick="showAuthModal()" style="color:var(--blue-lt)">Kirjaudu</button>
@@ -1261,10 +1403,21 @@ main {
         <div class="profile-avatar" id="header-avatar"><span id="header-avatar-initial">?</span></div>
         <span class="profile-name" id="header-profile-name"></span>
       </button>
-      <button class="theme-btn" onclick="toggleTheme()" id="theme-icon" title="Toggle theme">☀️</button>
-      <div class="lang-seg">
-        <button class="lang-btn active" onclick="setLang('fi')" id="btn-fi">FI</button>
-        <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+      <div class="settings-menu-wrap">
+        <button class="settings-trigger" onclick="toggleSettingsMenu(event)" id="settings-trigger" title="Asetukset"><span id="theme-icon">☀️</span></button>
+        <div class="settings-dropdown" id="settings-dropdown" onclick="event.stopPropagation()">
+          <div class="settings-row">
+            <span class="settings-label" data-fi="Teema" data-en="Theme">Teema</span>
+            <button class="settings-toggle" onclick="toggleTheme()" data-fi="Vaihda" data-en="Toggle">Vaihda</button>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label" data-fi="Kieli" data-en="Language">Kieli</span>
+            <div class="lang-seg">
+              <button class="lang-btn active" onclick="setLang('fi')" id="btn-fi">FI</button>
+              <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1391,6 +1544,52 @@ main {
   </div>
 </div>
 
+<div class="info-modal-overlay" id="modal-valuebet" onclick="closeInfoModalOutside(event,'modal-valuebet')">
+  <div class="info-modal">
+    <button class="btn-info-close" onclick="closeInfoModal('modal-valuebet')">✕</button>
+    <h2>Arvovedot</h2>
+    <p>Arvovedossa etsitään tilannetta, jossa tarjolla oleva kerroin on Vedoxin arvion mukaan kiinnostava suhteessa kohteen todelliseen mahdollisuuteen.</p>
+    <h3>Miten sitä käytetään?</h3>
+    <ul>
+      <li>Tarkista ottelu, kohde, kerroin ja suositeltu panos.</li>
+      <li>Päätä itse pelaatko kohteen ja millä panoksella.</li>
+      <li>Merkitse veto omiin vetoihin, jos pelaat sen.</li>
+    </ul>
+    <p>Arvovedot eivät tarkoita varmoja voittoja. Idea on tehdä toistuvasti parempia päätöksiä, ei voittaa jokaista yksittäistä vetoa.</p>
+  </div>
+</div>
+
+<div class="info-modal-overlay" id="modal-surebet" onclick="closeInfoModalOutside(event,'modal-surebet')">
+  <div class="info-modal">
+    <button class="btn-info-close" onclick="closeInfoModal('modal-surebet')">✕</button>
+    <h2>Varmavedot</h2>
+    <p>Varmavedossa panos jaetaan usealle eri lopputulokselle niin, että arvioitu tuotto voi lukittua ennen tapahtuman alkua.</p>
+    <h3>Miten sitä käytetään?</h3>
+    <ul>
+      <li>Katso jokaiselle lopputulokselle annettu bookkeri, kerroin ja panosjako.</li>
+      <li>Jaa oma kokonaispanoksesi prosenttien mukaan.</li>
+      <li>Tarkista kertoimet aina bookkerilta ennen pelaamista, koska ne voivat muuttua nopeasti.</li>
+    </ul>
+    <p>Varmavedoissa tärkeintä on nopeus ja tarkistus: jos yksikin kerroin muuttuu, laskelma ei välttämättä enää päde.</p>
+  </div>
+</div>
+
+<div class="info-modal-overlay" id="modal-about" onclick="closeInfoModalOutside(event,'modal-about')">
+  <div class="info-modal">
+    <button class="btn-info-close" onclick="closeInfoModal('modal-about')">✕</button>
+    <h2>Tietoa meistä</h2>
+    <p>Vedox on suljetussa beta-vaiheessa oleva vedonlyönnin seurantaan ja kohteiden vertailuun rakennettu työkalu.</p>
+    <p>Tavoitteemme on tehdä näkymä, jossa käyttäjä näkee olennaisen nopeasti: kiinnostavat kohteet, panosehdotukset, omat vedot ja oman pelikassan kehityksen.</p>
+    <h3>Mitä rakennamme seuraavaksi?</h3>
+    <ul>
+      <li>Selkeämmät ohjeet ja määritelmät.</li>
+      <li>Varmavetojen oma seurantamalli.</li>
+      <li>Mobiilinäkymän viimeistely.</li>
+      <li>Taso- ja oikeusjärjestelmä tulevia tilauksia varten.</li>
+    </ul>
+  </div>
+</div>
+
 <main>
   <div class="page active" id="page-home">
     <section class="home-shell">
@@ -1411,9 +1610,17 @@ main {
         <figure class="home-image-card">
           <img src="hero-football.jpg" alt="Jalkapallo stadionin nurmella">
         </figure>
-        <article class="home-about">
+        <article class="home-about" onclick="openInfoModal('about')" role="button" tabindex="0">
           <h2 data-fi="Tietoa meistä" data-en="About us">Tietoa meistä</h2>
           <p data-fi="Vedox rakentaa selkeää työkalua vedonlyönnin seurantaan, kohteiden vertailuun ja oman pelikassan hallintaan. Tavoitteena on tehdä päätöksistä rauhallisempia ja paremmin perusteltuja." data-en="Vedox is building a clear tool for tracking bets, comparing opportunities and managing your bankroll. The goal is calmer, better-grounded decisions.">Vedox rakentaa selkeää työkalua vedonlyönnin seurantaan, kohteiden vertailuun ja oman pelikassan hallintaan. Tavoitteena on tehdä päätöksistä rauhallisempia ja paremmin perusteltuja.</p>
+        </article>
+        <article class="home-news" onclick="showPage('news', navButtonForPage('news'))" role="button" tabindex="0">
+          <h2 data-fi="Ajankohtaista" data-en="Updates">Ajankohtaista</h2>
+          <div class="home-news-list">
+            <span data-fi="Varmavedot erotettu omalle välilehdelle." data-en="Sure bets now have their own tab.">Varmavedot erotettu omalle välilehdelle.</span>
+            <span data-fi="Suljettu beta: uudet tunnukset avataan myöhemmin." data-en="Closed beta: new accounts open later.">Suljettu beta: uudet tunnukset avataan myöhemmin.</span>
+            <span data-fi="Ohje- ja määritelmäosio työn alla." data-en="Guide and definitions section is in progress.">Ohje- ja määritelmäosio työn alla.</span>
+          </div>
         </article>
       </div>
 
@@ -1422,20 +1629,81 @@ main {
         <h1 data-fi="Mitä ovat arvo- ja varmavedot?" data-en="What are value bets and sure bets?">Mitä ovat arvo- ja varmavedot?</h1>
         <p class="home-lead" data-fi="Vedox kokoaa kiinnostavat vedonlyöntikohteet yhteen näkymään ja auttaa hahmottamaan, milloin kerroin, panos ja riski ovat järkevässä suhteessa toisiinsa." data-en="Vedox brings interesting betting opportunities into one view and helps you understand when odds, stake and risk are in a sensible balance.">Vedox kokoaa kiinnostavat vedonlyöntikohteet yhteen näkymään ja auttaa hahmottamaan, milloin kerroin, panos ja riski ovat järkevässä suhteessa toisiinsa.</p>
         <div class="home-explain-grid">
-          <div class="home-explain-card">
+          <div class="home-explain-card" onclick="openInfoModal('valuebet')" role="button" tabindex="0">
             <h3 data-fi="Arvovedot" data-en="Value bets">Arvovedot</h3>
             <p data-fi="Kohteita, joissa tarjolla oleva kerroin näyttää kiinnostavalta suhteessa Vedoxin arvioon. Näkymä auttaa löytämään pelattavat kohteet ilman turhaa taustahälyä." data-en="Selections where the offered odds look interesting compared with Vedox's estimate. The view helps you find playable spots without extra noise.">Kohteita, joissa tarjolla oleva kerroin näyttää kiinnostavalta suhteessa Vedoxin arvioon. Näkymä auttaa löytämään pelattavat kohteet ilman turhaa taustahälyä.</p>
           </div>
-          <div class="home-explain-card">
+          <div class="home-explain-card" onclick="openInfoModal('surebet')" role="button" tabindex="0">
             <h3 data-fi="Varmavedot" data-en="Sure bets">Varmavedot</h3>
             <p data-fi="Tilanteita, joissa panos voidaan jakaa eri lopputuloksille niin, että arvioitu tuotto voi lukittua jo ennen ottelun alkua." data-en="Situations where the stake can be split across outcomes so the estimated return can be locked before the event starts.">Tilanteita, joissa panos voidaan jakaa eri lopputuloksille niin, että arvioitu tuotto voi lukittua jo ennen ottelun alkua.</p>
           </div>
         </div>
         <div class="home-actions">
-          <button class="home-login-btn" onclick="showAuthModal()" data-fi="Kirjaudu sisään" data-en="Sign in">Kirjaudu sisään</button>
           <span class="home-beta" data-fi="Vedox on suljetussa beta-vaiheessa." data-en="Vedox is currently in closed beta.">Vedox on suljetussa beta-vaiheessa.</span>
         </div>
       </article>
+    </section>
+  </div>
+
+  <div class="page" id="page-guides">
+    <section class="content-page">
+      <div class="page-heading">
+        <div>
+          <h2 class="page-title" data-fi="Ohjeet ja määritelmät" data-en="Guides and definitions">Ohjeet ja määritelmät</h2>
+          <p class="page-sub" data-fi="Perusasiat Vedoxin käytöstä, arvovedoista ja varmavedoista." data-en="The basics of using Vedox, value bets and sure bets.">Perusasiat Vedoxin käytöstä, arvovedoista ja varmavedoista.</p>
+        </div>
+      </div>
+      <div class="content-grid">
+        <article class="content-card">
+          <h3>Vedoxin perusidea</h3>
+          <p>Vedox kokoaa kohteet yhteen näkymään, jotta käyttäjä voi vertailla vetoja, hallita pelikassaa ja seurata omia päätöksiä ilman turhaa hajontaa eri paikkoihin.</p>
+        </article>
+        <article class="content-card">
+          <h3>Arvovedot</h3>
+          <p>Arvovedossa kerroin näyttää kiinnostavalta suhteessa arvioon. Yksittäinen veto voi hävitä, mutta pitkällä aikavälillä tarkoitus on tehdä parempia toistuvia päätöksiä.</p>
+        </article>
+        <article class="content-card">
+          <h3>Varmavedot</h3>
+          <p>Varmavedossa panosjako tehdään usealle lopputulokselle. Tarkoitus on lukita arvioitu tuotto, jos kaikki tarvittavat kertoimet ovat yhä saatavilla.</p>
+        </article>
+        <article class="content-card">
+          <h3>Termit käytännössä</h3>
+          <ul>
+            <li><strong>Kerroin:</strong> bookkerin tarjoama palautuskerroin.</li>
+            <li><strong>Panosjako:</strong> miten kokonaispanos jaetaan eri lopputuloksille.</li>
+            <li><strong>Keskietu:</strong> valittujen kohteiden keskimääräinen etu.</li>
+            <li><strong>Arvioitu tuotto:</strong> Vedoxin laskema arvio ennen lopullista päätöstä.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <div class="page" id="page-news">
+    <section class="content-page">
+      <div class="page-heading">
+        <div>
+          <h2 class="page-title" data-fi="Ajankohtaista" data-en="Updates">Ajankohtaista</h2>
+          <p class="page-sub" data-fi="Vedox-järjestelmän päivitykset, tärkeät huomiot ja urheilumaailman ajankohtaiset nostot." data-en="Vedox updates, key notes and current sports highlights.">Vedox-järjestelmän päivitykset, tärkeät huomiot ja urheilumaailman ajankohtaiset nostot.</p>
+        </div>
+      </div>
+      <div class="news-list">
+        <article class="news-item">
+          <div class="news-date">18.5.2026</div>
+          <h3>Varmavedot omalle välilehdelle</h3>
+          <p>Varmavedot on erotettu arvovedoista, jotta käyttäjä näkee panosjaon ja arvioidun tuoton selkeämmin.</p>
+        </article>
+        <article class="news-item">
+          <div class="news-date">18.5.2026</div>
+          <h3>Vedox on suljetussa beta-vaiheessa</h3>
+          <p>Uusien käyttäjien luonti on väliaikaisesti suljettu. Nykyiset tunnukset toimivat normaalisti.</p>
+        </article>
+        <article class="news-item">
+          <div class="news-date">Tulossa</div>
+          <h3>Ohjeet, tasot ja mobiilin viimeistely</h3>
+          <p>Seuraavaksi viimeistellään ohjesisältöjä, käyttöoikeustasoja ja puhelinnäkymän pieniä korjauksia.</p>
+        </article>
+      </div>
     </section>
   </div>
 
@@ -1885,6 +2153,19 @@ function applyTheme(t) {
 }
 function toggleTheme() { applyTheme(currentTheme==="dark"?"light":"dark"); }
 
+function toggleSettingsMenu(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById("settings-dropdown");
+  const trigger = document.getElementById("settings-trigger");
+  const open = menu?.classList.toggle("open");
+  trigger?.classList.toggle("open", !!open);
+}
+
+function closeSettingsMenu() {
+  document.getElementById("settings-dropdown")?.classList.remove("open");
+  document.getElementById("settings-trigger")?.classList.remove("open");
+}
+
 function syncAuthLangBtns() {
   document.getElementById("auth-btn-fi").style.color=lang==="fi"?"var(--blue-lt)":"var(--text3)";
   document.getElementById("auth-btn-fi").style.borderColor=lang==="fi"?"var(--blue)":"var(--border2)";
@@ -1900,6 +2181,7 @@ function setLang(l) {
   document.querySelectorAll("option[data-fi]").forEach(el=>{el.textContent=el.getAttribute(`data-${l}`)||el.textContent;});
   document.documentElement.lang=l;
   if (currentUser) saveUserSettings({ lang: l });
+  closeSettingsMenu();
   renderBets(); renderMyBets();
   renderArbitrages(allArbitrages);
 }
@@ -2499,7 +2781,7 @@ function renderAnalytics() {
 }
 
 function openInfoModal(type) {
-  const ids = { terms:'modal-terms', privacy:'modal-privacy', responsible:'modal-responsible' };
+  const ids = { terms:'modal-terms', privacy:'modal-privacy', responsible:'modal-responsible', valuebet:'modal-valuebet', surebet:'modal-surebet', about:'modal-about' };
   const id = ids[type]; if (!id) return;
   document.getElementById(id).classList.add("open");
 }
@@ -2680,6 +2962,7 @@ function initAuthControls() {
   document.getElementById("register-btn")?.addEventListener("click",doRegister);
   document.getElementById("login-password")?.addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
   document.getElementById("reg-password")?.addEventListener("keydown",e=>{if(e.key==="Enter")doRegister();});
+  document.addEventListener("click", closeSettingsMenu);
 }
 
 applyTheme(currentTheme);
