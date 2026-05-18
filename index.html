@@ -100,8 +100,24 @@ body {
 }
 
 /* ===== AUTH OVERLAY ===== */
-#auth-overlay { position:fixed; inset:0; z-index:999; background:var(--bg); display:flex; align-items:center; justify-content:center; padding:1rem; }
+#auth-overlay { position:fixed; inset:0; z-index:999; background:rgba(8,9,13,0.72); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); display:none; align-items:center; justify-content:center; padding:1rem; }
 .auth-box { position:relative; z-index:2; background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius-lg); padding:2.25rem 1.75rem; width:100%; max-width:380px; box-shadow:0 20px 60px rgba(0,0,0,0.4); animation:fadeUp 0.3s ease; }
+.auth-close {
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:30px;
+  height:30px;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  background:var(--surface-2);
+  color:var(--text3);
+  font-size:1rem;
+  line-height:1;
+  cursor:pointer;
+  transition:all 0.15s;
+}
+.auth-close:hover { color:var(--text); border-color:var(--border3); background:var(--surface-3); }
 .auth-logo { display:flex; align-items:center; gap:10px; margin-bottom:1.25rem; justify-content:center; }
 .auth-logo-name { font-family:var(--font-brand); font-weight:800; font-size:1.6rem; letter-spacing:0.04em; color:var(--text); }
 .auth-logo-name span { color:var(--blue-lt); }
@@ -233,6 +249,145 @@ main {
 .page { display:none; }
 .page.active { display:block; animation:fadeUp 0.25s ease; }
 @keyframes fadeUp { from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+
+/* ===== PUBLIC HOME ===== */
+.home-shell {
+  display:grid;
+  grid-template-columns:minmax(280px, 0.9fr) minmax(340px, 1fr);
+  gap:clamp(2rem, 6vw, 5.5rem);
+  align-items:start;
+  max-width:1160px;
+  margin:0 auto;
+  padding:clamp(1rem, 2vw, 1.75rem) 0 2rem;
+}
+.home-left {
+  display:grid;
+  gap:1rem;
+}
+.home-brand {
+  display:flex;
+  align-items:center;
+  min-height:48px;
+}
+.home-brand .logo-assets { display:flex; align-items:center; }
+.home-brand .logo-fallback { display:none; align-items:center; }
+.home-brand .logo-image { height:44px; max-width:178px; }
+.home-brand .logo-fallback { gap:10px; }
+.home-logo-asset-missing .logo-assets { display:none; }
+.home-logo-asset-missing .logo-fallback { display:flex; }
+.home-image-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+  min-height:255px;
+  box-shadow:var(--shadow-soft);
+}
+.home-image-card img {
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:255px;
+  object-fit:cover;
+}
+.home-about {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1rem 1.1rem;
+  box-shadow:var(--shadow-soft);
+}
+.home-about h2,
+.home-copy-card h1,
+.home-explain-card h3 {
+  color:var(--text);
+  letter-spacing:-0.01em;
+}
+.home-about h2 {
+  font-size:0.95rem;
+  font-weight:700;
+  margin-bottom:0.35rem;
+}
+.home-about p {
+  color:var(--text2);
+  font-size:0.84rem;
+  line-height:1.65;
+}
+.home-copy-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:clamp(1.25rem, 3vw, 2rem);
+  min-height:410px;
+  box-shadow:var(--shadow-soft);
+}
+.home-kicker {
+  color:var(--blue-lt);
+  font-size:0.68rem;
+  font-weight:700;
+  letter-spacing:0.11em;
+  text-transform:uppercase;
+  margin-bottom:0.85rem;
+}
+.home-copy-card h1 {
+  font-family:var(--font-brand);
+  font-size:clamp(2rem, 4vw, 3.3rem);
+  line-height:0.94;
+  font-weight:800;
+  margin-bottom:1rem;
+}
+.home-lead {
+  color:var(--text2);
+  font-size:0.98rem;
+  line-height:1.75;
+  max-width:54ch;
+  margin-bottom:1.15rem;
+}
+.home-explain-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0.8rem;
+  margin:1rem 0 1.15rem;
+}
+.home-explain-card {
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:0.9rem;
+}
+.home-explain-card h3 {
+  font-size:0.9rem;
+  font-weight:700;
+  margin-bottom:0.35rem;
+}
+.home-explain-card p {
+  color:var(--text2);
+  font-size:0.82rem;
+  line-height:1.6;
+}
+.home-actions {
+  display:flex;
+  align-items:center;
+  gap:0.9rem;
+  flex-wrap:wrap;
+}
+.home-login-btn {
+  background:var(--blue);
+  border:1px solid var(--blue);
+  color:#fff;
+  font-family:var(--font-ui);
+  font-size:0.86rem;
+  font-weight:700;
+  padding:0.7rem 1rem;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all 0.15s;
+}
+.home-login-btn:hover { background:var(--blue-lt); border-color:var(--blue-lt); }
+.home-beta {
+  color:var(--text3);
+  font-size:0.78rem;
+}
 
 .page-heading {
   display:flex;
@@ -939,6 +1094,16 @@ main {
   .nav-btn { padding:10px 12px; font-size:0.8rem; }
   .nav-btn.active::after { bottom:0; left:12px; right:12px; height:2px; }
   main { padding:1rem 1rem 3rem; }
+  .home-shell {
+    grid-template-columns:1fr;
+    gap:1rem;
+    padding-top:0.35rem;
+  }
+  .home-copy-card { min-height:auto; }
+  .home-explain-grid { grid-template-columns:1fr; }
+  .home-brand .logo-image { height:38px; max-width:155px; }
+  .home-image-card,
+  .home-image-card img { min-height:220px; }
   .stats-row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
   .stat-card { border-right:none; border-bottom:1px solid var(--border); }
   .stat-card:nth-child(odd) { border-right:1px solid var(--border); }
@@ -991,6 +1156,11 @@ main {
   .stat-val { font-size:1.2rem; }
   .logo-image { height:30px; max-width:122px; }
   .logo-tagline { display:none; }
+  .home-copy-card h1 { font-size:2.05rem; }
+  .home-image-card,
+  .home-image-card img { min-height:185px; }
+  .home-actions { align-items:flex-start; flex-direction:column; }
+  .home-login-btn { width:100%; }
   .action-cluster { height:32px; gap:3px; padding:3px; }
   .profile-name { display:none; }
   .header-right .lang-btn, .header-right .theme-btn { padding:6px 8px; }
@@ -1017,6 +1187,7 @@ main {
 
 <div id="auth-overlay">
   <div class="auth-box">
+    <button class="auth-close" type="button" onclick="hideAuthModal()" aria-label="Sulje">×</button>
     <div class="auth-logo">
       <svg width="36" height="36" viewBox="0 0 40 40" fill="none"><path d="M4 8 L20 32 L36 8" stroke="url(#ag1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M14 8 L20 20 L26 8" stroke="url(#ag2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><defs><linearGradient id="ag1" x1="4" y1="8" x2="36" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a0b4d0"/></linearGradient><linearGradient id="ag2" x1="14" y1="8" x2="26" y2="20" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1a4fc4"/><stop offset="100%" stop-color="#2d6ae0"/></linearGradient></defs></svg>
       <div class="auth-logo-name">VEDO<span>X</span></div>
@@ -1061,7 +1232,7 @@ main {
 </div>
 
 <header>
-  <a class="logo" href="#">
+  <a class="logo" href="#" onclick="showPage('home', navButtonForPage('home')); return false;">
     <span class="logo-assets" aria-hidden="true">
       <img class="logo-image logo-image-dark" src="assets/vedox-logo-dark.png" alt="" onerror="this.closest('.logo').classList.add('logo-asset-missing')">
       <img class="logo-image logo-image-light" src="assets/vedox-logo-light.png" alt="" onerror="this.closest('.logo').classList.add('logo-asset-missing')">
@@ -1075,7 +1246,8 @@ main {
     </span>
   </a>
   <nav>
-    <button class="nav-btn active" onclick="showPage('bets',this)" data-fi="Arvovedot" data-en="Value Bets">Arvovedot</button>
+    <button class="nav-btn active" onclick="showPage('home',this)" data-fi="Etusivu" data-en="Home">Etusivu</button>
+    <button class="nav-btn" onclick="showPage('bets',this)" data-fi="Arvovedot" data-en="Value Bets">Arvovedot</button>
     <button class="nav-btn" onclick="showPage('arb',this)" data-fi="Varmavedot" data-en="Sure Bets">Varmavedot</button>
     <button class="nav-btn" onclick="showPage('mybets',this)" data-fi="Omat vedot" data-en="My Bets">Omat vedot</button>
     <button class="nav-btn" onclick="showPage('analytics',this)" data-fi="Analytiikka" data-en="Analytics">Analytiikka</button>
@@ -1220,7 +1392,54 @@ main {
 </div>
 
 <main>
-  <div class="page active" id="page-bets">
+  <div class="page active" id="page-home">
+    <section class="home-shell">
+      <div class="home-left">
+        <div class="home-brand">
+          <span class="logo-assets" aria-hidden="true">
+            <img class="logo-image logo-image-dark" src="assets/vedox-logo-dark.png" alt="" onerror="this.closest('.home-brand').classList.add('home-logo-asset-missing')">
+            <img class="logo-image logo-image-light" src="assets/vedox-logo-light.png" alt="" onerror="this.closest('.home-brand').classList.add('home-logo-asset-missing')">
+          </span>
+          <span class="logo-fallback">
+            <svg class="logo-icon" viewBox="0 0 40 40" fill="none"><path d="M4 8 L20 32 L36 8" stroke="url(#homeGrad1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M14 8 L20 20 L26 8" stroke="url(#homeGrad2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><defs><linearGradient id="homeGrad1" x1="4" y1="8" x2="36" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a0b4d0"/></linearGradient><linearGradient id="homeGrad2" x1="14" y1="8" x2="26" y2="20" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1a4fc4"/><stop offset="100%" stop-color="#2d6ae0"/></linearGradient></defs></svg>
+            <span class="logo-text-wrap">
+              <span class="logo-name">VEDO<span>X</span></span>
+              <span class="logo-tagline">Logic Over Luck</span>
+            </span>
+          </span>
+        </div>
+        <figure class="home-image-card">
+          <img src="hero-football.jpg" alt="Jalkapallo stadionin nurmella">
+        </figure>
+        <article class="home-about">
+          <h2 data-fi="Tietoa meistä" data-en="About us">Tietoa meistä</h2>
+          <p data-fi="Vedox rakentaa selkeää työkalua vedonlyönnin seurantaan, kohteiden vertailuun ja oman pelikassan hallintaan. Tavoitteena on tehdä päätöksistä rauhallisempia ja paremmin perusteltuja." data-en="Vedox is building a clear tool for tracking bets, comparing opportunities and managing your bankroll. The goal is calmer, better-grounded decisions.">Vedox rakentaa selkeää työkalua vedonlyönnin seurantaan, kohteiden vertailuun ja oman pelikassan hallintaan. Tavoitteena on tehdä päätöksistä rauhallisempia ja paremmin perusteltuja.</p>
+        </article>
+      </div>
+
+      <article class="home-copy-card">
+        <div class="home-kicker" data-fi="Vedox • Logic Over Luck" data-en="Vedox • Logic Over Luck">Vedox • Logic Over Luck</div>
+        <h1 data-fi="Mitä ovat arvo- ja varmavedot?" data-en="What are value bets and sure bets?">Mitä ovat arvo- ja varmavedot?</h1>
+        <p class="home-lead" data-fi="Vedox kokoaa kiinnostavat vedonlyöntikohteet yhteen näkymään ja auttaa hahmottamaan, milloin kerroin, panos ja riski ovat järkevässä suhteessa toisiinsa." data-en="Vedox brings interesting betting opportunities into one view and helps you understand when odds, stake and risk are in a sensible balance.">Vedox kokoaa kiinnostavat vedonlyöntikohteet yhteen näkymään ja auttaa hahmottamaan, milloin kerroin, panos ja riski ovat järkevässä suhteessa toisiinsa.</p>
+        <div class="home-explain-grid">
+          <div class="home-explain-card">
+            <h3 data-fi="Arvovedot" data-en="Value bets">Arvovedot</h3>
+            <p data-fi="Kohteita, joissa tarjolla oleva kerroin näyttää kiinnostavalta suhteessa Vedoxin arvioon. Näkymä auttaa löytämään pelattavat kohteet ilman turhaa taustahälyä." data-en="Selections where the offered odds look interesting compared with Vedox's estimate. The view helps you find playable spots without extra noise.">Kohteita, joissa tarjolla oleva kerroin näyttää kiinnostavalta suhteessa Vedoxin arvioon. Näkymä auttaa löytämään pelattavat kohteet ilman turhaa taustahälyä.</p>
+          </div>
+          <div class="home-explain-card">
+            <h3 data-fi="Varmavedot" data-en="Sure bets">Varmavedot</h3>
+            <p data-fi="Tilanteita, joissa panos voidaan jakaa eri lopputuloksille niin, että arvioitu tuotto voi lukittua jo ennen ottelun alkua." data-en="Situations where the stake can be split across outcomes so the estimated return can be locked before the event starts.">Tilanteita, joissa panos voidaan jakaa eri lopputuloksille niin, että arvioitu tuotto voi lukittua jo ennen ottelun alkua.</p>
+          </div>
+        </div>
+        <div class="home-actions">
+          <button class="home-login-btn" onclick="showAuthModal()" data-fi="Kirjaudu sisään" data-en="Sign in">Kirjaudu sisään</button>
+          <span class="home-beta" data-fi="Vedox on suljetussa beta-vaiheessa." data-en="Vedox is currently in closed beta.">Vedox on suljetussa beta-vaiheessa.</span>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <div class="page" id="page-bets">
     <div class="stats-row" id="bets-stats" style="display:none">
       <div class="stat-card"><div class="stat-lbl" data-fi="Kohteet" data-en="Opportunities">Kohteet</div><div class="stat-val" id="s-count">—</div></div>
       <div class="stat-card"><div class="stat-lbl" data-fi="Paras etu" data-en="Best edge">Paras etu</div><div class="stat-val" id="s-bestev">—</div></div>
@@ -1355,6 +1574,8 @@ let selectedAvatarFile = null;
 let lastSupabaseError = "";
 let _bankrollDebounceTimer = null;
 let _bankrollSnapshotDebounceTimer = null;
+const PROTECTED_PAGES = new Set(["bets", "arb", "mybets", "analytics"]);
+let pendingProtectedPage = null;
 
 // ===== AUTH =====
 function switchAuthTab(tab) {
@@ -1575,6 +1796,11 @@ function showApp(user) {
   fetchArbitrages();
 
   renderMyBets();
+  if (pendingProtectedPage) {
+    const targetPage = pendingProtectedPage;
+    pendingProtectedPage = null;
+    showPage(targetPage, navButtonForPage(targetPage));
+  }
 }
 
 function hideApp() {
@@ -1590,9 +1816,14 @@ function hideApp() {
   skippedIds = [];
   evBetStates = {};
   allArbitrages = [];
-  document.getElementById("auth-overlay").style.display = "flex";
+  pendingProtectedPage = null;
+  document.getElementById("auth-overlay").style.display = "none";
   document.getElementById("profile-btn").style.display  = "none";
   document.getElementById("btn-login-header").style.display = "block";
+  document.querySelectorAll(".page").forEach(el=>el.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(el=>el.classList.remove("active"));
+  document.getElementById("page-home")?.classList.add("active");
+  document.querySelector(".nav-btn[onclick*=\"home\"]")?.classList.add("active");
   document.getElementById("bets-list").innerHTML = "";
   document.getElementById("bets-stats").style.display = "none";
   document.getElementById("bets-loading").style.display = "none";
@@ -1610,6 +1841,12 @@ function hideApp() {
 
 function showAuthModal() {
   document.getElementById("auth-overlay").style.display = "flex";
+  switchAuthTab("login");
+}
+
+function hideAuthModal() {
+  document.getElementById("auth-overlay").style.display = "none";
+  setAuthMsg("", "");
 }
 
 // ===== USER SETTINGS =====
@@ -1668,6 +1905,17 @@ function setLang(l) {
 }
 
 function showPage(p, btn) {
+  if (PROTECTED_PAGES.has(p) && !currentUser) {
+    pendingProtectedPage = p;
+    showAuthModal();
+    setAuthMsg(
+      lang === "fi"
+        ? "Kirjaudu sisään avataksesi tämän osion. Vedox on suljetussa beta-vaiheessa."
+        : "Sign in to open this section. Vedox is currently in closed beta.",
+      "error"
+    );
+    return;
+  }
   document.querySelectorAll(".page").forEach(el=>el.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach(el=>el.classList.remove("active"));
   document.getElementById("page-"+p).classList.add("active");
@@ -1675,6 +1923,12 @@ function showPage(p, btn) {
   if (p==="analytics") { renderMyBets(); setTimeout(renderAnalytics,50); }
   if (p==="mybets") renderMyBets();
   if (p==="arb") renderArbitrages(allArbitrages);
+}
+
+function navButtonForPage(p) {
+  return Array.from(document.querySelectorAll(".nav-btn")).find(btn =>
+    (btn.getAttribute("onclick") || "").includes(`'${p}'`)
+  );
 }
 
 // ===== FETCH =====
