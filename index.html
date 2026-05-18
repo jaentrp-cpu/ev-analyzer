@@ -136,8 +136,16 @@ header {
   padding:0 1.5rem; height:56px;
   display:flex; align-items:center; justify-content:space-between;
 }
-.logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+.logo { display:flex; align-items:center; gap:10px; text-decoration:none; min-width:0; }
 .logo-icon { width:28px; height:28px; }
+.logo-assets { display:flex; align-items:center; }
+.logo-image { display:block; width:auto; height:34px; max-width:150px; object-fit:contain; }
+.logo-image-light { display:none; }
+[data-theme="dark"] .logo-image-light { display:block; }
+[data-theme="dark"] .logo-image-dark { display:none; }
+.logo-fallback { display:none; align-items:center; gap:10px; }
+.logo-asset-missing .logo-assets { display:none; }
+.logo-asset-missing .logo-fallback { display:flex; }
 .logo-text-wrap { line-height:1; }
 .logo-name { font-family:var(--font-brand); font-weight:800; font-size:1.25rem; letter-spacing:0.04em; color:var(--text); }
 .logo-name span { color:var(--blue-lt); }
@@ -466,6 +474,8 @@ main {
 }
 
 .bet-cell { text-align:left; }
+.bet-cell-book { min-width:0; }
+.bet-cell-edge { min-width:0; }
 .bet-cell.center { text-align:center; }
 .bet-cell.right { text-align:right; }
 .bet-cell-lbl {
@@ -658,6 +668,20 @@ main {
   font-family:var(--font-num);
   text-align:right;
 }
+.arb-outcome-head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 70px minmax(90px,130px) 76px;
+  gap:12px;
+  padding-bottom:5px;
+  border-bottom:1px solid var(--border);
+  font-size:0.58rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--text4);
+}
+.arb-outcome-head span:nth-child(2),
+.arb-outcome-head span:nth-child(4) { text-align:right; }
 
 /* ===== MY BETS ===== */
 .add-bet-btn {
@@ -891,19 +915,45 @@ main {
   }
 }
 @media (max-width:900px) {
-  header { padding:0 1rem; height:52px; }
-  nav { display:none; }
+  header {
+    padding:8px 1rem 0;
+    height:auto;
+    min-height:56px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .logo { order:1; flex:1 1 auto; }
+  .header-right { order:2; margin-left:auto; }
+  nav {
+    order:3;
+    display:flex;
+    flex:1 0 100%;
+    width:100%;
+    margin-left:0;
+    overflow-x:auto;
+    border-top:1px solid var(--border);
+    padding-top:2px;
+    scrollbar-width:none;
+  }
+  nav::-webkit-scrollbar { display:none; }
+  .nav-btn { padding:10px 12px; font-size:0.8rem; }
+  .nav-btn.active::after { bottom:0; left:12px; right:12px; height:2px; }
   main { padding:1rem 1rem 3rem; }
-  .stats-row { grid-template-columns:repeat(2,1fr); }
-  .toolbar { padding:0.75rem; }
+  .stats-row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .stat-card { border-right:none; border-bottom:1px solid var(--border); }
+  .stat-card:nth-child(odd) { border-right:1px solid var(--border); }
+  .stat-card:nth-last-child(-n+2) { border-bottom:none; }
+  .toolbar { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); padding:0.75rem; }
   .fg input, .fg select { width:100%; }
-  .filter-info { width:100%; padding-bottom:0; padding-top:4px; margin-left:0; text-align:left; }
+  .btn-reset { width:100%; }
+  .filter-info { grid-column:1/-1; width:100%; padding-bottom:0; padding-top:4px; margin-left:0; text-align:left; }
 
   .bet-row {
     grid-template-columns: 28px 1fr;
     grid-template-areas:
       "sport info"
-      "stats stats"
+      "odds book"
+      "edge edge"
       "stake stake"
       "actions actions";
     row-gap:10px;
@@ -911,13 +961,10 @@ main {
   }
   .bet-sport { grid-area:sport; }
   .bet-info { grid-area:info; }
-  .bet-row > .bet-cell-odds { grid-area:stats; }
-  .bet-stats-mobile {
-    grid-area:stats;
-    display:flex; gap:18px;
-    padding-top:8px;
-    border-top:1px solid var(--border);
-  }
+  .bet-row > .bet-cell-odds { grid-area:odds; border-top:1px solid var(--border); padding-top:8px; }
+  .bet-row > .bet-cell-book { grid-area:book; border-top:1px solid var(--border); padding-top:8px; }
+  .bet-row > .bet-cell-edge { grid-area:edge; }
+  .bet-cell.center { text-align:left; }
   .bet-stake { grid-area:stake; flex-direction:row; align-items:center; justify-content:space-between; }
   .bet-actions { grid-area:actions; }
   .btn-placed, .btn-skip { flex:1; }
@@ -932,13 +979,37 @@ main {
   .arb-top { flex-direction:column; }
   .arb-metrics { width:100%; justify-content:space-between; }
   .arb-metric { text-align:left; }
+  .arb-outcome-head { grid-template-columns:1fr 54px 80px 62px; gap:8px; }
   .arb-outcome-row { grid-template-columns:1fr 54px 80px 62px; gap:8px; }
 }
 @media (max-width:540px) {
-  .stats-row { grid-template-columns:1fr 1fr; gap:8px; }
+  .stats-row { grid-template-columns:1fr; gap:0; }
+  .stat-card,
+  .stat-card:nth-child(odd) { border-right:none; }
+  .stat-card:nth-last-child(-n+2) { border-bottom:1px solid var(--border); }
+  .stat-card:last-child { border-bottom:none; }
   .stat-val { font-size:1.2rem; }
+  .logo-image { height:30px; max-width:122px; }
+  .logo-tagline { display:none; }
+  .action-cluster { height:32px; gap:3px; padding:3px; }
+  .profile-name { display:none; }
   .header-right .lang-btn, .header-right .theme-btn { padding:6px 8px; }
   .live-pill { display:none; }
+  .toolbar { grid-template-columns:1fr; }
+  .page-heading, .mybets-toolbar { align-items:flex-start; flex-direction:column; }
+  .arb-outcome-head { display:none; }
+  .arb-outcome-row {
+    grid-template-columns:1fr auto;
+    grid-template-areas:
+      "side stake"
+      "book odds";
+    gap:3px 10px;
+    padding:8px 0;
+  }
+  .arb-side { grid-area:side; }
+  .arb-stake { grid-area:stake; }
+  .arb-book { grid-area:book; }
+  .arb-odds { grid-area:odds; }
 }
 </style>
 </head>
@@ -966,9 +1037,9 @@ main {
       <div class="auth-field"><label>Aloituskassa (€)</label><input type="number" id="reg-bankroll" min="10" placeholder="esim. 300"></div>
       <div class="auth-field"><label>Varovaisuustaso</label>
         <select id="reg-risk-level">
-          <option value="conservative">Varovainen — 0.5% kassasta per betsi</option>
-          <option value="normal" selected>Normaali — 1.0% kassasta per betsi</option>
-          <option value="aggressive">Rohkea — 1.5% kassasta per betsi</option>
+          <option value="conservative">Varovainen — 0.5% kassasta per veto</option>
+          <option value="normal" selected>Normaali — 1.0% kassasta per veto</option>
+          <option value="aggressive">Rohkea — 1.5% kassasta per veto</option>
         </select>
       </div>
       <input type="checkbox" id="reg-age" style="display:none">
@@ -991,11 +1062,17 @@ main {
 
 <header>
   <a class="logo" href="#">
-    <svg class="logo-icon" viewBox="0 0 40 40" fill="none"><path d="M4 8 L20 32 L36 8" stroke="url(#grad1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M14 8 L20 20 L26 8" stroke="url(#grad2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M26 8 L34 2" stroke="url(#grad3)" stroke-width="3" stroke-linecap="round"/><defs><linearGradient id="grad1" x1="4" y1="8" x2="36" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a0b4d0"/></linearGradient><linearGradient id="grad2" x1="14" y1="8" x2="26" y2="20" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1a4fc4"/><stop offset="100%" stop-color="#2d6ae0"/></linearGradient><linearGradient id="grad3" x1="26" y1="8" x2="34" y2="2" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#2d6ae0"/><stop offset="100%" stop-color="#4a88ff"/></linearGradient></defs></svg>
-    <div class="logo-text-wrap">
-      <div class="logo-name">VEDO<span>X</span></div>
-      <span class="logo-tagline">Logic Over Luck</span>
-    </div>
+    <span class="logo-assets" aria-hidden="true">
+      <img class="logo-image logo-image-dark" src="assets/vedox-logo-dark.png" alt="" onerror="this.closest('.logo').classList.add('logo-asset-missing')">
+      <img class="logo-image logo-image-light" src="assets/vedox-logo-light.png" alt="" onerror="this.closest('.logo').classList.add('logo-asset-missing')">
+    </span>
+    <span class="logo-fallback">
+      <svg class="logo-icon" viewBox="0 0 40 40" fill="none"><path d="M4 8 L20 32 L36 8" stroke="url(#grad1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M14 8 L20 20 L26 8" stroke="url(#grad2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M26 8 L34 2" stroke="url(#grad3)" stroke-width="3" stroke-linecap="round"/><defs><linearGradient id="grad1" x1="4" y1="8" x2="36" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a0b4d0"/></linearGradient><linearGradient id="grad2" x1="14" y1="8" x2="26" y2="20" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1a4fc4"/><stop offset="100%" stop-color="#2d6ae0"/></linearGradient><linearGradient id="grad3" x1="26" y1="8" x2="34" y2="2" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#2d6ae0"/><stop offset="100%" stop-color="#4a88ff"/></linearGradient></defs></svg>
+      <span class="logo-text-wrap">
+        <span class="logo-name">VEDO<span>X</span></span>
+        <span class="logo-tagline">Logic Over Luck</span>
+      </span>
+    </span>
   </a>
   <nav>
     <button class="nav-btn active" onclick="showPage('bets',this)" data-fi="Arvovedot" data-en="Value Bets">Arvovedot</button>
@@ -1247,7 +1324,7 @@ main {
       <div class="stat-card"><div class="stat-lbl" data-fi="Kokonaistuotto" data-en="Total Profit">Kokonaistuotto</div><div class="stat-val" id="an-profit">—</div></div>
       <div class="stat-card"><div class="stat-lbl" data-fi="ROI" data-en="ROI">ROI</div><div class="stat-val" id="an-roi">—</div></div>
       <div class="stat-card"><div class="stat-lbl" data-fi="Osumisprosentti" data-en="Hit Rate">Osumisprosentti</div><div class="stat-val" id="an-hit">—</div></div>
-      <div class="stat-card"><div class="stat-lbl" data-fi="Avg EV" data-en="Avg EV">Avg EV</div><div class="stat-val" id="an-avgev">—</div></div>
+      <div class="stat-card"><div class="stat-lbl" data-fi="Keskietu" data-en="Avg edge">Keskietu</div><div class="stat-val" id="an-avgev">—</div></div>
     </div>
     <div class="analytics-grid">
       <div class="chart-card"><div class="chart-title" data-fi="Kassan kehitys" data-en="Bankroll Growth">Kassan kehitys</div><canvas id="chart-bankroll" height="200"></canvas></div>
@@ -1897,11 +1974,11 @@ function renderBets() {
           <div class="bet-cell-lbl">${fi?"Kerroin":"Odds"}</div>
           <div class="bet-cell-val">${b.kerroin.toFixed(2)}</div>
         </div>
-        <div class="bet-cell">
+        <div class="bet-cell bet-cell-book">
           <div class="bet-cell-lbl">${fi?"Kirja":"Book"}</div>
           <div class="bet-cell-val" style="font-size:0.88rem;font-weight:500;color:var(--text2)">${escapeHtmlSafe(b.kirja||"—")}</div>
         </div>
-        <div class="bet-cell center">
+        <div class="bet-cell center bet-cell-edge">
           <div class="bet-cell-lbl">${fi?"Etu":"Edge"}</div>
           <div class="bet-edge">+${b.ev.toFixed(1)}%</div>
         </div>
@@ -2407,8 +2484,15 @@ function renderArbitrages(arbs) {
         <span class="arb-book">${escapeHtmlSafe(String(o.book??''))}</span>
         <span class="arb-stake">${Number(o.stake_pct ?? o.stake ?? 0).toFixed(2)}%</span>
       </div>`).join('');
+    const outcomeHead = `
+      <div class="arb-outcome-head">
+        <span>${fi ? 'Lopputulos' : 'Outcome'}</span>
+        <span>${fi ? 'Kerroin' : 'Odds'}</span>
+        <span>${fi ? 'Bookkeri' : 'Book'}</span>
+        <span>${fi ? 'Panos' : 'Stake'}</span>
+      </div>`;
     const outcomeSection = outcomes.length
-      ? outcomeRows
+      ? outcomeHead + outcomeRows
       : `<div style="font-size:0.75rem;color:var(--text3);padding-top:4px">${fi ? 'Panosjakoa ei saatavilla' : 'Stake split unavailable'}</div>`;
     return `<div class="arb-card">
       <div class="arb-top">
