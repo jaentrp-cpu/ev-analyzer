@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vedox — Logic Over Luck</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2308090d'/%3E%3Cpath d='M10 15l22 36 22-36' fill='none' stroke='%232d6ae0' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M19 15l13 22 13-22' fill='none' stroke='white' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -204,18 +205,6 @@ nav {
 .action-cluster .divider {
   width:1px; height:18px; background:var(--border2); margin:0 2px;
 }
-
-.live-pill {
-  display:inline-flex; align-items:center; gap:6px;
-  font-family:var(--font-ui); font-size:0.72rem; font-weight:500;
-  letter-spacing:0.02em; text-transform:none;
-  color:var(--text2);
-  background:transparent;
-  border:none;
-  padding:0 8px; border-radius:6px;
-}
-.live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 0 2px rgba(58,138,92,0.12); animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
 
 .user-pill { display:flex; align-items:center; gap:6px; font-family:var(--font-ui); font-size:0.78rem; font-weight:500; color:var(--text2); background:var(--surface-2); border:1px solid var(--border2); padding:5px 10px; border-radius:999px; max-width:180px; }
 .user-email { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -430,16 +419,6 @@ main {
   font-size:0.82rem;
   line-height:1.6;
 }
-.home-actions {
-  display:flex;
-  align-items:center;
-  gap:0.9rem;
-  flex-wrap:wrap;
-}
-.home-beta {
-  color:var(--text3);
-  font-size:0.78rem;
-}
 .home-news {
   background:var(--surface);
   border:1px solid var(--border);
@@ -448,6 +427,10 @@ main {
   box-shadow:var(--shadow-soft);
   cursor:pointer;
   transition:all 0.15s;
+}
+.home-copy-card .home-news {
+  margin-bottom:1rem;
+  box-shadow:none;
 }
 .home-news h2 {
   color:var(--text);
@@ -471,6 +454,16 @@ main {
   background:var(--green);
   margin-right:7px;
   vertical-align:1px;
+}
+.home-news-list strong {
+  color:var(--text);
+  font-weight:700;
+}
+.home-news-list small {
+  display:block;
+  color:var(--text3);
+  margin-left:12px;
+  margin-top:1px;
 }
 .content-page {
   max-width:980px;
@@ -1201,6 +1194,45 @@ main {
 .legal-link { background:none; border:none; color:var(--text3); font-family:var(--font-ui); font-size:0.72rem; cursor:pointer; text-decoration:none; padding:0; transition:color 0.15s; }
 .legal-link:hover { color:var(--text); text-decoration:underline; text-underline-offset:3px; }
 
+/* ===== FOOTER ===== */
+.site-footer {
+  border-top:1px solid var(--border);
+  margin-top:3rem;
+  padding:1rem 1.5rem 1.4rem;
+  color:var(--text3);
+}
+.site-footer-inner {
+  max-width:1440px;
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:wrap;
+  font-size:0.72rem;
+}
+.footer-brand {
+  color:var(--text4);
+  font-weight:700;
+  letter-spacing:0.02em;
+  margin-right:4px;
+}
+.footer-link {
+  background:none;
+  border:none;
+  color:var(--text3);
+  font:inherit;
+  padding:0;
+  cursor:pointer;
+  text-decoration:none;
+  transition:color 0.15s;
+}
+.footer-link:hover {
+  color:var(--text);
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width:1100px) {
   .bet-row {
@@ -1299,12 +1331,10 @@ main {
   .home-copy-card h1 { font-size:2.05rem; }
   .home-image-card,
   .home-image-card img { min-height:185px; }
-  .home-actions { align-items:flex-start; flex-direction:column; }
   .action-cluster { height:32px; gap:3px; padding:3px; }
   .profile-name { display:none; }
   .header-right .lang-btn, .header-right .theme-btn { padding:6px 8px; }
   .settings-dropdown { right:-2px; width:205px; }
-  .live-pill { display:none; }
   .toolbar { grid-template-columns:1fr; }
   .page-heading, .mybets-toolbar { align-items:flex-start; flex-direction:column; }
   .arb-outcome-head { display:none; }
@@ -1397,8 +1427,6 @@ main {
   <div class="header-right">
     <button class="btn-logout" id="btn-login-header" onclick="showAuthModal()" style="color:var(--blue-lt)">Kirjaudu</button>
     <div class="action-cluster">
-      <div class="live-pill"><span class="live-dot"></span><span id="live-txt">Live</span></div>
-      <span class="divider"></span>
       <button class="profile-btn" id="profile-btn" style="display:none" onclick="openProfileModal()">
         <div class="profile-avatar" id="header-avatar"><span id="header-avatar-initial">?</span></div>
         <span class="profile-name" id="header-profile-name"></span>
@@ -1578,8 +1606,8 @@ main {
   <div class="info-modal">
     <button class="btn-info-close" onclick="closeInfoModal('modal-about')">✕</button>
     <h2>Tietoa meistä</h2>
-    <p>Vedox on suljetussa beta-vaiheessa oleva vedonlyönnin seurantaan ja kohteiden vertailuun rakennettu työkalu.</p>
-    <p>Tavoitteemme on tehdä näkymä, jossa käyttäjä näkee olennaisen nopeasti: kiinnostavat kohteet, panosehdotukset, omat vedot ja oman pelikassan kehityksen.</p>
+    <p>Vedox on kotimainen palveluntarjoaja, joka tarjoaa työkaluja ja älykkäitä ratkaisuja vedonlyönnin seurantaan, kohteiden vertailuun ja pelikassan hallintaan.</p>
+    <p>Tavoitteemme on muuttaa data selkeiksi päätöksiksi ja tehdä kokonaisuuden hallinnasta sujuvampaa. Autamme sinua optimoimaan pelisi ja pysymään ajan tasalla markkinoista ilman turhaa säätöä.</p>
     <h3>Mitä rakennamme seuraavaksi?</h3>
     <ul>
       <li>Selkeämmät ohjeet ja määritelmät.</li>
@@ -1612,19 +1640,19 @@ main {
         </figure>
         <article class="home-about" onclick="openInfoModal('about')" role="button" tabindex="0">
           <h2 data-fi="Tietoa meistä" data-en="About us">Tietoa meistä</h2>
-          <p data-fi="Vedox rakentaa selkeää työkalua vedonlyönnin seurantaan, kohteiden vertailuun ja oman pelikassan hallintaan. Tavoitteena on tehdä päätöksistä rauhallisempia ja paremmin perusteltuja." data-en="Vedox is building a clear tool for tracking bets, comparing opportunities and managing your bankroll. The goal is calmer, better-grounded decisions.">Vedox rakentaa selkeää työkalua vedonlyönnin seurantaan, kohteiden vertailuun ja oman pelikassan hallintaan. Tavoitteena on tehdä päätöksistä rauhallisempia ja paremmin perusteltuja.</p>
-        </article>
-        <article class="home-news" onclick="showPage('news', navButtonForPage('news'))" role="button" tabindex="0">
-          <h2 data-fi="Ajankohtaista" data-en="Updates">Ajankohtaista</h2>
-          <div class="home-news-list">
-            <span data-fi="Varmavedot erotettu omalle välilehdelle." data-en="Sure bets now have their own tab.">Varmavedot erotettu omalle välilehdelle.</span>
-            <span data-fi="Suljettu beta: uudet tunnukset avataan myöhemmin." data-en="Closed beta: new accounts open later.">Suljettu beta: uudet tunnukset avataan myöhemmin.</span>
-            <span data-fi="Ohje- ja määritelmäosio työn alla." data-en="Guide and definitions section is in progress.">Ohje- ja määritelmäosio työn alla.</span>
-          </div>
+          <p data-fi="Vedox on kotimainen palveluntarjoaja, joka tarjoaa työkaluja ja älykkäitä ratkaisuja vedonlyönnin seurantaan, kohteiden vertailuun ja pelikassan hallintaan. Tavoitteemme on muuttaa data selkeiksi päätöksiksi ja tehdä kokonaisuuden hallinnasta sujuvampaa. Autamme sinua optimoimaan pelisi ja pysymään ajan tasalla markkinoista ilman turhaa säätöä." data-en="Vedox is a Finnish service provider offering tools and smart solutions for tracking bets, comparing opportunities and managing your bankroll. Our goal is to turn data into clear decisions and make the whole process easier to manage.">Vedox on kotimainen palveluntarjoaja, joka tarjoaa työkaluja ja älykkäitä ratkaisuja vedonlyönnin seurantaan, kohteiden vertailuun ja pelikassan hallintaan. Tavoitteemme on muuttaa data selkeiksi päätöksiksi ja tehdä kokonaisuuden hallinnasta sujuvampaa. Autamme sinua optimoimaan pelisi ja pysymään ajan tasalla markkinoista ilman turhaa säätöä.</p>
         </article>
       </div>
 
       <article class="home-copy-card">
+        <article class="home-news" onclick="showPage('news', navButtonForPage('news'))" role="button" tabindex="0">
+          <h2 data-fi="Ajankohtaista" data-en="Updates">Ajankohtaista</h2>
+          <div class="home-news-list">
+            <span data-fi="MM-kisat 2026: 11.6.–19.7.2026." data-en="World Cup 2026: 11 Jun–19 Jul 2026."><strong>MM-kisat 2026</strong><small>11.6.–19.7.2026</small></span>
+            <span data-fi="Mestarien liigan finaali: 30.5.2026." data-en="Champions League final: 30 May 2026."><strong>Mestarien liigan finaali</strong><small>30.5.2026</small></span>
+            <span data-fi="Premier League 2025/26 päättyy 24.5.2026." data-en="Premier League 2025/26 ends on 24 May 2026."><strong>Premier League</strong><small>2025/26 päätöskierros 24.5.2026</small></span>
+          </div>
+        </article>
         <div class="home-kicker" data-fi="Vedox • Logic Over Luck" data-en="Vedox • Logic Over Luck">Vedox • Logic Over Luck</div>
         <h1 data-fi="Mitä ovat arvo- ja varmavedot?" data-en="What are value bets and sure bets?">Mitä ovat arvo- ja varmavedot?</h1>
         <p class="home-lead" data-fi="Vedox kokoaa kiinnostavat vedonlyöntikohteet yhteen näkymään ja auttaa hahmottamaan, milloin kerroin, panos ja riski ovat järkevässä suhteessa toisiinsa." data-en="Vedox brings interesting betting opportunities into one view and helps you understand when odds, stake and risk are in a sensible balance.">Vedox kokoaa kiinnostavat vedonlyöntikohteet yhteen näkymään ja auttaa hahmottamaan, milloin kerroin, panos ja riski ovat järkevässä suhteessa toisiinsa.</p>
@@ -1637,9 +1665,6 @@ main {
             <h3 data-fi="Varmavedot" data-en="Sure bets">Varmavedot</h3>
             <p data-fi="Tilanteita, joissa panos voidaan jakaa eri lopputuloksille niin, että arvioitu tuotto voi lukittua jo ennen ottelun alkua." data-en="Situations where the stake can be split across outcomes so the estimated return can be locked before the event starts.">Tilanteita, joissa panos voidaan jakaa eri lopputuloksille niin, että arvioitu tuotto voi lukittua jo ennen ottelun alkua.</p>
           </div>
-        </div>
-        <div class="home-actions">
-          <span class="home-beta" data-fi="Vedox on suljetussa beta-vaiheessa." data-en="Vedox is currently in closed beta.">Vedox on suljetussa beta-vaiheessa.</span>
         </div>
       </article>
     </section>
@@ -1688,6 +1713,21 @@ main {
         </div>
       </div>
       <div class="news-list">
+        <article class="news-item">
+          <div class="news-date">11.6.–19.7.2026</div>
+          <h3>Jalkapallon MM-kisat 2026</h3>
+          <p>Kesän suurin jalkapalloturnaus alkaa 11.6.2026 ja finaali pelataan 19.7.2026. Vedox seuraa turnauksen lähestyessä markkinoita, otteluita ja kiinnostavia kohteita.</p>
+        </article>
+        <article class="news-item">
+          <div class="news-date">30.5.2026</div>
+          <h3>Mestarien liigan finaali</h3>
+          <p>UEFA Champions League -kauden 2025/26 finaali pelataan 30.5.2026. Suurissa finaaleissa kertoimet liikkuvat nopeasti, joten kohteiden tarkistus ennen pelaamista korostuu.</p>
+        </article>
+        <article class="news-item">
+          <div class="news-date">24.5.2026</div>
+          <h3>Premier League 2025/26 päätöskierros</h3>
+          <p>Valioliigan kausi päättyy 24.5.2026. Kauden lopussa panokset, rotaatiot ja motivaatio vaikuttavat usein markkinaan tavallista enemmän.</p>
+        </article>
         <article class="news-item">
           <div class="news-date">18.5.2026</div>
           <h3>Varmavedot omalle välilehdelle</h3>
@@ -1819,6 +1859,20 @@ main {
     </div>
   </div>
 </main>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <span class="footer-brand">© 2026 Vedox</span>
+    <button class="footer-link" onclick="openInfoModal('terms')">Terms</button>
+    <button class="footer-link" onclick="openInfoModal('privacy')">Privacy</button>
+    <button class="footer-link" onclick="openInfoModal('responsible')">Responsible gaming</button>
+    <button class="footer-link" onclick="showPage('news', navButtonForPage('news'))">Status</button>
+    <button class="footer-link" onclick="showPage('guides', navButtonForPage('guides'))">Docs</button>
+    <button class="footer-link" onclick="showPage('news', navButtonForPage('news'))">Community</button>
+    <a class="footer-link" href="mailto:support@vedox.fi">Contact</a>
+    <button class="footer-link" onclick="openInfoModal('privacy')">Manage cookies</button>
+  </div>
+</footer>
 
 <script>
 const SUPABASE_URL  = "https://gvywnucdwikkeblcorfj.supabase.co";
