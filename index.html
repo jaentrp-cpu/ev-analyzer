@@ -191,6 +191,13 @@ nav {
   content:''; position:absolute; left:14px; right:14px; bottom:-1px; height:3px;
   background:var(--blue); border-radius:2px;
 }
+.nav-btn.locked { color:var(--text4); }
+.nav-btn.locked::before {
+  content:'\1F512';
+  font-size:0.68rem;
+  margin-right:5px;
+  opacity:0.72;
+}
 
 .header-right { display:flex; align-items:center; gap:10px; }
 .action-cluster {
@@ -1158,6 +1165,43 @@ main {
 .profile-avatar img { display:block; width:100%; height:100%; object-fit:cover; }
 .profile-avatar span { line-height:1; }
 .profile-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tier-badge {
+  display:none;
+  align-items:center;
+  height:22px;
+  padding:0 8px;
+  border:1px solid var(--blue-border);
+  border-radius:999px;
+  background:var(--blue-soft);
+  color:var(--blue-lt);
+  font-family:var(--font-ui);
+  font-size:0.68rem;
+  font-weight:700;
+  line-height:1;
+  white-space:nowrap;
+}
+.tier-toast {
+  position:fixed;
+  left:50%;
+  bottom:24px;
+  z-index:800;
+  transform:translate(-50%, 16px);
+  max-width:min(420px, calc(100vw - 32px));
+  padding:11px 14px;
+  border:1px solid var(--blue-border);
+  border-radius:8px;
+  background:var(--surface);
+  color:var(--text);
+  box-shadow:0 14px 38px rgba(0,0,0,0.32);
+  font-size:0.86rem;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.18s, transform 0.18s;
+}
+.tier-toast.show {
+  opacity:1;
+  transform:translate(-50%, 0);
+}
 
 .profile-modal-overlay { position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; padding:1rem; }
 .profile-modal-overlay.open { display:flex; }
@@ -1431,6 +1475,7 @@ main {
         <div class="profile-avatar" id="header-avatar"><span id="header-avatar-initial">?</span></div>
         <span class="profile-name" id="header-profile-name"></span>
       </button>
+      <span class="tier-badge" id="tier-badge"></span>
       <div class="settings-menu-wrap">
         <button class="settings-trigger" onclick="toggleSettingsMenu(event)" id="settings-trigger" title="Asetukset"><span id="theme-icon">☀️</span></button>
         <div class="settings-dropdown" id="settings-dropdown" onclick="event.stopPropagation()">
@@ -1450,6 +1495,8 @@ main {
     </div>
   </div>
 </header>
+
+<div class="tier-toast" id="tier-toast" role="status" aria-live="polite"></div>
 
 <div class="profile-modal-overlay" id="profile-modal-overlay"
      onmousedown="onProfileModalMouseDown(event)"
@@ -1896,7 +1943,20 @@ let selectedAvatarFile = null;
 let lastSupabaseError = "";
 let _bankrollDebounceTimer = null;
 let _bankrollSnapshotDebounceTimer = null;
+let currentTierCode = "none";
+const PUBLIC_PAGES = new Set(["home", "guides", "news"]);
 const PROTECTED_PAGES = new Set(["bets", "arb", "mybets", "analytics"]);
+const TIER_META = {
+  none:         { label: "",         pages: [] },
+  rookie_value: { label: "Rookie",   pages: ["bets", "mybets"] },
+  rookie_sure:  { label: "Rookie",   pages: ["arb", "mybets"] },
+  pro_value:    { label: "Pro",      pages: ["bets", "mybets", "analytics"] },
+  pro_sure:     { label: "Pro",      pages: ["arb", "mybets", "analytics"] },
+  all_star:     { label: "All-Star", pages: ["bets", "arb", "mybets", "analytics"] },
+};
+const TIER_ACCESS = Object.fromEntries(
+  Object.entries(TIER_META).map(([tier, meta]) => [tier, new Set(meta.pages)])
+);
 let pendingProtectedPage = null;
 
 // ===== AUTH =====
@@ -1934,6 +1994,66 @@ async function doRegister() {
 }
 
 async function doLogout() { await sbClient.auth.signOut(); }
+
+function normalizeTierCode(tierCode) {
+  return Object.prototype.hasOwnProperty.call(TIER_META, tierCode) ? tierCode : "none";
+}
+
+function tierLabel(tierCode) {
+  return TIER_META[normalizeTierCode(tierCode)].label;
+}
+
+function canAccessPage(page) {
+  if (PUBLIC_PAGES.has(page)) return true;
+  if (!PROTECTED_PAGES.has(page)) return true;
+  if (!currentUser) return false;
+  return TIER_ACCESS[normalizeTierCode(currentTierCode)].has(page);
+}
+
+function setTierBadge(tierCode) {
+  const badge = document.getElementById("tier-badge");
+  if (!badge) return;
+  const label = tierLabel(tierCode);
+  badge.textContent = label;
+  badge.style.display = label ? "inline-flex" : "none";
+}
+
+function updateNavLocks() {
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    const page = (btn.getAttribute("onclick") || "").match(/showPage\('([^']+)'/)?.[1];
+    if (!page) return;
+    btn.classList.toggle("locked", PROTECTED_PAGES.has(page) && !canAccessPage(page));
+  });
+  setTierBadge(currentTierCode);
+}
+
+let tierToastTimer = null;
+function showTierToast(msg) {
+  const toast = document.getElementById("tier-toast");
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(tierToastTimer);
+  tierToastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
+}
+
+function showLockedPageMessage(page) {
+  if (!currentUser) {
+    showAuthModal();
+    setAuthMsg(
+      lang === "fi"
+        ? "Kirjaudu sisään avataksesi tämän osion. Vedox on suljetussa beta-vaiheessa."
+        : "Sign in to open this section. Vedox is currently in closed beta.",
+      "error"
+    );
+    return;
+  }
+  showTierToast(
+    lang === "fi"
+      ? "Tämä osio ei kuulu nykyiseen Vedox-tasoosi."
+      : "This section is not included in your current Vedox tier."
+  );
+}
 
 // ===== USER BETS — Supabase mapperit =====
 const USER_BET_ESTIMATE_COLUMN = "pinn";
@@ -2039,6 +2159,8 @@ function rebuildSkippedIdsFromEvStates(user) {
 function showApp(user) {
   const isSameUser = currentUser?.id === user.id;
   currentUser = user;
+  currentTierCode = "none";
+  updateNavLocks();
   skippedIds = JSON.parse(localStorage.getItem(`vedox_skipped_${user.id}`) || "[]");
   myBets = JSON.parse(localStorage.getItem(`vedox_bets_${user.id}`) || "[]");
   const savedBankroll = localStorage.getItem(`vedox_bankroll_${user.id}`);
@@ -2079,10 +2201,21 @@ function showApp(user) {
   });
 
   loadProfile(user).then(profile => {
+    currentTierCode = normalizeTierCode(profile.tier_code);
     updateHeaderProfile(profile.username, profile.avatar_url);
+    updateNavLocks();
+    if (canAccessPage("bets") && (!isSameUser || allBets.length === 0)) fetchAll();
+    if (canAccessPage("arb")) fetchArbitrages();
+    if (pendingProtectedPage) {
+      const targetPage = pendingProtectedPage;
+      pendingProtectedPage = null;
+      showPage(targetPage, navButtonForPage(targetPage));
+    }
   }).catch(err => {
     console.warn("[Vedox] profile init failed:", err.message || err);
+    currentTierCode = "none";
     updateHeaderProfile(user.email.split("@")[0], null);
+    updateNavLocks();
   });
 
   loadUserBets(user).then(sbBets => {
@@ -2110,23 +2243,19 @@ function showApp(user) {
   document.getElementById("profile-btn").style.display  = "flex";
   document.getElementById("btn-login-header").style.display = "none";
 
-  if (!isSameUser && allBets.length === 0) {
+  if (!isSameUser && canAccessPage("bets") && allBets.length === 0) {
     document.getElementById("bets-loading").style.display = "block";
   }
-  if (!isSameUser || allBets.length === 0) fetchAll();
+  if (canAccessPage("bets") && (!isSameUser || allBets.length === 0)) fetchAll();
   if (!isSameUser) startTimer();
-  fetchArbitrages();
+  if (canAccessPage("arb")) fetchArbitrages();
 
   renderMyBets();
-  if (pendingProtectedPage) {
-    const targetPage = pendingProtectedPage;
-    pendingProtectedPage = null;
-    showPage(targetPage, navButtonForPage(targetPage));
-  }
 }
 
 function hideApp() {
   currentUser = null;
+  currentTierCode = "none";
   stakePct = 0.01;
   clearInterval(timer);
   clearTimeout(_bankrollDebounceTimer);
@@ -2158,6 +2287,7 @@ function hideApp() {
   if (arbList) arbList.innerHTML = "";
   if (arbEmpty) arbEmpty.style.display = "none";
   if (arbCount) arbCount.textContent = "";
+  updateNavLocks();
   renderMyBets();
 }
 
@@ -2238,24 +2368,25 @@ function setLang(l) {
   closeSettingsMenu();
   renderBets(); renderMyBets();
   renderArbitrages(allArbitrages);
+  updateNavLocks();
 }
 
 function showPage(p, btn) {
-  if (PROTECTED_PAGES.has(p) && !currentUser) {
-    pendingProtectedPage = p;
-    showAuthModal();
-    setAuthMsg(
-      lang === "fi"
-        ? "Kirjaudu sisään avataksesi tämän osion. Vedox on suljetussa beta-vaiheessa."
-        : "Sign in to open this section. Vedox is currently in closed beta.",
-      "error"
-    );
+  if (PROTECTED_PAGES.has(p) && !canAccessPage(p)) {
+    pendingProtectedPage = currentUser ? null : p;
+    showLockedPageMessage(p);
     return;
   }
   document.querySelectorAll(".page").forEach(el=>el.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach(el=>el.classList.remove("active"));
   document.getElementById("page-"+p).classList.add("active");
   if (btn) btn.classList.add("active");
+  updateNavLocks();
+  if (p==="bets" && allBets.length === 0) {
+    document.getElementById("bets-loading").style.display = "block";
+    fetchAll();
+  }
+  if (p==="arb") fetchArbitrages();
   if (p==="analytics") { renderMyBets(); setTimeout(renderAnalytics,50); }
   if (p==="mybets") renderMyBets();
   if (p==="arb") renderArbitrages(allArbitrages);
@@ -2277,7 +2408,7 @@ async function fetchAll() {
   renderBets();
   document.getElementById("bets-loading").style.display="none";
   countdown=REFRESH;
-  fetchArbitrages();
+  if (canAccessPage("arb")) fetchArbitrages();
 }
 
 function betId(b) {
@@ -2875,16 +3006,16 @@ async function loadProfile(user) {
   const fallbackName = user.email.split("@")[0];
   const { data, error } = await sbClient
     .from("profiles")
-    .select("username, avatar_url")
+    .select("username, avatar_url, tier_code")
     .eq("id", user.id)
     .maybeSingle();
   if (error) {
     console.warn("[Vedox] profile load failed:", error.message);
     const localName   = localStorage.getItem(`vedox_profile_name_${user.id}`);
     const localAvatar = localStorage.getItem(`vedox_profile_avatar_${user.id}`);
-    return { username: localName || fallbackName, avatar_url: localAvatar || null };
+    return { username: localName || fallbackName, avatar_url: localAvatar || null, tier_code: "none" };
   }
-  return { username: data?.username || fallbackName, avatar_url: data?.avatar_url || null };
+  return { username: data?.username || fallbackName, avatar_url: data?.avatar_url || null, tier_code: normalizeTierCode(data?.tier_code || "none") };
 }
 
 async function uploadAvatarIfSelected(user) {
@@ -3023,6 +3154,7 @@ applyTheme(currentTheme);
 setLang(lang);
 syncAuthLangBtns();
 initAuthControls();
+updateNavLocks();
 
 // ===== SURE BETS =====
 async function fetchArbitrages() {
