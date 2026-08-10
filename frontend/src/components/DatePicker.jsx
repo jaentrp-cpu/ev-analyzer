@@ -143,6 +143,7 @@ export default function DatePicker({ value, onChange, mode = 'date', placeholder
   };
 
   const shown = displayValue(value, mode);
+  const portalTheme = rootRef.current?.closest('.vdx')?.dataset.theme || 'dark';
 
   const toggleOpen = () => {
     setPopoverPosition(null);
@@ -150,15 +151,16 @@ export default function DatePicker({ value, onChange, mode = 'date', placeholder
   };
 
   const popover = open ? (
-    <div
-      className="date-picker-popover"
-      ref={popoverRef}
-      style={{
-        left: popoverPosition?.left ?? -9999,
-        top: popoverPosition?.top ?? -9999,
-        visibility: popoverPosition ? 'visible' : 'hidden',
-      }}
-    >
+    <div className="date-picker-portal" data-theme={portalTheme}>
+      <div
+        className="date-picker-popover"
+        ref={popoverRef}
+        style={{
+          left: popoverPosition?.left ?? -9999,
+          top: popoverPosition?.top ?? -9999,
+          visibility: popoverPosition ? 'visible' : 'hidden',
+        }}
+      >
       <div className="date-picker-head">
         <button type="button" onClick={() => changeMonth(-1)} aria-label="Edellinen kuukausi">&lt;</button>
         <strong>{MONTHS[viewDate.getMonth()]} {viewDate.getFullYear()}</strong>
@@ -202,6 +204,7 @@ export default function DatePicker({ value, onChange, mode = 'date', placeholder
         <button type="button" onClick={setToday}>Tanaan</button>
         <button type="button" onClick={clear}>Tyhjenna</button>
         {mode === 'datetime' && <button type="button" className="primary" onClick={() => setOpen(false)}>Valmis</button>}
+      </div>
       </div>
     </div>
   ) : null;
