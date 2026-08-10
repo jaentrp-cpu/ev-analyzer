@@ -4,6 +4,7 @@ import { useVedox } from '../context/VedoxContext.jsx';
 
 const TEAM_MEMBERS = ['AJ', 'Leo', 'Jalo'];
 const REFRESH_MS = 2_000;
+const TEAM_ACCOUNT_EMAIL = 'jaentrp@gmail.com';
 
 function emptyPresence() {
   return TEAM_MEMBERS.reduce((all, member) => ({ ...all, [member]: false }), {});
@@ -17,11 +18,13 @@ function rowsToPresence(rows) {
   return next;
 }
 
-// This is a manual shared-account status. Multiple browsers using the same
-// Vedox login read and write the same three rows, while other accounts remain private.
+// This is a manual status for the shared Vedox account only. The control is
+// hidden for visitors and other accounts; RLS also keeps each account's rows private.
 export default function TeamPresence() {
   const { session, setShowAuth } = useVedox();
-  const userId = session?.user?.id || null;
+  const accountEmail = (session?.user?.email || '').trim().toLowerCase();
+  const isTeamAccount = accountEmail === TEAM_ACCOUNT_EMAIL;
+  const userId = isTeamAccount ? (session?.user?.id || null) : null;
   const [presence, setPresence] = useState(emptyPresence);
   const [saving, setSaving] = useState({});
   const presenceRef = useRef(presence);
@@ -81,6 +84,8 @@ export default function TeamPresence() {
     }
     setSaving(prev => ({ ...prev, [member]: false }));
   }, [saving, setShowAuth, userId]);
+
+  if (!isTeamAccount) return null;
 
   return (
     <div className="team-presence" aria-label="Vedox-tiimin paikallaolotila">
