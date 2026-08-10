@@ -852,6 +852,11 @@ export async function loadUserBets(userId, tierCode) {
 }
 
 export async function addUserBet(userId, bet) {
+  const persistedLeague = cleanTaxonomyValue(bet.liiga || bet.league);
+  const persistedSport = cleanTaxonomyValue(bet.sport);
+  const persistedTaxonomyStatus = persistedLeague && persistedSport
+    ? (bet.taxonomyStatus || 'ok')
+    : null;
   const row = {
     user_id:         userId,
     created_at:      new Date().toISOString(),
@@ -869,6 +874,11 @@ export async function addUserBet(userId, bet) {
     potential:       bet.odds * bet.stake,
     source_bet_id:   bet.sourceBetId || null,
     bettor_name:     bet.bettorName || null,
+    liiga:           persistedLeague || null,
+    league:          persistedLeague || null,
+    sport:           persistedSport || null,
+    taxonomy_status: persistedTaxonomyStatus,
+    taxonomy_reason: persistedTaxonomyStatus ? (bet.taxonomyReason || 'saved_with_bet') : null,
   };
 
   if (bet.sourceBetId) {
@@ -884,29 +894,31 @@ export async function addUserBet(userId, bet) {
     if (existing) return { duplicate: true };
   }
 
-  let { error } = await sbClient.from('user_bets').insert(row);
-  if (error && /bettor_name|column|schema cache|does not exist/i.test(error.message || '')) {
-    const retryRow = { ...row };
-    delete retryRow.bettor_name;
-    const retry = await sbClient.from('user_bets').insert(retryRow);
-    error = retry.error;
+  let writeRow = row;
+  let { error } = await sbClient.from('user_bets').insert(writeRow);
+  while (error) {
+    const fallbackRow = withoutUnsupportedUserBetColumns(writeRow, error);
+    if (!fallbackRow) break;
+    writeRow = fallbackRow;
+    ({ error } = await sbClient.from('user_bets').insert(writeRow));
   }
   if (error) {
     if (bet.sourceBetId && error.code === '23505') {
+      let updateRow = writeRow;
       let { error: updateError } = await sbClient
         .from('user_bets')
-        .update(row)
+        .update(updateRow)
         .eq('user_id', userId)
         .eq('source_bet_id', bet.sourceBetId);
-      if (updateError && /bettor_name|column|schema cache|does not exist/i.test(updateError.message || '')) {
-        const retryRow = { ...row };
-        delete retryRow.bettor_name;
-        const retry = await sbClient
+      while (updateError) {
+        const fallbackRow = withoutUnsupportedUserBetColumns(updateRow, updateError);
+        if (!fallbackRow) break;
+        updateRow = fallbackRow;
+        ({ error: updateError } = await sbClient
           .from('user_bets')
-          .update(retryRow)
+          .update(updateRow)
           .eq('user_id', userId)
-          .eq('source_bet_id', bet.sourceBetId);
-        updateError = retry.error;
+          .eq('source_bet_id', bet.sourceBetId));
       }
       if (updateError) throw updateError;
       return { duplicate: false };
@@ -914,6 +926,25 @@ export async function addUserBet(userId, bet) {
     throw error;
   }
   return { duplicate: false };
+}
+
+function withoutUnsupportedUserBetColumns(row, error) {
+  const message = String(error?.message || '');
+  const next = { ...row };
+  let changed = false;
+  if (/liiga|league|sport|taxonomy_status|taxonomy_reason|column|schema cache|does not exist/i.test(message)) {
+    ['liiga', 'league', 'sport', 'taxonomy_status', 'taxonomy_reason'].forEach(column => {
+      if (Object.prototype.hasOwnProperty.call(next, column)) {
+        delete next[column];
+        changed = true;
+      }
+    });
+  }
+  if (/bettor_name|column|schema cache|does not exist/i.test(message) && Object.prototype.hasOwnProperty.call(next, 'bettor_name')) {
+    delete next.bettor_name;
+    changed = true;
+  }
+  return changed ? next : null;
 }
 
 export async function deleteUserBet(userId, dbId) {
