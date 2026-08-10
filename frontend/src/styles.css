@@ -25,7 +25,8 @@ body {
   --red-soft: rgba(255,107,123,.10);
   --amber: #f0a833;
 }
-.vdx[data-theme="dark"] {
+.vdx[data-theme="dark"],
+.date-picker-portal[data-theme="dark"] {
   --bg: #070708;
   --bg2: #0d0d10;
   --bg3: #13131a;
@@ -40,7 +41,8 @@ body {
   --shadow-pop: 0 20px 60px rgba(0,0,0,.6), 0 0 0 1px var(--bd2);
   --bg-radial: radial-gradient(circle at 80% -10%, rgba(10,132,255,.06) 0%, transparent 50%);
 }
-.vdx[data-theme="light"] {
+.vdx[data-theme="light"],
+.date-picker-portal[data-theme="light"] {
   --bg: #fafafa;
   --bg2: #ffffff;
   --bg3: #f4f4f6;
@@ -2094,9 +2096,17 @@ body {
   border-color: var(--bd2);
 }
 /* The picker popup is rendered in document.body so it can escape clipped cards. */
+.date-picker-portal {
+  color: var(--tx);
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+}
+.date-picker-portal,
+.date-picker-portal * {
+  box-sizing: border-box;
+}
 .date-picker-popover {
   position: fixed;
-  z-index: 1000;
+  z-index: 10000;
   width: 252px;
   max-width: calc(100vw - 16px);
   padding: 10px;
