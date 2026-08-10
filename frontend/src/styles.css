@@ -484,6 +484,50 @@ body {
 .vdx .topbar .crumb b { color: var(--tx); font-weight: 500; }
 .vdx .topbar .crumb .s { color: var(--tx4); }
 .vdx .topbar .right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.vdx .team-presence {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px;
+  border: 1px solid var(--bd2);
+  border-radius: 9px;
+  background: var(--bg3);
+  flex-shrink: 0;
+}
+.vdx .team-presence-member {
+  min-height: 26px;
+  border: 0;
+  border-radius: 7px;
+  padding: 0 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: transparent;
+  color: var(--tx2);
+  font: 650 10.5px/1 inherit;
+  cursor: pointer;
+  transition: background .12s, color .12s, box-shadow .12s;
+}
+.vdx .team-presence-member:hover { color: var(--tx); background: var(--bg4); }
+.vdx .team-presence-member:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+.vdx .team-presence-member:disabled { cursor: wait; opacity: .72; }
+.vdx .team-presence-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tx3);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--tx3) 18%, transparent);
+}
+.vdx .team-presence-member.is-online {
+  color: var(--green);
+  background: var(--green-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--green) 30%, transparent);
+}
+.vdx .team-presence-member.is-online .team-presence-dot {
+  background: var(--green);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--green) 18%, transparent), 0 0 8px color-mix(in srgb, var(--green) 62%, transparent);
+}
 .vdx .search {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 12px; background: var(--bg2); border: 1px solid var(--bd);
@@ -512,6 +556,14 @@ body {
   white-space: nowrap;
 }
 .vdx .mob-top .grow { flex: 1; }
+.vdx .mob-top .team-presence { margin-left: 0; }
+.vdx .mob-top .team-presence-member { min-height: 26px; padding: 0 5px; gap: 4px; font-size: 10px; }
+@media (max-width: 390px) {
+  .vdx .mob-top { gap: 7px; padding: 0 10px; }
+  .vdx .mob-top .team-presence { gap: 1px; }
+  .vdx .mob-top .team-presence-member { padding: 0 4px; }
+  .vdx .mob-top .team-presence-dot { width: 5px; height: 5px; }
+}
 .vdx .mob-profile-trigger {
   width: 34px;
   height: 34px;

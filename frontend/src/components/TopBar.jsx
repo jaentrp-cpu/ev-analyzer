@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon } from './Icon.jsx';
+import TeamPresence from './TeamPresence.jsx';
 import { useVedox } from '../context/VedoxContext.jsx';
 
 const TAB_LABELS = {
@@ -18,6 +19,7 @@ export default function TopBar({ page }) {
         <b>{TAB_LABELS[page] || page}</b>
       </div>
       <div className="right">
+        <TeamPresence />
         <button className="ib top-alert" title={loading ? 'Päivitetään…' : `Päivitetty ${stats.paivitetty}`}>
           <Icon name="bell" size={14} />
         </button>
