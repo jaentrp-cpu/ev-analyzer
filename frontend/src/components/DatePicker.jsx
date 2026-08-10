@@ -49,6 +49,7 @@ export default function DatePicker({ value, onChange, mode = 'date', placeholder
   const rootRef = useRef(null);
   const parsed = parsePickerValue(value);
   const [open, setOpen] = useState(false);
+  const [alignEnd, setAlignEnd] = useState(false);
   const [viewDate, setViewDate] = useState(parsed || new Date());
   const [timeValue, setTimeValue] = useState(() => {
     const match = String(value || '').match(/T(\d{2}:\d{2})/);
@@ -108,14 +109,22 @@ export default function DatePicker({ value, onChange, mode = 'date', placeholder
 
   const shown = displayValue(value, mode);
 
+  const toggleOpen = () => {
+    if (!open && rootRef.current) {
+      const rect = rootRef.current.getBoundingClientRect();
+      setAlignEnd(rect.left + 252 > window.innerWidth - 12);
+    }
+    setOpen(current => !current);
+  };
+
   return (
     <div className={`date-picker ${className}`.trim()} ref={rootRef}>
-      <button type="button" className="date-picker-btn" onClick={() => setOpen(v => !v)}>
+      <button type="button" className="date-picker-btn" onClick={toggleOpen}>
         <span>{shown || placeholder}</span>
         <span aria-hidden="true">v</span>
       </button>
       {open && (
-        <div className="date-picker-popover">
+        <div className={`date-picker-popover${alignEnd ? ' align-end' : ''}`}>
           <div className="date-picker-head">
             <button type="button" onClick={() => changeMonth(-1)} aria-label="Edellinen kuukausi">&lt;</button>
             <strong>{MONTHS[viewDate.getMonth()]} {viewDate.getFullYear()}</strong>

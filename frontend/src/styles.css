@@ -76,7 +76,8 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  overflow-x: clip;
+  max-width: 100vw;
+  overflow: hidden;
 }
 .vdx.has-sidebar { flex-direction: row; }
 .vdx * { box-sizing: border-box; }
@@ -795,7 +796,7 @@ body {
 .vdx .page-body {
   padding: 24px 24px 32px;
   display: flex; flex-direction: column; gap: 18px;
-  flex: 1; min-width: 0;
+  flex: 1; min-width: 0; width: 100%; max-width: 100%; overflow-x: clip;
 }
 .vdx.is-mobile .page-body { padding: 12px 12px 22px; gap: 12px; }
 
@@ -2239,6 +2240,7 @@ body {
   padding: 0 6px;
   outline: none;
 }
+.vdx .date-picker-popover.align-end { left: auto; right: 0; }
 .vdx .date-edit-inline {
   display: grid;
   grid-template-columns: 156px 34px 28px;
@@ -2343,7 +2345,7 @@ body {
 
 /* Mobile my-bet cards */
 .vdx .my-cards { display: flex; flex-direction: column; }
-.vdx .history-mobile { display: none; }
+.vdx .history-cards { display: none; }
 .vdx .my-cards .mc {
   padding: 14px 16px; border-bottom: 1px solid var(--bd);
   display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: start;
@@ -2377,7 +2379,7 @@ body {
   text-align: left;
 }
 .vdx.is-mobile .history-desktop { display: none; }
-.vdx.is-mobile .history-mobile { display: flex; }
+.vdx.is-mobile .history-cards { display: flex; }
 .vdx .history-mobile-empty {
   justify-content: center;
   padding: 2rem;
@@ -2397,6 +2399,18 @@ body {
 }
 .vdx.is-mobile .my-cards .mc .row .b .v {
   overflow-wrap: anywhere;
+}
+
+/* The desktop table has thirteen fields. In the application frame the
+   available width is smaller than the browser width because of the sidebar,
+   so use the complete card representation before a horizontal page scrollbar
+   could appear. Every field and action remains available. */
+@media (max-width: 1800px) {
+  .vdx:not(.is-mobile) .history-desktop { display: none; }
+  .vdx:not(.is-mobile) .history-cards { display: flex; }
+  .vdx .portfolio-toolbar { flex-wrap: wrap; }
+  .vdx .portfolio-toolbar > div:first-child { min-width: 0; }
+  .vdx .portfolio-toolbar .analytics-range { margin-left: auto; }
 }
 
 /* ─── Page: Analytiikka ─── */

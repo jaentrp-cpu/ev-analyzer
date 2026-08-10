@@ -611,7 +611,7 @@ export default function MyBets() {
               )}
             </div>
             {bets.length > 0 && (
-              <div className="my-cards history-mobile">
+              <div className="my-cards history-cards">
                 {bets.map((b, i) => {
                   const isEditingTerms = editingTerms?.id === b._dbId;
                   return (
@@ -725,7 +725,7 @@ export default function MyBets() {
                 })}
               </div>
             )}
-            {bets.length === 0 && <div className="history-mobile history-mobile-empty">Ei vetoja</div>}
+            {bets.length === 0 && <div className="history-cards history-mobile-empty">Ei vetoja</div>}
           </div>
         </>
       )}
