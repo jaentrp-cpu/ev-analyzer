@@ -68,7 +68,7 @@ export default function App() {
         ref={mainRef}
         style={{
           flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column',
-          background: 'var(--bg-radial), var(--bg)', overflow: 'auto',
+          background: 'var(--bg-radial), var(--bg)', overflowY: 'auto', overflowX: 'hidden',
         }}
       >
         {isMobile

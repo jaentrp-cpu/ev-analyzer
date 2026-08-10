@@ -317,6 +317,10 @@ export async function fetchArbitrages(tierCode) {
 
 // â”€â”€â”€ User bets â€” vain kirjautuneelle + mybets-oikeudella â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const USER_BETS_MIGRATION_CUTOFF = '2026-05-21T21:25:00.000Z';
+const SOURCE_LEGACY_SELECT = 'id, alkaa, ottelu, kohde, kirja, liiga, markkina';
+const SOURCE_CONTRACT_SELECT = `${SOURCE_LEGACY_SELECT}, event_id, stable_event_key, market_key, selection_key, line_key`;
+const SOURCE_BASE_SELECT = `${SOURCE_CONTRACT_SELECT}, aalto`;
+const SOURCE_STEAM_SELECT = `${SOURCE_BASE_SELECT}, steam_quality_score, steam_edge_pct, signal_json`;
 
 function fiDateParts(value) {
   const d = value instanceof Date ? value : new Date(value);
@@ -597,33 +601,12 @@ async function loadUserBetSources(sourceIds) {
   const chunks = [];
   for (let i = 0; i < ids.length; i += 75) chunks.push(ids.slice(i, i + 75));
   const sourcesById = new Map();
-  const sourceLegacySelect = 'id, alkaa, ottelu, kohde, kirja, liiga, markkina';
-  const sourceContractSelect = `${sourceLegacySelect}, event_id, stable_event_key, market_key, selection_key, line_key`;
-  const sourceBaseSelect = `${sourceContractSelect}, aalto`;
-  const sourceSteamSelect = `${sourceBaseSelect}, steam_quality_score, steam_edge_pct, signal_json`;
-
   for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex += 1) {
     const chunk = chunks[chunkIndex];
-    let { data: sourceRows, error: sourceError } = await sbClient
+    const { data: sourceRows, error: sourceError } = await loadEvBetSourceRows(select => sbClient
       .from('ev_bets')
-      .select(sourceSteamSelect)
-      .in('id', chunk);
-    if (sourceError && /steam_|signal_json|column|schema cache|does not exist/i.test(sourceError.message || '')) {
-      const fallback = await sbClient
-        .from('ev_bets')
-        .select(sourceBaseSelect)
-        .in('id', chunk);
-      sourceRows = fallback.data;
-      sourceError = fallback.error;
-    }
-    if (sourceError && /aalto|column|schema cache|does not exist/i.test(sourceError.message || '')) {
-      const legacyFallback = await sbClient
-        .from('ev_bets')
-        .select(sourceLegacySelect)
-        .in('id', chunk);
-      sourceRows = legacyFallback.data;
-      sourceError = legacyFallback.error;
-    }
+      .select(select)
+      .in('id', chunk));
     if (sourceError) {
       console.warn(
         `[Vedox] user bet source metadata chunk ${chunkIndex + 1}/${chunks.length} load failed:`,
@@ -636,6 +619,86 @@ async function loadUserBetSources(sourceIds) {
     });
   }
   return sourcesById;
+}
+
+async function loadEvBetSourceRows(buildQuery) {
+  let { data, error } = await buildQuery(SOURCE_STEAM_SELECT);
+  if (error && /steam_|signal_json|column|schema cache|does not exist/i.test(error.message || '')) {
+    ({ data, error } = await buildQuery(SOURCE_BASE_SELECT));
+  }
+  if (error && /aalto|column|schema cache|does not exist/i.test(error.message || '')) {
+    ({ data, error } = await buildQuery(SOURCE_LEGACY_SELECT));
+  }
+  return { data: data || [], error };
+}
+
+function taxonomyMatchText(value) {
+  return String(value || '')
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '');
+}
+
+function taxonomySourceMatchKey(row, source = null) {
+  const match = taxonomyMatchText(source ? source.ottelu : row.match);
+  const outcome = taxonomyMatchText(source ? source.kohde : row.target);
+  const market = taxonomyMatchText(source ? source.markkina : row.market);
+  const book = taxonomyMatchText(normalizeBookName(source ? source.kirja : row.book));
+  const day = fiDateKey(source ? source.alkaa : row.date);
+  if (!match || !outcome || !market || !book || !day) return '';
+  return [match, outcome, market, book, day].join('|');
+}
+
+function needsFallbackTaxonomy(row, directSource) {
+  return !cleanTaxonomyValue(directSource?.liiga || directSource?.league)
+    && !cleanTaxonomyValue(row?.liiga || row?.league);
+}
+
+async function loadFallbackTaxonomySources(rows, sourcesById) {
+  const candidates = (rows || []).filter(row => {
+    const directSource = row?.source_bet_id
+      ? sourcesById.get(String(row.source_bet_id))
+      : null;
+    return needsFallbackTaxonomy(row, directSource) && taxonomySourceMatchKey(row);
+  });
+  if (!candidates.length) return new Map();
+
+  const requestedKeys = new Set(candidates.map(row => taxonomySourceMatchKey(row)));
+  const matches = Array.from(new Set(candidates.map(row => String(row.match || '').trim()).filter(Boolean)));
+  const sourcesByKey = new Map();
+
+  // Matching by the source's exact match name keeps the request bounded even
+  // for old own bets. The final key below additionally requires the exact
+  // target, market, bookmaker and Finnish event date.
+  for (let index = 0; index < matches.length; index += 60) {
+    const matchChunk = matches.slice(index, index + 60);
+    const { data: sourceRows, error } = await loadEvBetSourceRows(select => sbClient
+      .from('ev_bets')
+      .select(select)
+      .in('ottelu', matchChunk)
+      .limit(5000));
+    if (error) {
+      console.warn('[Vedox] own-bet taxonomy fallback load failed:', error.message);
+      continue;
+    }
+    sourceRows.forEach(source => {
+      const key = taxonomySourceMatchKey(null, source);
+      if (!requestedKeys.has(key)) return;
+      const sourceRowsForKey = sourcesByKey.get(key) || [];
+      sourceRowsForKey.push(source);
+      sourcesByKey.set(key, sourceRowsForKey);
+    });
+  }
+
+  const sourceByUserBetId = new Map();
+  candidates.forEach(row => {
+    const matchesForRow = sourcesByKey.get(taxonomySourceMatchKey(row)) || [];
+    // A fallback is safe only if exactly one source row has the whole key.
+    if (matchesForRow.length === 1) sourceByUserBetId.set(String(row.id), matchesForRow[0]);
+  });
+  return sourceByUserBetId;
 }
 
 export async function loadUserBets(userId, tierCode) {
@@ -676,8 +739,10 @@ export async function loadUserBets(userId, tierCode) {
     loadUserBetSources(sourceIds),
     loadClvObservationCandidates(sourceIds),
   ]);
+  const fallbackTaxonomySourcesByUserBetId = await loadFallbackTaxonomySources(rows, startsById);
   return rows.map(row => {
     const sourceById = row.source_bet_id ? startsById.get(String(row.source_bet_id)) : null;
+    const fallbackTaxonomySource = fallbackTaxonomySourcesByUserBetId.get(String(row.id)) || null;
     const source = sourceById || null;
     const observationId = row.source_bet_id || null;
     const clvObservation = observationId
@@ -694,14 +759,15 @@ export async function loadUserBets(userId, tierCode) {
       league: clvObservation.liiga || '',
       markkina: clvObservation.markkina || '',
     } : null;
-    const metadataSource = sourceById
+    const taxonomySource = sourceById || fallbackTaxonomySource;
+    const metadataSource = taxonomySource
       ? {
-          ...sourceById,
-          liiga: sourceById.liiga || observationSource?.liiga || '',
-          league: sourceById.liiga || sourceById.league || observationSource?.liiga || '',
-          markkina: sourceById.markkina || observationSource?.markkina || '',
-          kohde: sourceById.kohde || observationSource?.kohde || '',
-          ottelu: sourceById.ottelu || observationSource?.ottelu || '',
+          ...taxonomySource,
+          liiga: taxonomySource.liiga || observationSource?.liiga || '',
+          league: taxonomySource.liiga || taxonomySource.league || observationSource?.liiga || '',
+          markkina: taxonomySource.markkina || observationSource?.markkina || '',
+          kohde: taxonomySource.kohde || observationSource?.kohde || '',
+          ottelu: taxonomySource.ottelu || observationSource?.ottelu || '',
         }
       : observationSource || null;
     const taxonomy = deriveBetTaxonomy(row, metadataSource);
@@ -719,7 +785,7 @@ export async function loadUserBets(userId, tierCode) {
       source_clv_odds: clvObservation?.reference_odds,
       source_clv_pct: clvObservation?.clv_pct,
       source_clv_checked_at: clvObservation?.observed_at,
-      source_starts_at: sourceById?.alkaa || row.date || null,
+      source_starts_at: sourceById?.alkaa || fallbackTaxonomySource?.alkaa || row.date || null,
       source_clv_source: clvObservation
         ? (clvObservation.observation_type === 'closing_reference' ? 'clv_observations_closing' : 'clv_observations_prestart')
         : '',
