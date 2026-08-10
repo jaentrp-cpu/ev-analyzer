@@ -3,7 +3,7 @@ import { sbClient } from '../supabase.js';
 import { useVedox } from '../context/VedoxContext.jsx';
 
 const TEAM_MEMBERS = ['AJ', 'Leo', 'Jalo'];
-const REFRESH_MS = 15_000;
+const REFRESH_MS = 2_000;
 
 function emptyPresence() {
   return TEAM_MEMBERS.reduce((all, member) => ({ ...all, [member]: false }), {});
