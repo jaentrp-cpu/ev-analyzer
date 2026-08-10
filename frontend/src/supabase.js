@@ -554,6 +554,22 @@ function isBetterClvObservation(candidate, current) {
   return new Date(candidate?.observed_at || 0).getTime() > new Date(current?.observed_at || 0).getTime();
 }
 
+function uniqueObservationTaxonomySource(candidates) {
+  const sourcesByLeague = new Map();
+  (candidates || []).forEach(candidate => {
+    const league = cleanTaxonomyValue(candidate?.liiga || candidate?.league);
+    if (!league) return;
+    const existing = sourcesByLeague.get(league) || [];
+    existing.push(candidate);
+    sourcesByLeague.set(league, existing);
+  });
+  // The source-bet ID is the direct link. If its historical CLV records all
+  // name the same league, that is safe taxonomy metadata even after the
+  // original ev_bets row has been pruned.
+  if (sourcesByLeague.size !== 1) return null;
+  return Array.from(sourcesByLeague.values())[0][0] || null;
+}
+
 async function loadClvObservationCandidates(sourceIds) {
   const ids = Array.from(new Set((sourceIds || []).filter(Boolean).map(String)));
   if (!ids.length) return new Map();
@@ -704,14 +720,27 @@ async function loadFallbackTaxonomySources(rows, sourcesById) {
 export async function loadUserBets(userId, tierCode) {
   if (!userId || !canAccess(tierCode, 'mybets')) return [];
   const baseSelect = 'id, created_at, date, match, target, book, odds, stake, ev, result, settled, returned_amount, market, source_bet_id';
+  const storedTaxonomySelect = `${baseSelect}, liiga, league, sport, taxonomy_status, taxonomy_reason`;
   const clvSelect = `${baseSelect}, clv_odds, clv_pct, clv_checked_at, clv_source, auto_result_checked_at, auto_result_source`;
   const bettorSelect = `${clvSelect}, bettor_name`;
+  const taxonomyClvSelect = `${storedTaxonomySelect}, clv_odds, clv_pct, clv_checked_at, clv_source, auto_result_checked_at, auto_result_source`;
+  const taxonomyBettorSelect = `${taxonomyClvSelect}, bettor_name`;
   let { data, error } = await sbClient
     .from('user_bets')
-    .select(bettorSelect)
+    .select(taxonomyBettorSelect)
     .eq('user_id', userId)
     .gte('created_at', USER_BETS_MIGRATION_CUTOFF)
     .order('created_at', { ascending: false });
+  if (error && /liiga|league|sport|taxonomy_|column|schema cache|does not exist/i.test(error.message || '')) {
+    const taxonomyFallback = await sbClient
+      .from('user_bets')
+      .select(bettorSelect)
+      .eq('user_id', userId)
+      .gte('created_at', USER_BETS_MIGRATION_CUTOFF)
+      .order('created_at', { ascending: false });
+    data = taxonomyFallback.data;
+    error = taxonomyFallback.error;
+  }
   if (error && /bettor_name|clv_|auto_result_|column|schema cache|does not exist/i.test(error.message || '')) {
     const clvFallback = await sbClient
       .from('user_bets')
@@ -721,16 +750,16 @@ export async function loadUserBets(userId, tierCode) {
       .order('created_at', { ascending: false });
     data = clvFallback.data;
     error = clvFallback.error;
-    if (error && /clv_|auto_result_|column|schema cache|does not exist/i.test(error.message || '')) {
-      const fallback = await sbClient
-        .from('user_bets')
-        .select(baseSelect)
-        .eq('user_id', userId)
-        .gte('created_at', USER_BETS_MIGRATION_CUTOFF)
-        .order('created_at', { ascending: false });
-      data = fallback.data;
-      error = fallback.error;
-    }
+  }
+  if (error && /clv_|auto_result_|column|schema cache|does not exist/i.test(error.message || '')) {
+    const fallback = await sbClient
+      .from('user_bets')
+      .select(baseSelect)
+      .eq('user_id', userId)
+      .gte('created_at', USER_BETS_MIGRATION_CUTOFF)
+      .order('created_at', { ascending: false });
+    data = fallback.data;
+    error = fallback.error;
   }
   if (error) { console.warn('[Vedox] user_bets load failed:', error.message); return []; }
   const rows = data || [];
@@ -745,8 +774,11 @@ export async function loadUserBets(userId, tierCode) {
     const fallbackTaxonomySource = fallbackTaxonomySourcesByUserBetId.get(String(row.id)) || null;
     const source = sourceById || null;
     const observationId = row.source_bet_id || null;
-    const clvObservation = observationId
+    const sourceObservationCandidates = observationId
       ? (clvCandidatesBySourceId.get(String(observationId)) || [])
+      : [];
+    const clvObservation = observationId
+      ? sourceObservationCandidates
           .filter(candidate => clvObservationMatchesSource(candidate, sourceById))
           .reduce((best, candidate) => (
             isBetterClvObservation(candidate, best) ? candidate : best
@@ -759,7 +791,10 @@ export async function loadUserBets(userId, tierCode) {
       league: clvObservation.liiga || '',
       markkina: clvObservation.markkina || '',
     } : null;
-    const taxonomySource = sourceById || fallbackTaxonomySource;
+    const observationTaxonomySource = sourceById || fallbackTaxonomySource
+      ? null
+      : uniqueObservationTaxonomySource(sourceObservationCandidates);
+    const taxonomySource = sourceById || fallbackTaxonomySource || observationTaxonomySource;
     const metadataSource = taxonomySource
       ? {
           ...taxonomySource,
@@ -785,7 +820,7 @@ export async function loadUserBets(userId, tierCode) {
       source_clv_odds: clvObservation?.reference_odds,
       source_clv_pct: clvObservation?.clv_pct,
       source_clv_checked_at: clvObservation?.observed_at,
-      source_starts_at: sourceById?.alkaa || fallbackTaxonomySource?.alkaa || row.date || null,
+      source_starts_at: sourceById?.alkaa || fallbackTaxonomySource?.alkaa || observationTaxonomySource?.alkaa || row.date || null,
       source_clv_source: clvObservation
         ? (clvObservation.observation_type === 'closing_reference' ? 'clv_observations_closing' : 'clv_observations_prestart')
         : '',

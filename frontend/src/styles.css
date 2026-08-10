@@ -2053,6 +2053,10 @@ body {
   background: var(--bg2);
   box-shadow: 0 18px 42px rgba(0,0,0,.32);
 }
+.vdx .analytics-range .filter-field.date:last-child .date-picker-popover {
+  left: auto;
+  right: 0;
+}
 .vdx .date-picker-head {
   display: grid;
   grid-template-columns: 28px 1fr 28px;
