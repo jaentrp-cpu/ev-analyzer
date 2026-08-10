@@ -563,9 +563,8 @@ function uniqueObservationTaxonomySource(candidates) {
     existing.push(candidate);
     sourcesByLeague.set(league, existing);
   });
-  // The source-bet ID is the direct link. If its historical CLV records all
-  // name the same league, that is safe taxonomy metadata even after the
-  // original ev_bets row has been pruned.
+  // Taxonomy is usable only when every available candidate agrees on one
+  // non-empty league. This also makes same-match fallbacks safe.
   if (sourcesByLeague.size !== 1) return null;
   return Array.from(sourcesByLeague.values())[0][0] || null;
 }
@@ -683,7 +682,9 @@ async function loadFallbackTaxonomySources(rows, sourcesById) {
 
   const requestedKeys = new Set(candidates.map(row => taxonomySourceMatchKey(row)));
   const matches = Array.from(new Set(candidates.map(row => String(row.match || '').trim()).filter(Boolean)));
+  const requestedMatchKeys = new Set(candidates.map(row => taxonomyMatchText(row.match)));
   const sourcesByKey = new Map();
+  const sourcesByMatch = new Map();
 
   // Matching by the source's exact match name keeps the request bounded even
   // for old own bets. The final key below additionally requires the exact
@@ -700,6 +701,12 @@ async function loadFallbackTaxonomySources(rows, sourcesById) {
       continue;
     }
     sourceRows.forEach(source => {
+      const matchKey = taxonomyMatchText(source.ottelu);
+      if (requestedMatchKeys.has(matchKey)) {
+        const sourcesForMatch = sourcesByMatch.get(matchKey) || [];
+        sourcesForMatch.push(source);
+        sourcesByMatch.set(matchKey, sourcesForMatch);
+      }
       const key = taxonomySourceMatchKey(null, source);
       if (!requestedKeys.has(key)) return;
       const sourceRowsForKey = sourcesByKey.get(key) || [];
@@ -712,7 +719,17 @@ async function loadFallbackTaxonomySources(rows, sourcesById) {
   candidates.forEach(row => {
     const matchesForRow = sourcesByKey.get(taxonomySourceMatchKey(row)) || [];
     // A fallback is safe only if exactly one source row has the whole key.
-    if (matchesForRow.length === 1) sourceByUserBetId.set(String(row.id), matchesForRow[0]);
+    if (matchesForRow.length === 1) {
+      sourceByUserBetId.set(String(row.id), matchesForRow[0]);
+      return;
+    }
+    // Older own bets can have changed bookmaker, market label or event time.
+    // The match itself is still enough only when all matching source rows
+    // agree on one league; otherwise we deliberately leave it unclassified.
+    const sameMatchSource = uniqueObservationTaxonomySource(
+      sourcesByMatch.get(taxonomyMatchText(row.match)) || [],
+    );
+    if (sameMatchSource) sourceByUserBetId.set(String(row.id), sameMatchSource);
   });
   return sourceByUserBetId;
 }
@@ -772,6 +789,7 @@ export async function loadUserBets(userId, tierCode) {
   return rows.map(row => {
     const sourceById = row.source_bet_id ? startsById.get(String(row.source_bet_id)) : null;
     const fallbackTaxonomySource = fallbackTaxonomySourcesByUserBetId.get(String(row.id)) || null;
+    const sourceHasLeague = Boolean(cleanTaxonomyValue(sourceById?.liiga || sourceById?.league));
     const source = sourceById || null;
     const observationId = row.source_bet_id || null;
     const sourceObservationCandidates = observationId
@@ -791,10 +809,12 @@ export async function loadUserBets(userId, tierCode) {
       league: clvObservation.liiga || '',
       markkina: clvObservation.markkina || '',
     } : null;
-    const observationTaxonomySource = sourceById || fallbackTaxonomySource
+    const observationTaxonomySource = sourceHasLeague || fallbackTaxonomySource
       ? null
       : uniqueObservationTaxonomySource(sourceObservationCandidates);
-    const taxonomySource = sourceById || fallbackTaxonomySource || observationTaxonomySource;
+    const taxonomySource = sourceHasLeague
+      ? sourceById
+      : fallbackTaxonomySource || observationTaxonomySource;
     const metadataSource = taxonomySource
       ? {
           ...taxonomySource,
