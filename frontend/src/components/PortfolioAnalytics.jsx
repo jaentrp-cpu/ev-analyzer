@@ -238,9 +238,11 @@ function steamClvSummaries(bets) {
   return Array.from(groups.entries())
     .map(([key, group]) => {
       const { score, source, rows } = group;
-      // Steam remains a validation view: historical fallback CLV must not
-      // influence rating-level CLV comparisons.
-      const clvRows = rows.filter(hasVerifiedClv);
+      // Keep Steam comparisons on the same effective CLV series as the rest
+      // of the analytics. A verified observation already replaces the older
+      // historical value for the same bet during data loading.
+      const clvRows = rows.filter(hasStoredClv);
+      const verifiedClvN = clvRows.filter(hasVerifiedClv).length;
       const avgClv = clvRows.length
         ? clvRows.reduce((sum, bet) => sum + Number(bet.clvPct), 0) / clvRows.length
         : null;
@@ -259,6 +261,7 @@ function steamClvSummaries(bets) {
         source,
         bets: rows.length,
         clvN: clvRows.length,
+        verifiedClvN,
         avgClv,
         positivePct: clvRows.length ? (positive / clvRows.length) * 100 : null,
         dominantLevel,
@@ -282,7 +285,7 @@ function SteamClvRows({ rows }) {
           <strong>{row.score}/100</strong>
           <div>
             <span>{row.dominantLevel}</span>
-            <small>{row.clvN}/{row.bets} vetoa CLV:llä</small>
+            <small>{row.clvN}/{row.bets} vetoa CLV:llä · {row.verifiedClvN} varmennettua</small>
           </div>
           <div className="steam-clv-stat">
             <small>AVG CLV</small>
@@ -730,7 +733,8 @@ export default function PortfolioAnalytics({
     && Number.isFinite(Number(bet.steamDisplayScore))
   );
   const steamClvRows = steamClvSummaries(rangeBets);
-  const steamDisplayWithClv = steamDisplayBets.filter(hasVerifiedClv).length;
+  const steamDisplayWithClv = steamDisplayBets.filter(hasStoredClv).length;
+  const steamDisplayWithVerifiedClv = steamDisplayBets.filter(hasVerifiedClv).length;
   const sportRows = groupSummaries(rangeBets, bet => taxonomyOf(bet).sport);
   const leagueRows = groupSummaries(rangeBets, bet => taxonomyOf(bet).league);
   const clvMarketRows = groupSummaries(rangeBets, marketOf);
@@ -834,12 +838,12 @@ export default function PortfolioAnalytics({
           <MetricRows rows={marketRows} />
         </div>
         <div className="card portfolio-panel">
-          <SectionTitle meta={`${steamDisplayWithClv}/${steamDisplayBets.length} Steam-vetoa CLV:llä`}>
+          <SectionTitle meta={`${steamDisplayWithClv}/${steamDisplayBets.length} Steam-vetoa CLV:llä · ${steamDisplayWithVerifiedClv} varmennettua`}>
             CLV per Steam-arvo
           </SectionTitle>
           <SteamClvRows rows={steamClvRows} />
           <div className="portfolio-coverage-note">
-            Vain varmennetut CLV-rivit. Opittu rating näytetään ensisijaisena. Muuten reaaliaikainen 0–58 signaali skaalataan kaavalla arvo / 58 × 100; lähteet pidetään erillisinä.
+            Tallennettu CLV käytössä. Varmennettu lähde korvaa aina saman vedon historiallisen arvon. Opittu rating näytetään ensisijaisena. Muuten reaaliaikainen 0–58 signaali skaalataan kaavalla arvo / 58 × 100; lähteet pidetään erillisinä.
           </div>
         </div>
       </div>
@@ -872,7 +876,7 @@ export default function PortfolioAnalytics({
           </div>
           <div className="portfolio-coverage-note">
             Viitelähteet: closing {closingClvCount}, pre-start {preStartClvCount}, historiallinen {historicalClvCount}, muu tallennettu {otherStoredClvCount}.
-            {' '}Uusi varmennettu lähde korvaa aina saman vedon historiallisen arvon. Steam–CLV käyttää vain varmennettuja rivejä.
+            {' '}Uusi varmennettu lähde korvaa aina saman vedon historiallisen arvon. Steam–CLV käyttää samaa tallennettua CLV-sarjaa kuin yhteenveto.
           </div>
         </div>
       </div>
