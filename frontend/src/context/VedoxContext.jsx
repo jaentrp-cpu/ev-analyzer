@@ -82,6 +82,7 @@ export function VedoxProvider({ children }) {
   const [session,   setSession]   = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [permissionsReady, setPermissionsReady] = useState(false);
+  const [profileError, setProfileError] = useState(false);
   const [showAuth,  setShowAuth]  = useState(false);
 
   // Profile
@@ -256,6 +257,7 @@ export function VedoxProvider({ children }) {
   }
 
   function clearProtectedData() {
+    setProfileError(false);
     clearSettingsTimers();
     settingsSessionGenerationRef.current += 1;
     settingsRequestRef.current = {};
@@ -310,7 +312,7 @@ export function VedoxProvider({ children }) {
       return;
     }
 
-    if (currentUserIdRef.current === userId && permissionsReady) return;
+    if (currentUserIdRef.current === userId) return;
 
     currentUserIdRef.current = userId;
     const runId = initRunRef.current + 1;
@@ -318,7 +320,7 @@ export function VedoxProvider({ children }) {
     setPermissionsReady(false);
     clearProtectedData();
     initUserData(session.user, runId);
-  }, [session?.user?.id, authReady, permissionsReady]);
+  }, [session?.user?.id, authReady]);
 
   // â”€â”€â”€ Fetch public/tier data when tier is known â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
@@ -331,6 +333,14 @@ export function VedoxProvider({ children }) {
     const t = setInterval(() => refreshEvData(tierCode, { silent: true }), REFRESH_MS);
     return () => clearInterval(t);
   }, [tierCode]);
+
+  function retryProfile() {
+    if (!session?.user || !permissionsReady) return;
+    const runId = ++initRunRef.current;
+    setPermissionsReady(false);
+    clearProtectedData();
+    void initUserData(session.user, runId);
+  }
 
   async function initUserData(user, runId) {
     try {
@@ -440,6 +450,12 @@ export function VedoxProvider({ children }) {
     loadBankrollSnapshots(user.id, resolvedTier).then(snaps => {
       if (runId === initRunRef.current) setSnapshots(snaps);
     }).catch(err => console.warn('[Vedox] bankroll snapshots background load failed:', err.message));
+    } catch (err) {
+      if (runId !== initRunRef.current) return;
+      setTierCode('none');
+      setProfile(null);
+      setProfileError(true);
+      console.warn('[Vedox] account data could not be loaded');
     } finally {
       if (runId === initRunRef.current) setPermissionsReady(true);
     }
@@ -981,7 +997,7 @@ export function VedoxProvider({ children }) {
 
   return (
     <Ctx.Provider value={{
-      session, authReady, permissionsReady, showAuth, setShowAuth, signIn, signUp, resetPassword, signOut,
+      session, authReady, permissionsReady, profileError, retryProfile, showAuth, setShowAuth, signIn, signUp, resetPassword, signOut,
       profile, tierCode,
       tierLabel: tierLabel(tierCode),
       canAccess: (pageId) => canAccess(tierCode, pageId),

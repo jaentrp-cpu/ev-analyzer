@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon } from './Icon.jsx';
+import { useVedox } from '../context/VedoxContext.jsx';
 
 const pageNames = {
   value: 'Arvovedot',
@@ -17,6 +18,20 @@ const pageHints = {
 
 export default function LockedView({ pageId, session, setShowAuth }) {
   const title = pageNames[pageId] || 'Tämä näkymä';
+  const { profileError, retryProfile } = useVedox();
+  if (session && profileError) {
+    return (
+      <div className="page-body">
+        <h1>{title}</h1>
+        <section className="card locked-card" role="alert">
+          <h2>Käyttöoikeuksia ei voitu tarkistaa</h2>
+          <p>Profiilin lataus epäonnistui. Tämä ei tarkoita, että tilauksesi olisi päättynyt.
+            Näkymä avataan vasta onnistuneen käyttöoikeustarkistuksen jälkeen.</p>
+          <button className="btn p" onClick={retryProfile}>Yritä uudelleen</button>
+        </section>
+      </div>
+    );
+  }
   return (
     <div className="page-body">
       <div className="ph">

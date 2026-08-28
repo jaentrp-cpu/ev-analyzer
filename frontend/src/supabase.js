@@ -3,6 +3,7 @@
 // Uses only VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 import { createClient } from '@supabase/supabase-js';
+import { readProfileWithRecovery } from './profile-access.js';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -189,12 +190,7 @@ function isPublicValueBet(row) {
 
 // â”€â”€â”€ Profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function loadProfile(user) {
-  const { data, error } = await sbClient
-    .from('profiles')
-    .select('username, avatar_url, tier_code')
-    .eq('id', user.id)
-    .maybeSingle();
-  if (error) console.warn('[Vedox] profile load failed:', error.message);
+  const data = await readProfileWithRecovery(sbClient, user.id);
   const fallback = user.email.split('@')[0];
   return {
     username:   data?.username   || fallback,
