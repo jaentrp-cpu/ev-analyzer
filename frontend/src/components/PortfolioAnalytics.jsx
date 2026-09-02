@@ -11,6 +11,7 @@ const DAY_MS = 864e5;
 const ANALYTICS_RANGES = new Set([
   'all',
   'today',
+  'tomorrow',
   'yesterday',
   'day_before_yesterday',
   '7d',
@@ -69,6 +70,14 @@ export function betInAnalyticsRange(bet, range, from, to) {
   if (range === 'today') {
     const [start, end] = dayBounds(0);
     return time >= start && time <= end;
+  }
+  if (range === 'tomorrow') {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() + 1);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
+    return time >= start.getTime() && time < end.getTime();
   }
   if (range === 'yesterday') {
     const [start, end] = dayBounds(-1);
@@ -741,6 +750,7 @@ export default function PortfolioAnalytics({
 
   const rangeLabel = range === 'all' ? 'kaikki vedot'
     : range === 'today' ? 'tänään'
+    : range === 'tomorrow' ? 'huomenna'
     : range === 'yesterday' ? 'eilen'
     : range === 'day_before_yesterday' ? 'toissapäivänä'
     : range === '7d' ? 'viimeiset 7 päivää'
@@ -761,6 +771,7 @@ export default function PortfolioAnalytics({
             <span>Aika</span>
             <select value={range} onChange={event => onRangeChange(event.target.value)}>
               <option value="today">Tänään</option>
+              <option value="tomorrow">Huomenna</option>
               <option value="yesterday">Eilen</option>
               <option value="day_before_yesterday">Toissapäivänä</option>
               <option value="7d">7 pv</option>
