@@ -431,6 +431,7 @@ export default function MyBets() {
                 <select value={timeFilter} onChange={e => saveTimeFilter(e.target.value)}>
                   <option value="all">Kaikki</option>
                   <option value="today">T&auml;n&auml;&auml;n</option>
+                  <option value="tomorrow">Huomenna</option>
                   <option value="yesterday">Eilen</option>
                   <option value="day_before_yesterday">Toissap&auml;iv&auml;n&auml;</option>
                   <option value="7d">7 pv</option>
