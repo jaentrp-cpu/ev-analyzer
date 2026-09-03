@@ -139,6 +139,10 @@ export default function MyBets() {
   const pnlBars = rangeSettledBets.slice(0, 24).reverse().map(b => b.pnl || 0);
   const maxPnl = Math.max(...pnlBars.map(v => Math.abs(v)), 1);
   const totalBookBalance = booksForBalances.reduce((sum, book) => sum + (Number(bookBalanceMap.get(book)) || 0), 0);
+  const totalOpenStake = userBets
+    .filter(b => b.status === 'pending')
+    .reduce((sum, b) => sum + (Number(b.stake) || 0), 0);
+  const totalBankroll = totalBookBalance + totalOpenStake;
 
   const setManualField = (field, value) => setManual(prev => ({ ...prev, [field]: value }));
 
@@ -411,6 +415,7 @@ export default function MyBets() {
           <PortfolioAnalytics
             userBets={userBets}
             bankroll={bankroll}
+            totalBankroll={totalBankroll}
             canViewAdvanced={canAccess('analytics')}
             range={timeFilter}
             dateFrom={dateFrom}

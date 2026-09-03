@@ -350,17 +350,20 @@ function OutcomeDonut({ bets }) {
   );
 }
 
-function PnlCurve({ settled, bankroll }) {
+function compareBetChronology(a, b) {
+  const aTime = parseBetTime(a) ?? new Date(a.createdAt || 0).getTime();
+  const bTime = parseBetTime(b) ?? new Date(b.createdAt || 0).getTime();
+  if (aTime !== bTime) return aTime - bTime;
+  const aCreated = new Date(a.createdAt || 0).getTime();
+  const bCreated = new Date(b.createdAt || 0).getTime();
+  if (aCreated !== bCreated) return aCreated - bCreated;
+  return String(a._dbId || '').localeCompare(String(b._dbId || ''));
+}
+
+function PnlCurve({ settled, allSettled, totalBankroll }) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
-  const chronological = [...settled].sort((a, b) => {
-    const aTime = parseBetTime(a) ?? new Date(a.createdAt || 0).getTime();
-    const bTime = parseBetTime(b) ?? new Date(b.createdAt || 0).getTime();
-    if (aTime !== bTime) return aTime - bTime;
-    const aCreated = new Date(a.createdAt || 0).getTime();
-    const bCreated = new Date(b.createdAt || 0).getTime();
-    if (aCreated !== bCreated) return aCreated - bCreated;
-    return String(a._dbId || '').localeCompare(String(b._dbId || ''));
-  });
+  const chronological = [...settled].sort(compareBetChronology);
+  const allChronological = [...allSettled].sort(compareBetChronology);
   const values = [0];
   chronological.forEach(bet => values.push(values[values.length - 1] + (Number(bet.pnl) || 0)));
   if (values.length < 2) return <div className="portfolio-chart-empty">Ei ratkaistuja vetoja valitulla aikavälillä.</div>;
@@ -382,17 +385,17 @@ function PnlCurve({ settled, bankroll }) {
   const zeroY = padding + ((domainMax - 0) / span) * (height - padding * 2);
   const area = `${line} ${width - padding},${zeroY} ${padding},${zeroY}`;
   const final = values[values.length - 1];
-  const currentBankroll = Number(bankroll);
-  const estimatedStartBankroll = Number.isFinite(currentBankroll) && currentBankroll > 0
-    ? currentBankroll - final
-    : null;
   const activeIndex = Number.isInteger(hoveredIndex)
     ? Math.min(Math.max(hoveredIndex, 1), chronological.length)
     : null;
   const activeBet = activeIndex ? chronological[activeIndex - 1] : null;
   const activePoint = activeIndex ? points[activeIndex] : null;
-  const activeBankroll = activeIndex && estimatedStartBankroll !== null
-    ? estimatedStartBankroll + values[activeIndex]
+  const activeGlobalIndex = activeBet ? allChronological.indexOf(activeBet) : -1;
+  const laterPnl = activeGlobalIndex >= 0
+    ? allChronological.slice(activeGlobalIndex + 1).reduce((sum, bet) => sum + (Number(bet.pnl) || 0), 0)
+    : null;
+  const activeTotalBankroll = laterPnl !== null && Number.isFinite(Number(totalBankroll))
+    ? Number(totalBankroll) - laterPnl
     : null;
   const activeBetNumber = activeBet && /^\d+$/.test(String(activeBet.sourceBetId || ''))
     ? String(activeBet.sourceBetId)
@@ -452,7 +455,7 @@ function PnlCurve({ settled, bankroll }) {
           {activeBet.match && <span>{activeBet.match}</span>}
           <span>Panos: {formatEuro(activeBet.stake)}</span>
           <span>Kumulatiivinen PnL: {values[activeIndex] >= 0 ? '+' : ''}{formatEuro(values[activeIndex])}</span>
-          <span>Kassa (arvio): {activeBankroll === null ? '—' : formatEuro(activeBankroll)}</span>
+          <span>Kokonaiskassa: {activeTotalBankroll === null ? '—' : formatEuro(activeTotalBankroll)}</span>
         </div>
       )}
       <div className="portfolio-chart-scale">
@@ -668,6 +671,7 @@ function SportLeagueAnalysis({ bets }) {
 export default function PortfolioAnalytics({
   userBets,
   bankroll,
+  totalBankroll,
   canViewAdvanced,
   range = '30d',
   dateFrom = '',
@@ -837,10 +841,10 @@ export default function PortfolioAnalytics({
           <div>
             <SectionTitle meta={`${settled.length} ratkennutta`}>Kumulatiivinen PnL</SectionTitle>
             <strong className={totalPnl < 0 ? 'bad' : 'g'}>{totalPnl >= 0 ? '+' : ''}{formatEuro(totalPnl)}</strong>
-            <p>Lähtötaso on 0 {EURO}. Käyrä näyttää valitun jakson kumulatiivisen PnL:n, ei historiallista kassan saldoa tai kassasnapshotteja.</p>
+            <p>Lähtötaso on 0 {EURO}. Tooltipin kokonaiskassa johdetaan nykyisistä kasinoiden saldoista, avoimista panoksista ja ratkenneiden vetojen PnL:stä.</p>
           </div>
         </div>
-        <PnlCurve settled={settled} bankroll={bankroll} />
+        <PnlCurve settled={settled} allSettled={userBets.filter(isSettled)} totalBankroll={totalBankroll} />
       </div>
 
       <div className="portfolio-grid two">
