@@ -277,17 +277,21 @@ export default function MyBets() {
     <div className="page-body">
       <div className="ph">
         <div>
-          <h1>Omat vedot &amp; analytiikka</h1>
+          <h1>{view === 'analytics' ? 'Analytiikka' : view === 'balances' ? 'Kassat' : 'Omat vedot'}</h1>
           <div className="sub">Tulokset, CLV, ROI ja muokattava vetohistoria &middot; {timeSelectedBets.length}/{userBets.length} vetoa valitulla aikav&auml;lill&auml;</div>
         </div>
         <div className="actions">
           <div className="seg">
-            <button disabled={Boolean(editingTerms || betMutationId)} className={view === 'bets' ? 'on' : ''} onClick={() => setView('bets')}>Analytiikka &amp; vetohistoria</button>
+            <button disabled={Boolean(editingTerms || betMutationId)} onClick={() => setView(view === 'bets' ? 'analytics' : 'bets')}>
+              {view === 'bets' ? 'Analytiikka' : 'Omat vedot'}
+            </button>
             <button disabled={Boolean(editingTerms || betMutationId)} className={view === 'balances' ? 'on' : ''} onClick={() => setView('balances')}>Kassat</button>
           </div>
-          <button className="btn p" disabled={Boolean(editingTerms || betMutationId)} onClick={() => setShowManualForm(v => !v)}>
-            {showManualForm ? 'Sulje' : 'Lis\u00e4\u00e4 veto'}
-          </button>
+          {view === 'bets' && (
+            <button className="btn p" disabled={Boolean(editingTerms || betMutationId)} onClick={() => setShowManualForm(v => !v)}>
+              {showManualForm ? 'Sulje' : 'Lis\u00e4\u00e4 veto'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -298,7 +302,7 @@ export default function MyBets() {
         </div>
       )}
 
-      {view === 'bets' && !canAccess('analytics') && (
+      {view === 'analytics' && !canAccess('analytics') && (
         <div className="stat-grid my-stats">
           <div className="s"><div className="l">Vetoja aikav&auml;lill&auml;</div><div className="v">{timeSelectedBets.length}</div><div className="d">{rangeOpenCount} avoinna &middot; {userBets.length} kaikkiaan</div></div>
           <div className="s"><div className="l">Voitettu</div><div className="v g">{rangeWonCount}</div><div className="d">{rangeDecidedCount > 0 ? ((rangeWonCount / rangeDecidedCount) * 100).toFixed(1) : '0'} % osuma</div></div>
@@ -307,7 +311,7 @@ export default function MyBets() {
         </div>
       )}
 
-      {showManualForm && (
+      {view === 'bets' && showManualForm && (
         <form className="card" style={{ padding: '14px 18px' }} onSubmit={submitManualBet}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: 12 }}>
             <div>
@@ -402,7 +406,7 @@ export default function MyBets() {
         </div>
       )}
 
-      {view === 'bets' && (
+      {view === 'analytics' && (
         <>
           <PortfolioAnalytics
             userBets={userBets}
@@ -415,7 +419,11 @@ export default function MyBets() {
             onDateFromChange={saveDateFrom}
             onDateToChange={saveDateTo}
           />
+        </>
+      )}
 
+      {view === 'bets' && (
+        <>
           <div className="card my-filter-card">
             <div className="mini-profit">
               <div className="mini-profit-label">Tuottok&auml;yr&auml; &middot; {pnlBars.length} viim. vetoa</div>
