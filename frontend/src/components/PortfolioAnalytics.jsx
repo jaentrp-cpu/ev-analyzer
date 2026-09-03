@@ -714,8 +714,8 @@ export default function PortfolioAnalytics({
   const otherStoredClvCount = verifiedClvBets.length - closingClvCount - preStartClvCount;
   const bestClv = clvBets.length ? Math.max(...clvBets.map(bet => Number(bet.clvPct))) : null;
   const worstClv = clvBets.length ? Math.min(...clvBets.map(bet => Number(bet.clvPct))) : null;
-  const open = rangeBets.filter(bet => bet.status === 'pending').length;
-  const openBets = userBets.filter(bet => bet.status === 'pending');
+  const openBets = rangeBets.filter(bet => bet.status === 'pending');
+  const open = openBets.length;
   const openStake = openBets.reduce((sum, bet) => sum + (Number(bet.stake) || 0), 0);
 
   const evRows = bucketSummaries(settled, [
@@ -816,7 +816,7 @@ export default function PortfolioAnalytics({
         <div className="s">
           <div className="l">Avoimet panokset</div>
           <div className="v">{formatEuro(openStake)}</div>
-          <div className="d">{openBets.length} kesken kaikkiaan{open !== openBets.length ? ` · ${open} valitulla ajalla` : ''}</div>
+          <div className="d">{openBets.length} kesken valitulla ajalla</div>
         </div>
       </div>
 
