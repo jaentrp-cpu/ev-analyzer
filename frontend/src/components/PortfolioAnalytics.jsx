@@ -721,7 +721,6 @@ export default function PortfolioAnalytics({
   const openBets = rangeBets.filter(bet => bet.status === 'pending');
   const open = openBets.length;
   const openStake = openBets.reduce((sum, bet) => sum + (Number(bet.stake) || 0), 0);
-  const visibleTotalBankroll = Number(bankroll) + openStake;
 
   const evRows = bucketSummaries(settled, [
     { label: 'EV alle 0%', value: bet => bet.ev, test: value => value < 0 },
@@ -800,11 +799,6 @@ export default function PortfolioAnalytics({
           <div className="l">Kassa nyt</div>
           <div className="v">{bankroll > 0 ? formatEuro(bankroll) : '—'}</div>
           <div className={'d ' + (totalPnl >= 0 ? 'g' : 'r')}>{totalPnl >= 0 ? '+' : ''}{formatEuro(totalPnl)} · ROI {formatPct(roi)}</div>
-        </div>
-        <div className="s portfolio-total-bankroll">
-          <div className="l">Koko kassa</div>
-          <div className="v">{bankroll > 0 ? formatEuro(visibleTotalBankroll) : '—'}</div>
-          <div className="d">Kassa nyt + avoimet panokset</div>
         </div>
         <div className="s">
           <div className="l">Osumisprosentti</div>
