@@ -2631,7 +2631,7 @@ body {
   font-size: 12px;
 }
 .vdx .portfolio-stats {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 .vdx .portfolio-grid {
   display: grid;
@@ -3302,6 +3302,9 @@ body {
 }
 .vdx.is-mobile .portfolio-stats {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.vdx.is-mobile .portfolio-total-bankroll {
+  order: 1;
 }
 .vdx.is-mobile .portfolio-grid.two,
 .vdx.is-mobile .portfolio-segments,
