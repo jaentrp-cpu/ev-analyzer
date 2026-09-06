@@ -11,6 +11,7 @@ import {
   deriveBetTaxonomy, formatTime, normalizeBookName,
 } from '../supabase.js';
 import { DEFAULT_KELLY_FRACTION, normalizeKellyFraction } from '../staking.js';
+import { createSteamBetSnapshot } from '../steam-bet-snapshot.js';
 
 const Ctx = createContext(null);
 export const useVedox = () => useContext(Ctx);
@@ -603,6 +604,7 @@ export function VedoxProvider({ children }) {
     const selectedOdds = Number(evBet.odds) > 1 ? Number(evBet.odds) : 0;
     const selectedEdge = Number.isFinite(Number(evBet.edge)) ? Number(evBet.edge) : 0;
     const taxonomy = deriveBetTaxonomy(evBet);
+    const steamSnapshot = createSteamBetSnapshot(evBet);
     const optimisticBet = {
       _dbId: optimisticId,
       createdAt: new Date().toISOString(),
@@ -623,6 +625,7 @@ export function VedoxProvider({ children }) {
       taxonomyStatus: taxonomy.taxonomyStatus,
       taxonomyReason: taxonomy.taxonomyReason,
       bettorName: evBet.bettorName || 'AJ',
+      ...(steamSnapshot?.display || {}),
       pnl: null,
     };
     setUserBets(prev => [optimisticBet, ...prev]);
@@ -643,6 +646,7 @@ export function VedoxProvider({ children }) {
         taxonomyReason: taxonomy.taxonomyReason,
         startsAt:     evBet.startsAt,
         bettorName: evBet.bettorName || 'AJ',
+        steamSnapshot,
       });
       if (result?.duplicate) {
         setUserBets(prev => prev.filter(b => b._dbId !== optimisticId));
