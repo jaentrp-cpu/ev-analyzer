@@ -182,6 +182,25 @@ function steamInfoFromRow(row) {
   };
 }
 
+function storedSteamSnapshot(row) {
+  const snapshot = parseJsonMaybe(row?.steam_snapshot);
+  return snapshot && snapshot.schema_version === 1 ? snapshot : null;
+}
+
+function steamInfoForUserBet(row) {
+  const live = steamInfoFromRow(row);
+  const snapshot = storedSteamSnapshot(row);
+  if (!snapshot) return live;
+  const stored = snapshot.display && typeof snapshot.display === 'object'
+    ? snapshot.display
+    : snapshot.raw && typeof snapshot.raw === 'object'
+      ? steamInfoFromRow(snapshot.raw)
+      : null;
+  if (!stored) return live;
+  // The immutable bet-time display wins over a later, disappearing ev_bets row.
+  return { ...live, ...stored };
+}
+
 function isPublicValueBet(row) {
   const odds = Number(row?.odds || 0);
   const edge = Number(row?.edge || 0);
@@ -486,7 +505,7 @@ function dbBetToLocal(row) {
   const clvPct = Number.isFinite(clvOdds) && clvOdds > 0 && odds > 0
     ? ((odds / clvOdds) - 1) * 100
     : null;
-  const steam = steamInfoFromRow(row);
+  const steam = steamInfoForUserBet(row);
   const settled = row.settled === true;
   const result = settled && ['won', 'lost', 'push', 'half_won', 'half_lost'].includes(row.result) ? row.result : 'pending';
   const pnl = result === 'won'  ? (odds - 1) * stake
@@ -733,8 +752,9 @@ async function loadFallbackTaxonomySources(rows, sourcesById) {
 export async function loadUserBets(userId, tierCode) {
   if (!userId || !canAccess(tierCode, 'mybets')) return [];
   const baseSelect = 'id, created_at, date, match, target, book, odds, stake, ev, result, settled, returned_amount, market, source_bet_id';
-  const storedTaxonomySelect = `${baseSelect}, liiga, league, sport, taxonomy_status, taxonomy_reason`;
-  const clvSelect = `${baseSelect}, clv_odds, clv_pct, clv_checked_at, clv_source, auto_result_checked_at, auto_result_source`;
+  const snapshotBaseSelect = `${baseSelect}, steam_snapshot`;
+  const storedTaxonomySelect = `${snapshotBaseSelect}, liiga, league, sport, taxonomy_status, taxonomy_reason`;
+  const clvSelect = `${snapshotBaseSelect}, clv_odds, clv_pct, clv_checked_at, clv_source, auto_result_checked_at, auto_result_source`;
   const bettorSelect = `${clvSelect}, bettor_name`;
   const taxonomyClvSelect = `${storedTaxonomySelect}, clv_odds, clv_pct, clv_checked_at, clv_source, auto_result_checked_at, auto_result_source`;
   const taxonomyBettorSelect = `${taxonomyClvSelect}, bettor_name`;
@@ -744,6 +764,16 @@ export async function loadUserBets(userId, tierCode) {
     .eq('user_id', userId)
     .gte('created_at', USER_BETS_MIGRATION_CUTOFF)
     .order('created_at', { ascending: false });
+  if (error && /steam_snapshot/i.test(error.message || '')) {
+    const preSnapshotFallback = await sbClient
+      .from('user_bets')
+      .select(`${baseSelect}, liiga, league, sport, taxonomy_status, taxonomy_reason, clv_odds, clv_pct, clv_checked_at, clv_source, auto_result_checked_at, auto_result_source, bettor_name`)
+      .eq('user_id', userId)
+      .gte('created_at', USER_BETS_MIGRATION_CUTOFF)
+      .order('created_at', { ascending: false });
+    data = preSnapshotFallback.data;
+    error = preSnapshotFallback.error;
+  }
   if (error && /liiga|league|sport|taxonomy_|column|schema cache|does not exist/i.test(error.message || '')) {
     const taxonomyFallback = await sbClient
       .from('user_bets')
@@ -875,6 +905,7 @@ export async function addUserBet(userId, bet) {
     sport:           persistedSport || null,
     taxonomy_status: persistedTaxonomyStatus,
     taxonomy_reason: persistedTaxonomyStatus ? (bet.taxonomyReason || 'saved_with_bet') : null,
+    steam_snapshot:  bet.steamSnapshot || null,
   };
 
   if (bet.sourceBetId) {
@@ -900,7 +931,10 @@ export async function addUserBet(userId, bet) {
   }
   if (error) {
     if (bet.sourceBetId && error.code === '23505') {
-      let updateRow = writeRow;
+      // A duplicate repair may update bet terms, but must not rewrite the
+      // original bet-time Steam snapshot.
+      const { steam_snapshot: _ignoredSteamSnapshot, ...duplicateUpdateRow } = writeRow;
+      let updateRow = duplicateUpdateRow;
       let { error: updateError } = await sbClient
         .from('user_bets')
         .update(updateRow)
@@ -928,6 +962,10 @@ function withoutUnsupportedUserBetColumns(row, error) {
   const message = String(error?.message || '');
   const next = { ...row };
   let changed = false;
+  if (/steam_snapshot|column|schema cache|does not exist/i.test(message) && Object.prototype.hasOwnProperty.call(next, 'steam_snapshot')) {
+    delete next.steam_snapshot;
+    changed = true;
+  }
   if (/liiga|league|sport|taxonomy_status|taxonomy_reason|column|schema cache|does not exist/i.test(message)) {
     ['liiga', 'league', 'sport', 'taxonomy_status', 'taxonomy_reason'].forEach(column => {
       if (Object.prototype.hasOwnProperty.call(next, column)) {
