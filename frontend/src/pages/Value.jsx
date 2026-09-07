@@ -5,10 +5,11 @@ import DatePicker from '../components/DatePicker.jsx';
 import LockedView from '../components/LockedView.jsx';
 import LoadingView from '../components/LoadingView.jsx';
 import { calculateKellyStake, formatKellyFraction, KELLY_MAX_BET_PCT } from '../staking.js';
-import { formatSteamScore100 } from '../supabase.js';
+import { formatSteamScore100, sbClient } from '../supabase.js';
+import { applyValueBetSkipEvent, createValueBetSkipStore } from '../value-bet-skips.js';
 
 const EURO = '\u20ac';
-const BETTOR_OPTIONS = ['AJ', 'Jalo', 'Leo'];
+const valueBetSkipStore = createValueBetSkipStore(sbClient);
 
 function startsInDateRange(startsAt, timeFilter, from, to) {
   if (timeFilter === 'all' || !startsAt) return true;
@@ -205,21 +206,11 @@ export default function Value() {
   const [timeFilter, setTimeFilter] = useState(() => localStorage.getItem('vedox_value_time') || 'all');
   const [dateFrom, setDateFrom] = useState(() => localStorage.getItem('vedox_value_date_from') || '');
   const [dateTo, setDateTo] = useState(() => localStorage.getItem('vedox_value_date_to') || '');
-  const [bettorName, setBettorName] = useState(() => {
-    const saved = localStorage.getItem('vedox_value_bettor_name') || 'AJ';
-    return BETTOR_OPTIONS.includes(saved) ? saved : 'AJ';
-  });
   const [betEdits, setBetEdits] = useState({});
   const [betActionState, setBetActionState] = useState({});
   const [showSkipped, setShowSkipped] = useState(false);
-  const [skippedIds, setSkippedIds] = useState(() => {
-    try {
-      const parsed = JSON.parse(localStorage.getItem('vedox_value_skipped_ids') || '[]');
-      return Array.isArray(parsed) ? parsed.map(String) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [skippedIds, setSkippedIds] = useState([]);
+  const [skipError, setSkipError] = useState('');
 
   useEffect(() => { localStorage.setItem('vedox_value_sport', sportFilter); }, [sportFilter]);
   useEffect(() => { localStorage.setItem('vedox_value_league', leagueFilter); }, [leagueFilter]);
@@ -228,8 +219,31 @@ export default function Value() {
   useEffect(() => { localStorage.setItem('vedox_value_time', timeFilter); }, [timeFilter]);
   useEffect(() => { localStorage.setItem('vedox_value_date_from', dateFrom); }, [dateFrom]);
   useEffect(() => { localStorage.setItem('vedox_value_date_to', dateTo); }, [dateTo]);
-  useEffect(() => { localStorage.setItem('vedox_value_bettor_name', bettorName); }, [bettorName]);
-  useEffect(() => { localStorage.setItem('vedox_value_skipped_ids', JSON.stringify(skippedIds)); }, [skippedIds]);
+
+  useEffect(() => {
+    const userId = session?.user?.id;
+    setSkippedIds([]);
+    setSkipError('');
+    localStorage.removeItem('vedox_value_skipped_ids');
+    localStorage.removeItem('vedox_value_bettor_name');
+    if (!userId) return undefined;
+
+    let active = true;
+    valueBetSkipStore.load(userId)
+      .then(ids => { if (active) setSkippedIds(ids); })
+      .catch(error => {
+        if (!active) return;
+        console.warn('[Vedox] value-bet skips load failed:', error.message);
+        setSkipError('Ohitusten lataus ep\u00e4onnistui. Yrit\u00e4 p\u00e4ivitt\u00e4\u00e4 sivu.');
+      });
+    const unsubscribe = valueBetSkipStore.subscribe(userId, payload => {
+      if (active) setSkippedIds(current => applyValueBetSkipEvent(current, payload, userId));
+    });
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [session?.user?.id]);
 
   const setBetEdit = (betId, patch) => {
     setBetEdits(prev => ({
@@ -255,6 +269,36 @@ export default function Value() {
       if (!prev[betId]?.error) return prev;
       return { ...prev, [betId]: { ...prev[betId], error: '' } };
     });
+  };
+
+  const skipValueBet = async (betId) => {
+    const userId = session?.user?.id;
+    if (!userId) return;
+    const normalizedId = String(betId);
+    setSkipError('');
+    setSkippedIds(current => Array.from(new Set([...current, normalizedId])));
+    try {
+      await valueBetSkipStore.add(userId, normalizedId);
+    } catch (error) {
+      setSkippedIds(current => current.filter(id => id !== normalizedId));
+      console.warn('[Vedox] value-bet skip save failed:', error.message);
+      setSkipError('Ohituksen tallennus ep\u00e4onnistui. Yrit\u00e4 uudelleen.');
+    }
+  };
+
+  const clearValueBetSkips = async () => {
+    const userId = session?.user?.id;
+    if (!userId) return;
+    const previous = skippedIds;
+    setSkipError('');
+    setSkippedIds([]);
+    try {
+      await valueBetSkipStore.clear(userId);
+    } catch (error) {
+      setSkippedIds(previous);
+      console.warn('[Vedox] value-bet skips clear failed:', error.message);
+      setSkipError('Ohitusten tyhjennys ep\u00e4onnistui. Yrit\u00e4 uudelleen.');
+    }
   };
 
   if (!authReady || (session && !permissionsReady && evBets.length === 0)) {
@@ -337,7 +381,6 @@ export default function Value() {
         odds: rowState.calc.odds,
         edge: rowState.calc.edge,
         stake: rowState.calc.stake,
-        bettorName,
       });
       if (result === false) {
         throw new Error('Vetoa ei voitu lis\u00e4t\u00e4 omiin vetoihin.');
@@ -442,13 +485,6 @@ export default function Value() {
       </div>
 
       <div className="filters">
-        <label className="filter-field bettor-field">
-          <span>Lis&auml;&auml;j&auml;</span>
-          <select value={bettorName} onChange={e => setBettorName(e.target.value)}>
-            {BETTOR_OPTIONS.map(name => <option key={name} value={name}>{name}</option>)}
-          </select>
-        </label>
-        <span className="vsep" />
         {sports.map(s => (
           <span key={s} className={'chip' + (sportFilter === s ? ' on' : '')} onClick={() => setSportFilter(s)}>
             {s}<span className="ct">{counts[s] || 0}</span>
@@ -498,8 +534,9 @@ export default function Value() {
           {showSkipped ? 'Piilota ohitetut' : `N\u00e4yt\u00e4 ohitetut${skippedCount ? ` ${skippedCount}` : ''}`}
         </button>
         {skippedCount > 0 && (
-          <button className="chip action" onClick={() => setSkippedIds([])}>Tyhjenn\u00e4 ohitukset</button>
+          <button className="chip action" onClick={clearValueBetSkips}>Tyhjenn\u00e4 ohitukset</button>
         )}
+        {skipError && <small className="value-action-error" role="alert">{skipError}</small>}
       </div>
 
       <div className="card val-table">
@@ -622,9 +659,9 @@ export default function Value() {
                         <div className="row-acts">
                           <button
                             className="ib ghost"
-                            onClick={() => setSkippedIds(prev => Array.from(new Set([...prev, String(b.id)])))}
+                            onClick={() => skipValueBet(b.id)}
                             disabled={isSkipped}
-                            title="Piilota t\u00e4m\u00e4 kohde t\u00e4st\u00e4 selaimesta"
+                            title="Piilota t\u00e4m\u00e4 kohde t\u00e4lt\u00e4 k\u00e4ytt\u00e4j\u00e4tililt\u00e4"
                           >
                             {isSkipped ? 'Ohitettu' : 'Ohita'}
                           </button>
@@ -733,8 +770,9 @@ export default function Value() {
                   <button
                     type="button"
                     className="ib ghost"
-                    onClick={() => setSkippedIds(prev => Array.from(new Set([...prev, String(b.id)])))}
+                    onClick={() => skipValueBet(b.id)}
                     disabled={isSkipped}
+                    title="Piilota t\u00e4m\u00e4 kohde t\u00e4lt\u00e4 k\u00e4ytt\u00e4j\u00e4tililt\u00e4"
                   >
                     {isSkipped ? 'Ohitettu' : 'Ohita'}
                   </button>

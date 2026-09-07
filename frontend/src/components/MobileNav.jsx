@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useTheme } from '../theme.jsx';
 import { Icon, iconFor, VedoxLogo } from './Icon.jsx';
-import TeamPresence from './TeamPresence.jsx';
 import { useVedox } from '../context/VedoxContext.jsx';
 import { formatKellyFraction, KELLY_FRACTIONS } from '../staking.js';
 
@@ -35,7 +34,6 @@ export function MobileTop({ page, onMenu, onProfile }) {
       <VedoxLogo size={22} />
       <div className="ti">{cur.lbl}</div>
       <div className="grow" />
-      <TeamPresence />
       <button
         className="ib"
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}

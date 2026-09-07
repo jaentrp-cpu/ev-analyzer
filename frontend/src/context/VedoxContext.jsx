@@ -624,7 +624,7 @@ export function VedoxProvider({ children }) {
       sport: taxonomy.sport,
       taxonomyStatus: taxonomy.taxonomyStatus,
       taxonomyReason: taxonomy.taxonomyReason,
-      bettorName: evBet.bettorName || 'AJ',
+      bettorName: evBet.bettorName || profile?.username || '',
       ...(steamSnapshot?.display || {}),
       pnl: null,
     };
@@ -645,7 +645,7 @@ export function VedoxProvider({ children }) {
         taxonomyStatus: taxonomy.taxonomyStatus,
         taxonomyReason: taxonomy.taxonomyReason,
         startsAt:     evBet.startsAt,
-        bettorName: evBet.bettorName || 'AJ',
+        bettorName: evBet.bettorName || profile?.username || '',
         steamSnapshot,
       });
       if (result?.duplicate) {
@@ -684,7 +684,7 @@ export function VedoxProvider({ children }) {
         market: bet.market || '',
         date: bet.date,
         sourceBetId: null,
-        bettorName: bet.bettorName || profile?.username || 'AJ',
+        bettorName: bet.bettorName || profile?.username || '',
       });
       await adjustBookBalance(bet.book, -stake);
       const fresh = await loadUserBets(session.user.id, tierCode);
