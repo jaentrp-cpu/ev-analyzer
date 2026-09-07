@@ -10,7 +10,6 @@ import PortfolioAnalytics, {
 import { formatSteamScore100, isTrustedClvTiming } from '../supabase.js';
 
 const EURO = '\u20ac';
-const BETTOR_OPTIONS = ['AJ', 'Jalo', 'Leo'];
 
 function formatClvPct(value) {
   if (!Number.isFinite(value)) return null;
@@ -71,10 +70,6 @@ export default function MyBets() {
   const [dateTo, setDateToState] = useState(() => localStorage.getItem('vedox_analytics_to') || '');
   const [showManualForm, setShowManualForm] = useState(false);
   const [manual, setManual] = useState({ date: '', match: '', outcome: '', book: '', odds: '', stake: '', edge: '', market: '' });
-  const [manualBettorName, setManualBettorName] = useState(() => {
-    const saved = localStorage.getItem('vedox_value_bettor_name') || 'AJ';
-    return BETTOR_OPTIONS.includes(saved) ? saved : 'AJ';
-  });
   const [bookToAdd, setBookToAdd] = useState('');
   const [editingDate, setEditingDate] = useState(null);
   const [editingTerms, setEditingTerms] = useState(null);
@@ -179,7 +174,7 @@ export default function MyBets() {
     setMutationError(null);
     setBetMutationId('manual');
     try {
-      const result = await addManualBet({ ...manual, bettorName: manualBettorName });
+      const result = await addManualBet(manual);
       if (result === false) throw new Error('Vetoa ei voitu lisätä.');
       setManual({ date: '', match: '', outcome: '', book: '', odds: '', stake: '', edge: '', market: '' });
       setShowManualForm(false);
@@ -325,15 +320,6 @@ export default function MyBets() {
             <button className="btn p" type="submit" disabled={Boolean(editingTerms || betMutationId)}>Lis&auml;&auml;</button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(132px, 1fr))', gap: 8 }}>
-            <label className="filter-field" style={{ margin: 0 }}>
-              <span>Lis&auml;&auml;j&auml;</span>
-              <select value={manualBettorName} onChange={e => {
-                setManualBettorName(e.target.value);
-                localStorage.setItem('vedox_value_bettor_name', e.target.value);
-              }}>
-                {BETTOR_OPTIONS.map(name => <option key={name} value={name}>{name}</option>)}
-              </select>
-            </label>
             <label className="filter-field" style={{ margin: 0 }}>
               <span>Pvm</span>
               <DatePicker mode="datetime" value={manual.date} onChange={value => setManualField('date', value)} placeholder="Valitse aika" />
@@ -493,7 +479,6 @@ export default function MyBets() {
                   <thead>
                     <tr>
                       <th style={{ width: 96 }}>Aika</th>
-                      <th style={{ width: 76 }}>Lis&auml;&auml;j&auml;</th>
                       <th>Ottelu</th>
                       <th>Kohde</th>
                       <th style={{ width: 90 }}>Kirja</th>
@@ -530,7 +515,6 @@ export default function MyBets() {
                             </button>
                           )}
                         </td>
-                        <td><span style={{ fontSize: 12.5, color: 'var(--tx2)', fontWeight: 600 }}>{b.bettorName || '-'}</span></td>
                         <td><span style={{ fontWeight: 500 }}>{b.match}</span></td>
                         <td><span style={{ color: 'var(--blue)', fontSize: 12.5, fontWeight: 500 }}>{b.pick}</span></td>
                         <td><span style={{ fontSize: 12.5, color: 'var(--tx2)' }}>{b.book}</span></td>
@@ -649,8 +633,6 @@ export default function MyBets() {
                               {b.date || '-'}
                             </button>
                           )}
-                          <span className="d" />
-                          <span>{b.bettorName || '-'}</span>
                           <span className="d" />
                           <span className="pk">{b.pick}</span>
                           <span className="d" />
