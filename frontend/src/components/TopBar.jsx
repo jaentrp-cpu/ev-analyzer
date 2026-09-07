@@ -1,5 +1,4 @@
 import React from 'react';
-import { Icon } from './Icon.jsx';
 import { useVedox } from '../context/VedoxContext.jsx';
 
 const TAB_LABELS = {
@@ -9,7 +8,7 @@ const TAB_LABELS = {
 };
 
 export default function TopBar({ page }) {
-  const { stats, loading, setShowAuth, session, signOut } = useVedox();
+  const { setShowAuth, session, signOut } = useVedox();
   return (
     <div className="topbar">
       <div className="crumb">
@@ -18,9 +17,6 @@ export default function TopBar({ page }) {
         <b>{TAB_LABELS[page] || page}</b>
       </div>
       <div className="right">
-        <button className="ib top-alert" title={loading ? 'Päivitetään…' : `Päivitetty ${stats.paivitetty}`}>
-          <Icon name="bell" size={14} />
-        </button>
         {session
           ? <button className="btn ghost logout-top" title="Kirjaudu ulos" onClick={signOut}>
               Kirjaudu ulos

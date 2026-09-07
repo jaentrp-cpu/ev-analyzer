@@ -157,12 +157,6 @@ body {
 }
 .vdx .ib:hover { background: var(--bg4); color: var(--tx); }
 .vdx .ib.p { background: var(--blue); border-color: var(--blue); color: #fff; }
-.vdx .top-alert {
-  color: var(--tx2);
-}
-.vdx .top-alert:hover {
-  color: var(--blue);
-}
 .vdx .logout-top {
   height: 28px;
   padding: 0 10px;
