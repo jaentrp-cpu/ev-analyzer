@@ -534,7 +534,7 @@ export default function Value() {
           {showSkipped ? 'Piilota ohitetut' : `N\u00e4yt\u00e4 ohitetut${skippedCount ? ` ${skippedCount}` : ''}`}
         </button>
         {skippedCount > 0 && (
-          <button className="chip action" onClick={clearValueBetSkips}>Tyhjenn\u00e4 ohitukset</button>
+          <button className="chip action" onClick={clearValueBetSkips}>Tyhjennä ohitukset</button>
         )}
         {skipError && <small className="value-action-error" role="alert">{skipError}</small>}
       </div>
