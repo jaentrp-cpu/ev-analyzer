@@ -136,12 +136,12 @@ function steamInfoFromRow(row) {
   ).trim();
   const displayScore = validLearnedScore
     ? learnedScore
-    : isV1Unscorable ? null : normalizedLegacyScore;
+    : null;
   const displaySource = validLearnedScore
     ? 'steam_rating_rules'
     : isV1Unscorable
       ? 'unscorable_input_error'
-      : Number.isFinite(normalizedLegacyScore) ? 'legacy_quality_normalized' : '';
+      : '';
   return {
     steamScore: validLearnedScore ? learnedScore : null,
     steamGrade: validLearnedScore && ['A', 'B', 'C', 'D'].includes(learnedGrade)
@@ -176,7 +176,7 @@ function steamInfoFromRow(row) {
       ? (matchLabel || 'opittu sääntö')
       : isV1Unscorable
         ? 'puuttuva mallisyöte'
-        : Number.isFinite(normalizedLegacyScore) ? 'reaaliaikainen 0–58' : '',
+        : 'ei saatavilla',
     steamEdgePct: Number.isFinite(edge) ? edge : null,
     evMarker: marker === '@' || marker === '!' ? marker : '',
   };
