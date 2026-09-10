@@ -559,7 +559,7 @@ export default function Value() {
                   <th style={{ width: 96 }}>Kirja</th>
                   <th className="r" style={{ width: 86 }}>Saldo</th>
                   <th className="r" style={{ width: 90 }}>Etu</th>
-                  <th className="r" style={{ width: 84 }}>Steam</th>
+                  <th className="r" style={{ width: 84 }}>Steam CLV</th>
                   <th className="r" style={{ width: 80 }}>Panos</th>
                   <th className="r" style={{ width: 130 }}>Toiminnot</th>
                 </tr>
@@ -638,7 +638,7 @@ export default function Value() {
                             Tarkista
                           </span>
                         ) : (
-                          <span className="steam-empty" title="Steam-signaalia ei ole saatavilla">-</span>
+                          <span className="steam-empty" title="Steam CLV-arviota ei ole saatavilla">—</span>
                         )}
                       </td>
                       <td className="r">
@@ -733,7 +733,7 @@ export default function Value() {
                     Saldo {hasBalance ? `${Number(bookBalance).toFixed(2)} ${EURO}` : '-'}
                   </span>
                   <span>
-                    Steam {b.steamDisplayScore != null && Number.isFinite(Number(b.steamDisplayScore))
+                    Steam CLV {b.steamDisplayScore != null && Number.isFinite(Number(b.steamDisplayScore))
                       ? formatSteamScore100(b.steamDisplayScore)
                       : b.steamUnscorable ? 'Tarkista' : '-'}
                   </span>
