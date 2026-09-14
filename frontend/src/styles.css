@@ -2888,6 +2888,23 @@ body {
   font-size: 30px;
   letter-spacing: -.035em;
 }
+.vdx .portfolio-curve-summary {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.vdx .portfolio-curve-summary span {
+  color: var(--tx3);
+  font: 700 13px 'Geist Mono', monospace;
+  letter-spacing: -.015em;
+}
+.vdx .portfolio-curve-summary span.g {
+  color: var(--green);
+}
+.vdx .portfolio-curve-summary span.bad {
+  color: var(--red);
+}
 .vdx .portfolio-curve-head p {
   margin-top: 5px;
   color: var(--tx3);
