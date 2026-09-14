@@ -846,7 +846,9 @@ export default function PortfolioAnalytics({
         <div className="portfolio-curve-head">
           <div>
             <SectionTitle meta={`${settled.length} ratkennutta`}>Kumulatiivinen PnL</SectionTitle>
-            <strong className={totalPnl < 0 ? 'bad' : 'g'}>{totalPnl >= 0 ? '+' : ''}{formatEuro(totalPnl)}</strong>
+            <strong className={totalPnl < 0 ? 'bad' : 'g'}>
+              {totalPnl >= 0 ? '+' : ''}{formatEuro(totalPnl)} &middot; {formatPct(roi)}
+            </strong>
             <p>Lähtötaso on 0 {EURO}. Tooltipin kokonaiskassa johdetaan nykyisistä kasinoiden saldoista, avoimista panoksista ja ratkenneiden vetojen PnL:stä.</p>
           </div>
         </div>
