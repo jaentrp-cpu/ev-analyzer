@@ -2905,6 +2905,9 @@ body {
 .vdx .portfolio-curve-summary span.bad {
   color: var(--red);
 }
+.vdx .portfolio-curve-summary span.portfolio-curve-separator {
+  color: var(--tx3);
+}
 .vdx .portfolio-curve-head p {
   margin-top: 5px;
   color: var(--tx3);

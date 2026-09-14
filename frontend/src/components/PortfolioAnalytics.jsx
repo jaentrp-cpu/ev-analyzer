@@ -7,6 +7,7 @@ import {
 } from '../supabase.js';
 import {
   betInAnalyticsRange,
+  calculateBankrollReturn,
   calculateSettledReturn,
   isSettledBet,
   normalizeAnalyticsRange,
@@ -594,6 +595,7 @@ function SportLeagueAnalysis({ bets }) {
 export default function PortfolioAnalytics({
   userBets,
   bankroll,
+  startingBankroll,
   totalBankroll,
   canViewAdvanced,
   range = '30d',
@@ -618,6 +620,7 @@ export default function PortfolioAnalytics({
 
   const rangeBets = userBets.filter(bet => betInAnalyticsRange(bet, range, dateFrom, dateTo));
   const { settled, totalStake, totalPnl, roi } = calculateSettledReturn(rangeBets);
+  const bankrollReturn = calculateBankrollReturn(totalPnl, startingBankroll);
   const decided = settled.filter(bet => isWin(bet) || isLoss(bet));
   const wins = decided.filter(isWin);
   const hit = decided.length ? (wins.length / decided.length) * 100 : null;
@@ -769,6 +772,10 @@ export default function PortfolioAnalytics({
             <div className="portfolio-curve-summary">
               <strong className={totalPnl < 0 ? 'bad' : 'g'}>{totalPnl >= 0 ? '+' : ''}{formatEuro(totalPnl)}</strong>
               <span className={roi === null ? '' : (roi < 0 ? 'bad' : 'g')}>ROI {roi === null ? '—' : formatPct(roi)}</span>
+              <span className="portfolio-curve-separator" aria-hidden="true">·</span>
+              <span className={bankrollReturn === null ? '' : (bankrollReturn < 0 ? 'bad' : 'g')}>
+                Kassatuotto {bankrollReturn === null ? '—' : formatPct(bankrollReturn)}
+              </span>
             </div>
             <p>Lähtötaso on 0 {EURO}. Tooltipin kokonaiskassa johdetaan nykyisistä kasinoiden saldoista, avoimista panoksista ja ratkenneiden vetojen PnL:stä.</p>
           </div>
