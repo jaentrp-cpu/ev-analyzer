@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   betInAnalyticsRange,
+  calculateBankrollReturn,
   calculateSettledReturn,
   normalizeAnalyticsRange,
 } from './portfolio-analytics.js';
@@ -80,4 +81,25 @@ test('changing the selected range changes ROI from that range data', () => {
 test('empty and zero-stake ranges have no calculable ROI', () => {
   assert.equal(calculateSettledReturn([]).roi, null);
   assert.equal(calculateSettledReturn([{ status: 'push', stake: 0, pnl: 0 }]).roi, null);
+});
+
+test('bankroll return uses selected PnL divided by the saved starting bankroll', () => {
+  assert.equal(calculateBankrollReturn(900, 300), 300);
+  assert.equal(calculateBankrollReturn(-75, 300), -25);
+  assert.equal(calculateBankrollReturn(0, 300), 0);
+});
+
+test('bankroll return follows the selected range and requires a positive starting bankroll', () => {
+  const bets = [
+    { status: 'won', stake: 100, pnl: 90, dateValue: localDate(0).toISOString() },
+    { status: 'lost', stake: 100, pnl: -30, dateValue: localDate(-5).toISOString() },
+  ];
+  const today = calculateSettledReturn(bets.filter(bet => betInAnalyticsRange(bet, 'today')));
+  const sevenDays = calculateSettledReturn(bets.filter(bet => betInAnalyticsRange(bet, '7d')));
+
+  assert.equal(calculateBankrollReturn(today.totalPnl, 300), 30);
+  assert.equal(calculateBankrollReturn(sevenDays.totalPnl, 300), 20);
+  assert.equal(calculateBankrollReturn(10, 0), null);
+  assert.equal(calculateBankrollReturn(10, null), null);
+  assert.equal(calculateBankrollReturn(10, 'not-a-number'), null);
 });

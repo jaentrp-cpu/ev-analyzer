@@ -54,7 +54,7 @@ function mutationErrorMessage(error, fallback) {
 
 export default function MyBets() {
   const {
-    userBets, bankroll, addManualBet, removeBet, settleBet, editBetDate, editBetTerms,
+    userBets, bankroll, baseBankroll, addManualBet, removeBet, settleBet, editBetDate, editBetTerms,
     bookBalanceMap, booksForBalances, bookBalanceSuggestions, setBookBalance,
     addBookBalanceBook, removeBookBalanceBook,
     session, authReady, permissionsReady, setShowAuth, canAccess,
@@ -401,6 +401,7 @@ export default function MyBets() {
           <PortfolioAnalytics
             userBets={userBets}
             bankroll={bankroll}
+            startingBankroll={baseBankroll}
             totalBankroll={totalBankroll}
             canViewAdvanced={canAccess('analytics')}
             range={timeFilter}

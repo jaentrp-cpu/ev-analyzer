@@ -97,3 +97,10 @@ export function calculateSettledReturn(bets = []) {
     roi: totalStake > 0 ? (totalPnl / totalStake) * 100 : null,
   };
 }
+
+export function calculateBankrollReturn(totalPnl, startingBankroll) {
+  const pnl = Number(totalPnl);
+  const starting = Number(startingBankroll);
+  if (!Number.isFinite(pnl) || !Number.isFinite(starting) || starting <= 0) return null;
+  return (pnl / starting) * 100;
+}
