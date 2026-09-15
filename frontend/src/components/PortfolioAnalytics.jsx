@@ -284,7 +284,7 @@ function compareBetChronology(a, b) {
   return String(a._dbId || '').localeCompare(String(b._dbId || ''));
 }
 
-function PnlCurve({ settled, allSettled, totalBankroll }) {
+function PnlCurve({ settled, allSettled, startingBankroll, totalBankroll }) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const chronological = [...settled].sort(compareBetChronology);
   const allChronological = [...allSettled].sort(compareBetChronology);
@@ -320,6 +320,9 @@ function PnlCurve({ settled, allSettled, totalBankroll }) {
     : null;
   const activeTotalBankroll = laterPnl !== null && Number.isFinite(Number(totalBankroll))
     ? Number(totalBankroll) - laterPnl
+    : null;
+  const activeBankrollReturn = activeIndex
+    ? calculateBankrollReturn(values[activeIndex], startingBankroll)
     : null;
   const activeBetNumber = activeBet && /^\d+$/.test(String(activeBet.sourceBetId || ''))
     ? String(activeBet.sourceBetId)
@@ -379,6 +382,7 @@ function PnlCurve({ settled, allSettled, totalBankroll }) {
           {activeBet.match && <span>{activeBet.match}</span>}
           <span>Panos: {formatEuro(activeBet.stake)}</span>
           <span>Kumulatiivinen PnL: {values[activeIndex] >= 0 ? '+' : ''}{formatEuro(values[activeIndex])}</span>
+          <span>Kassatuotto: {activeBankrollReturn === null ? '—' : formatPct(activeBankrollReturn)}</span>
           <span>Kokonaiskassa: {activeTotalBankroll === null ? '—' : formatEuro(activeTotalBankroll)}</span>
         </div>
       )}
@@ -780,7 +784,12 @@ export default function PortfolioAnalytics({
             <p>Lähtötaso on 0 {EURO}. Tooltipin kokonaiskassa johdetaan nykyisistä kasinoiden saldoista, avoimista panoksista ja ratkenneiden vetojen PnL:stä.</p>
           </div>
         </div>
-        <PnlCurve settled={settled} allSettled={userBets.filter(isSettledBet)} totalBankroll={totalBankroll} />
+        <PnlCurve
+          settled={settled}
+          allSettled={userBets.filter(isSettledBet)}
+          startingBankroll={startingBankroll}
+          totalBankroll={totalBankroll}
+        />
       </div>
 
       <div className="portfolio-grid two">
