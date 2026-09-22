@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import DatePicker from './DatePicker.jsx';
 import {
   clvPhaseFromSource,
@@ -7,9 +7,11 @@ import {
 } from '../supabase.js';
 import {
   betInAnalyticsRange,
+  buildDailyBetSummaries,
   calculateBankrollReturn,
   calculateSettledReturn,
   isSettledBet,
+  localDateKey,
   normalizeAnalyticsRange,
   parseBetTime,
 } from '../portfolio-analytics.js';
@@ -18,6 +20,9 @@ import { buildPortfolioCurveSeries } from '../portfolioCurveSeries.js';
 export { betInAnalyticsRange, normalizeAnalyticsRange } from '../portfolio-analytics.js';
 
 const EURO = '\u20ac';
+const MONTH_LABEL = new Intl.DateTimeFormat('fi-FI', { month: 'long', year: 'numeric' });
+const DAY_LABEL = new Intl.DateTimeFormat('fi-FI', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const WEEKDAYS = ['Ma', 'Ti', 'Ke', 'To', 'Pe', 'La', 'Su'];
 
 const RESULT_META = {
   won: { label: 'Voitot', color: 'var(--green)' },
@@ -66,6 +71,122 @@ function formatEuro(value, digits = 2) {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   })} ${EURO}`;
+}
+
+function calendarMonthDays(monthDate) {
+  const first = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+  const mondayOffset = (first.getDay() + 6) % 7;
+  const cursor = new Date(first);
+  cursor.setDate(first.getDate() - mondayOffset);
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(cursor);
+    date.setDate(cursor.getDate() + index);
+    return date;
+  });
+}
+
+function shiftMonth(date, amount) {
+  return new Date(date.getFullYear(), date.getMonth() + amount, 1);
+}
+
+function AnalyticsCalendar({ userBets, selectedKey, onSelectDay }) {
+  const today = new Date();
+  const todayKey = localDateKey(today);
+  const [anchorMonth, setAnchorMonth] = useState(() => {
+    const selected = selectedKey ? new Date(`${selectedKey}T12:00:00`) : today;
+    const valid = Number.isFinite(selected.getTime()) ? selected : today;
+    return new Date(valid.getFullYear(), valid.getMonth(), 1);
+  });
+  const summaries = useMemo(() => buildDailyBetSummaries(userBets), [userBets]);
+  useEffect(() => {
+    if (!selectedKey) return;
+    const selected = new Date(`${selectedKey}T12:00:00`);
+    if (Number.isFinite(selected.getTime())) {
+      setAnchorMonth(new Date(selected.getFullYear(), selected.getMonth(), 1));
+    }
+  }, [selectedKey]);
+  const months = [-1, 0, 1].map(offset => shiftMonth(anchorMonth, offset));
+  const visibleKeys = months.flatMap(calendarMonthDays).map(localDateKey);
+  const maxAbsPnl = Math.max(1, ...visibleKeys.map(key => Math.abs(summaries.get(key)?.pnl || 0)));
+  const selected = selectedKey ? summaries.get(selectedKey) : null;
+
+  return (
+    <div className="card analytics-calendar-card">
+      <div className="analytics-calendar-head">
+        <div>
+          <span>Kalenteri</span>
+          <h3>Päiväkohtainen tulos</h3>
+          <p>Valitse päivä nähdäksesi koko analytiikan kyseiseltä päivältä.</p>
+        </div>
+        <div className="analytics-calendar-actions" aria-label="Kalenterin selaus">
+          <button type="button" onClick={() => setAnchorMonth(value => shiftMonth(value, -1))} aria-label="Edellinen kuukausi">&#8592;</button>
+          <button type="button" onClick={() => setAnchorMonth(new Date(today.getFullYear(), today.getMonth(), 1))}>Tänään</button>
+          <button type="button" onClick={() => setAnchorMonth(value => shiftMonth(value, 1))} aria-label="Seuraava kuukausi">&#8594;</button>
+        </div>
+      </div>
+
+      <div className="analytics-calendar-months">
+        {months.map(month => (
+          <section className="analytics-calendar-month" key={localDateKey(month)} aria-label={MONTH_LABEL.format(month)}>
+            <h4>{MONTH_LABEL.format(month)}</h4>
+            <div className="analytics-calendar-weekdays" aria-hidden="true">
+              {WEEKDAYS.map(day => <span key={day}>{day}</span>)}
+            </div>
+            <div className="analytics-calendar-grid">
+              {calendarMonthDays(month).map(date => {
+                const key = localDateKey(date);
+                const summary = summaries.get(key);
+                const outside = date.getMonth() !== month.getMonth();
+                const positive = summary?.settled > 0 && summary.pnl > 0;
+                const negative = summary?.settled > 0 && summary.pnl < 0;
+                const strength = summary?.settled
+                  ? 0.12 + Math.min(Math.abs(summary.pnl) / maxAbsPnl, 1) * 0.38
+                  : 0;
+                const status = positive ? 'positive' : negative ? 'negative' : 'neutral';
+                const aria = [
+                  DAY_LABEL.format(date),
+                  summary ? `${summary.bets} vetoa` : 'ei vetoja',
+                  summary ? `panostettu ${formatEuro(summary.totalStake)}` : '',
+                  summary?.settled ? `tulos ${summary.pnl >= 0 ? 'plus' : 'miinus'} ${formatEuro(Math.abs(summary.pnl))}` : 'ei ratkaistua tulosta',
+                ].filter(Boolean).join(', ');
+                return (
+                  <button
+                    type="button"
+                    key={key}
+                    className={`analytics-calendar-day ${status}${outside ? ' outside' : ''}${key === todayKey ? ' today' : ''}${key === selectedKey ? ' selected' : ''}`}
+                    style={{ '--day-strength': strength }}
+                    onClick={() => onSelectDay(key)}
+                    aria-label={aria}
+                    aria-pressed={key === selectedKey}
+                  >
+                    <span className="analytics-calendar-date">{date.getDate()}{key === todayKey && <i>Tänään</i>}</span>
+                    {summary ? (
+                      <>
+                        <strong>{summary.settled ? `${summary.pnl >= 0 ? '+' : ''}${summary.pnl.toFixed(2)} ${EURO}` : 'Avoin'}</strong>
+                        <small>{summary.bets} vetoa</small>
+                        <small>{formatEuro(summary.totalStake)} panos</small>
+                      </>
+                    ) : <small className="analytics-calendar-empty">Ei vetoja</small>}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ))}
+      </div>
+
+      {selectedKey && (
+        <div className="analytics-calendar-selection" aria-live="polite">
+          <div><span>Valittu päivä</span><b>{new Date(`${selectedKey}T12:00:00`).toLocaleDateString('fi-FI')}</b></div>
+          <div><span>Vedot</span><b>{selected?.bets || 0}</b><small>{selected ? `${selected.settled} ratkaistu · ${selected.open} avoinna` : 'Ei vetoja'}</small></div>
+          <div><span>Panostettu</span><b>{formatEuro(selected?.totalStake || 0)}</b></div>
+          <div><span>PnL / ROI</span><b className={selected?.settled ? (selected.pnl < 0 ? 'bad' : 'g') : ''}>{selected?.settled ? `${selected.pnl >= 0 ? '+' : ''}${formatEuro(selected.pnl)}` : '—'}</b><small>{selected?.roi == null ? 'ROI —' : `ROI ${formatPct(selected.roi)}`}</small></div>
+          <div><span>AVG EV</span><b>{selected?.avgEv == null ? '—' : formatPct(selected.avgEv, 2)}</b><small>{selected?.evCount || 0}/{selected?.bets || 0} vetoa</small></div>
+          <div><span>AVG CLV</span><b className={selected?.avgClv == null ? '' : (selected.avgClv < 0 ? 'bad' : 'g')}>{selected?.avgClv == null ? '—' : formatPct(selected.avgClv, 2)}</b><small>{selected?.clvCount || 0}/{selected?.bets || 0} vetoa</small></div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function taxonomyOf(bet) {
@@ -740,6 +861,12 @@ export default function PortfolioAnalytics({
     : range === '30d' ? 'viimeiset 30 päivää'
     : range === '90d' ? 'viimeiset 90 päivää'
     : 'valittu aikaväli';
+  const selectedDayKey = range === 'custom' && dateFrom && dateFrom === dateTo ? dateFrom : '';
+  const selectCalendarDay = key => {
+    onRangeChange('custom');
+    onDateFromChange(key);
+    onDateToChange(key);
+  };
 
   return (
     <section className="portfolio-analytics">
@@ -772,6 +899,12 @@ export default function PortfolioAnalytics({
           )}
         </div>
       </div>
+
+      <AnalyticsCalendar
+        userBets={userBets}
+        selectedKey={selectedDayKey}
+        onSelectDay={selectCalendarDay}
+      />
 
       <div className="stat-grid portfolio-stats">
         <div className="s">

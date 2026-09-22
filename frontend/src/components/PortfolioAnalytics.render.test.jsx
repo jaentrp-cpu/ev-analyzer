@@ -28,7 +28,9 @@ const html = renderToStaticMarkup(
     startingBankroll={500}
     totalBankroll={1200}
     canViewAdvanced
-    range="all"
+    range="custom"
+    dateFrom="2026-09-01"
+    dateTo="2026-09-01"
   />,
 );
 
@@ -37,5 +39,8 @@ if (!html.includes('EV-odotusarvo') || !html.includes('CLV-proxy')) {
 }
 if (!html.includes('CLV 239/955')) {
   throw new Error('Stored CLV coverage did not render');
+}
+if (!html.includes('Päiväkohtainen tulos') || !html.includes('Valittu päivä')) {
+  throw new Error('Analytics calendar and selected-day summary did not render');
 }
 console.log('PortfolioAnalytics 955-row render passed');

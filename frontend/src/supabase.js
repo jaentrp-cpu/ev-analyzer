@@ -3,6 +3,7 @@
 // Uses only VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 import { createClient } from '@supabase/supabase-js';
+import { loadPagedRows } from './userBetsPagination.js';
 import { readProfileWithRecovery } from './profile-access.js';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -749,6 +750,16 @@ async function loadFallbackTaxonomySources(rows, sourcesById) {
   return sourceByUserBetId;
 }
 
+async function loadUserBetPages(userId, columns) {
+  return loadPagedRows((from, to) => sbClient
+      .from('user_bets')
+      .select(columns)
+      .eq('user_id', userId)
+      .gte('created_at', USER_BETS_MIGRATION_CUTOFF)
+      .order('created_at', { ascending: false })
+      .range(from, to));
+}
+
 export async function loadUserBets(userId, tierCode) {
   if (!userId || !canAccess(tierCode, 'mybets')) return [];
   const baseSelect = 'id, created_at, date, match, target, book, odds, stake, ev, result, settled, returned_amount, market, source_bet_id';
@@ -758,49 +769,27 @@ export async function loadUserBets(userId, tierCode) {
   const bettorSelect = `${clvSelect}, bettor_name`;
   const taxonomyClvSelect = `${storedTaxonomySelect}, clv_odds, clv_pct, clv_checked_at, clv_source, auto_result_checked_at, auto_result_source`;
   const taxonomyBettorSelect = `${taxonomyClvSelect}, bettor_name`;
-  let { data, error } = await sbClient
-    .from('user_bets')
-    .select(taxonomyBettorSelect)
-    .eq('user_id', userId)
-    .gte('created_at', USER_BETS_MIGRATION_CUTOFF)
-    .order('created_at', { ascending: false });
+  let { data, error } = await loadUserBetPages(userId, taxonomyBettorSelect);
   if (error && /steam_snapshot/i.test(error.message || '')) {
-    const preSnapshotFallback = await sbClient
-      .from('user_bets')
-      .select(`${baseSelect}, liiga, league, sport, taxonomy_status, taxonomy_reason, clv_odds, clv_pct, clv_checked_at, clv_source, auto_result_checked_at, auto_result_source, bettor_name`)
-      .eq('user_id', userId)
-      .gte('created_at', USER_BETS_MIGRATION_CUTOFF)
-      .order('created_at', { ascending: false });
+    const preSnapshotFallback = await loadUserBetPages(
+      userId,
+      `${baseSelect}, liiga, league, sport, taxonomy_status, taxonomy_reason, clv_odds, clv_pct, clv_checked_at, clv_source, auto_result_checked_at, auto_result_source, bettor_name`,
+    );
     data = preSnapshotFallback.data;
     error = preSnapshotFallback.error;
   }
   if (error && /liiga|league|sport|taxonomy_|column|schema cache|does not exist/i.test(error.message || '')) {
-    const taxonomyFallback = await sbClient
-      .from('user_bets')
-      .select(bettorSelect)
-      .eq('user_id', userId)
-      .gte('created_at', USER_BETS_MIGRATION_CUTOFF)
-      .order('created_at', { ascending: false });
+    const taxonomyFallback = await loadUserBetPages(userId, bettorSelect);
     data = taxonomyFallback.data;
     error = taxonomyFallback.error;
   }
   if (error && /bettor_name|clv_|auto_result_|column|schema cache|does not exist/i.test(error.message || '')) {
-    const clvFallback = await sbClient
-      .from('user_bets')
-      .select(clvSelect)
-      .eq('user_id', userId)
-      .gte('created_at', USER_BETS_MIGRATION_CUTOFF)
-      .order('created_at', { ascending: false });
+    const clvFallback = await loadUserBetPages(userId, clvSelect);
     data = clvFallback.data;
     error = clvFallback.error;
   }
   if (error && /clv_|auto_result_|column|schema cache|does not exist/i.test(error.message || '')) {
-    const fallback = await sbClient
-      .from('user_bets')
-      .select(baseSelect)
-      .eq('user_id', userId)
-      .gte('created_at', USER_BETS_MIGRATION_CUTOFF)
-      .order('created_at', { ascending: false });
+    const fallback = await loadUserBetPages(userId, baseSelect);
     data = fallback.data;
     error = fallback.error;
   }
