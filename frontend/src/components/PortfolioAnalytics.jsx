@@ -13,7 +13,6 @@ import {
   normalizeAnalyticsRange,
   parseBetTime,
 } from '../portfolio-analytics.js';
-import { buildPortfolioCurveSeries } from '../portfolioCurveSeries.js';
 
 export { betInAnalyticsRange, normalizeAnalyticsRange } from '../portfolio-analytics.js';
 
@@ -287,38 +286,25 @@ function compareBetChronology(a, b) {
 
 function PnlCurve({ settled, allSettled, totalBankroll }) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
-  const [visible, setVisible] = useState({ actual: true, ev: true, clv: true });
   const chronological = [...settled].sort(compareBetChronology);
   const allChronological = [...allSettled].sort(compareBetChronology);
-  const series = buildPortfolioCurveSeries(chronological.map(bet => ({
-    ...bet,
-    clvUsable: hasVerifiedClv(bet),
-  })));
-  const values = series.actual;
+  const values = [0];
+  chronological.forEach(bet => values.push(values[values.length - 1] + (Number(bet.pnl) || 0)));
   if (values.length < 2) return <div className="portfolio-chart-empty">Ei ratkaistuja vetoja valitulla aikavälillä.</div>;
 
   const width = 1000;
   const height = 280;
   const padding = 18;
-  const visibleValues = [
-    ...(visible.actual ? series.actual : []),
-    ...(visible.ev ? series.ev : []),
-    ...(visible.clv ? series.clv : []),
-    0,
-  ];
-  const min = Math.min(...visibleValues);
-  const max = Math.max(...visibleValues);
+  const min = Math.min(...values, 0);
+  const max = Math.max(...values, 0);
   const domainMin = min === max ? min - 1 : min;
   const domainMax = min === max ? max + 1 : max;
   const span = domainMax - domainMin;
-  const toPoints = curve => curve.map((point, index) => {
+  const points = values.map((point, index) => {
     const x = padding + (index / (values.length - 1)) * (width - padding * 2);
     const y = padding + ((domainMax - point) / span) * (height - padding * 2);
     return [x, y];
   });
-  const points = toPoints(series.actual);
-  const evPoints = toPoints(series.ev);
-  const clvPoints = toPoints(series.clv);
   const line = points.map(point => point.join(',')).join(' ');
   const zeroY = padding + ((domainMax - 0) / span) * (height - padding * 2);
   const area = `${line} ${width - padding},${zeroY} ${padding},${zeroY}`;
@@ -327,8 +313,7 @@ function PnlCurve({ settled, allSettled, totalBankroll }) {
     ? Math.min(Math.max(hoveredIndex, 1), chronological.length)
     : null;
   const activeBet = activeIndex ? chronological[activeIndex - 1] : null;
-  const hoverPoints = visible.actual ? points : (visible.ev ? evPoints : clvPoints);
-  const activePoint = activeIndex ? hoverPoints[activeIndex] : null;
+  const activePoint = activeIndex ? points[activeIndex] : null;
   const activeGlobalIndex = activeBet ? allChronological.indexOf(activeBet) : -1;
   const laterPnl = activeGlobalIndex >= 0
     ? allChronological.slice(activeGlobalIndex + 1).reduce((sum, bet) => sum + (Number(bet.pnl) || 0), 0)
@@ -339,11 +324,6 @@ function PnlCurve({ settled, allSettled, totalBankroll }) {
   const activeBetNumber = activeBet && /^\d+$/.test(String(activeBet.sourceBetId || ''))
     ? String(activeBet.sourceBetId)
     : activeIndex;
-  const coveragePct = count => `${chronological.length ? Math.round(count / chronological.length * 100) : 0}%`;
-  const toggleCurve = key => setVisible(current => {
-    if (current[key] && Object.values(current).filter(Boolean).length === 1) return current;
-    return { ...current, [key]: !current[key] };
-  });
 
   const setHoveredBetFromPointer = event => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -355,18 +335,10 @@ function PnlCurve({ settled, allSettled, totalBankroll }) {
 
   return (
     <div className="portfolio-line-chart">
-      <div className="portfolio-curve-controls" aria-label="Käyrien näkyvyys">
-        <div>
-          <button type="button" className={visible.actual ? 'active actual' : 'actual'} onClick={() => toggleCurve('actual')}>Toteutunut PnL</button>
-          <button type="button" className={visible.ev ? 'active ev' : 'ev'} onClick={() => toggleCurve('ev')}>EV-odotusarvo</button>
-          <button type="button" className={visible.clv ? 'active clv' : 'clv'} onClick={() => toggleCurve('clv')}>CLV-proxy</button>
-        </div>
-        <span>Peitto: EV {series.evRows}/{chronological.length} ({coveragePct(series.evRows)}) · varmennettu CLV {series.clvRows}/{chronological.length} ({coveragePct(series.clvRows)})</span>
-      </div>
       <svg
         viewBox={`0 0 ${width} ${height}`}
         role="img"
-        aria-label="Valitun aikavälin toteutunut PnL, EV-odotusarvo ja varmennettuun CLV-dataan perustuva CLV-proxy."
+        aria-label="Valitun aikavälin kumulatiivinen PnL. Kohdista hiiri käyrälle nähdäksesi vedon tiedot."
         onPointerMove={setHoveredBetFromPointer}
         onPointerLeave={() => setHoveredIndex(null)}
       >
@@ -380,11 +352,8 @@ function PnlCurve({ settled, allSettled, totalBankroll }) {
           <line key={part} x1={padding} x2={width - padding} y1={height * part} y2={height * part} className="grid-line" />
         ))}
         <line x1={padding} x2={width - padding} y1={zeroY} y2={zeroY} className="zero-line" />
-        {visible.actual && <polygon points={area} fill="url(#portfolioPnlGradient)" />}
-        {visible.actual && <polyline points={line} fill="none" stroke="var(--blue)" strokeWidth="3" vectorEffect="non-scaling-stroke" />}
-        {visible.ev && <polyline points={evPoints.map(point => point.join(',')).join(' ')} fill="none" stroke="#d19a2c" strokeWidth="2" strokeDasharray="7 5" vectorEffect="non-scaling-stroke" />}
-        {visible.clv && <polyline points={clvPoints.map(point => point.join(',')).join(' ')} fill="none" stroke="#2ecc8e" strokeWidth="2" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />}
-
+        <polygon points={area} fill="url(#portfolioPnlGradient)" />
+        <polyline points={line} fill="none" stroke="var(--blue)" strokeWidth="3" vectorEffect="non-scaling-stroke" />
         {activePoint && (
           <>
             <line x1={activePoint[0]} x2={activePoint[0]} y1={padding} y2={height - padding} className="hover-line" />
@@ -410,8 +379,6 @@ function PnlCurve({ settled, allSettled, totalBankroll }) {
           {activeBet.match && <span>{activeBet.match}</span>}
           <span>Panos: {formatEuro(activeBet.stake)}</span>
           <span>Kumulatiivinen PnL: {values[activeIndex] >= 0 ? '+' : ''}{formatEuro(values[activeIndex])}</span>
-          <span>EV-odotusarvo: {series.ev[activeIndex] >= 0 ? '+' : ''}{formatEuro(series.ev[activeIndex])}</span>
-          <span>CLV-proxy: {series.clv[activeIndex] >= 0 ? '+' : ''}{formatEuro(series.clv[activeIndex])}</span>
           <span>Kokonaiskassa: {activeTotalBankroll === null ? '—' : formatEuro(activeTotalBankroll)}</span>
         </div>
       )}
@@ -810,7 +777,7 @@ export default function PortfolioAnalytics({
                 Kassatuotto {bankrollReturn === null ? '—' : formatPct(bankrollReturn)}
               </span>
             </div>
-            <p>Lähtötaso on 0 {EURO}. Toteutunut perustuu ratkaistujen vetojen PnL:ään, EV panokseen ja tallennettuun EV-%:iin sekä CLV-proxy panokseen ja varmennettuun CLV-%:iin. Tooltipin kokonaiskassa säilyttää nykyisen kassalaskennan.</p>
+            <p>Lähtötaso on 0 {EURO}. Tooltipin kokonaiskassa johdetaan nykyisistä kasinoiden saldoista, avoimista panoksista ja ratkenneiden vetojen PnL:stä.</p>
           </div>
         </div>
         <PnlCurve settled={settled} allSettled={userBets.filter(isSettledBet)} totalBankroll={totalBankroll} />
