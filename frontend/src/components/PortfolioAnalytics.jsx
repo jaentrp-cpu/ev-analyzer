@@ -285,6 +285,28 @@ function compareBetChronology(a, b) {
   return String(a._dbId || '').localeCompare(String(b._dbId || ''));
 }
 
+class PortfolioCurveBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { failed: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error) {
+    console.error('Portfolio curve render failed', error);
+  }
+
+  render() {
+    if (this.state.failed) {
+      return <div className="portfolio-chart-empty">Käyrää ei voitu näyttää. Muu analytiikka toimii normaalisti.</div>;
+    }
+    return this.props.children;
+  }
+}
+
 function PnlCurve({ settled, allSettled, totalBankroll }) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [visible, setVisible] = useState({ actual: true, ev: true, clv: true });
@@ -813,7 +835,9 @@ export default function PortfolioAnalytics({
             <p>Lähtötaso on 0 {EURO}. Toteutunut perustuu ratkaistujen vetojen PnL:ään, EV panokseen ja tallennettuun EV-%:iin sekä CLV-proxy panokseen ja varmennettuun CLV-%:iin. Tooltipin kokonaiskassa säilyttää nykyisen kassalaskennan.</p>
           </div>
         </div>
-        <PnlCurve settled={settled} allSettled={userBets.filter(isSettledBet)} totalBankroll={totalBankroll} />
+        <PortfolioCurveBoundary>
+          <PnlCurve settled={settled} allSettled={userBets.filter(isSettledBet)} totalBankroll={totalBankroll} />
+        </PortfolioCurveBoundary>
       </div>
 
       <div className="portfolio-grid two">

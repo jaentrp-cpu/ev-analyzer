@@ -5,13 +5,15 @@ export function buildPortfolioCurveSeries(bets) {
   let evRows = 0;
   let clvRows = 0;
 
-  (bets || []).forEach(bet => {
-    const stake = Number(bet?.stake) || 0;
-    const pnl = Number(bet?.pnl) || 0;
-    const evPct = Number(bet?.ev);
-    const clvPct = Number(bet?.clvPct);
+  (Array.isArray(bets) ? bets : []).forEach(bet => {
+    const stakeValue = bet?.stake === '' || bet?.stake === null || bet?.stake === undefined ? NaN : Number(bet.stake);
+    const pnlValue = bet?.pnl === '' || bet?.pnl === null || bet?.pnl === undefined ? NaN : Number(bet.pnl);
+    const evPct = bet?.ev === '' || bet?.ev === null || bet?.ev === undefined ? NaN : Number(bet.ev);
+    const clvPct = bet?.clvPct === '' || bet?.clvPct === null || bet?.clvPct === undefined ? NaN : Number(bet.clvPct);
+    const stake = Number.isFinite(stakeValue) ? stakeValue : 0;
+    const pnl = Number.isFinite(pnlValue) ? pnlValue : 0;
     actual.push(actual[actual.length - 1] + pnl);
-    const hasEv = bet?.ev !== null && bet?.ev !== undefined && Number.isFinite(evPct);
+    const hasEv = Number.isFinite(evPct);
     ev.push(ev[ev.length - 1] + (hasEv ? stake * evPct / 100 : 0));
     if (hasEv) evRows += 1;
     const hasClv = bet?.clvUsable === true && Number.isFinite(clvPct);

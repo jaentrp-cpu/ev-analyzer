@@ -11,4 +11,14 @@ assert.deepEqual(result.ev, [0, 5, 7, 7]);
 assert.deepEqual(result.clv, [0, 3, 3, 2.5]);
 assert.equal(result.evRows, 2);
 assert.equal(result.clvRows, 2);
+
+const sparse = buildPortfolioCurveSeries([
+  null,
+  { stake: '', pnl: 'invalid', ev: '', clvPct: '', clvUsable: true },
+]);
+assert.deepEqual(sparse.actual, [0, 0, 0]);
+assert.deepEqual(sparse.ev, [0, 0, 0]);
+assert.deepEqual(sparse.clv, [0, 0, 0]);
+assert.equal(sparse.evRows, 0);
+assert.equal(sparse.clvRows, 0);
 console.log('portfolioCurveSeries tests passed');
