@@ -38,6 +38,71 @@ export function parseBetTime(bet) {
   return Number.isFinite(created) ? created : null;
 }
 
+export function localDateKey(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(date.getTime())) return '';
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function buildDailyBetSummaries(bets = []) {
+  const days = new Map();
+  bets.forEach(bet => {
+    const time = parseBetTime(bet);
+    if (!Number.isFinite(time)) return;
+    const key = localDateKey(time);
+    if (!key) return;
+    const summary = days.get(key) || {
+      key,
+      bets: 0,
+      settled: 0,
+      open: 0,
+      totalStake: 0,
+      settledStake: 0,
+      pnl: 0,
+      evTotal: 0,
+      evCount: 0,
+      clvTotal: 0,
+      clvCount: 0,
+    };
+    const stake = Number(bet?.stake);
+    const pnl = Number(bet?.pnl);
+    const hasEv = bet?.ev !== null && bet?.ev !== undefined && String(bet.ev).trim() !== '';
+    const ev = Number(bet?.ev);
+    const clvOdds = Number(bet?.clvOdds);
+    const clv = Number(bet?.clvPct);
+    const settled = isSettledBet(bet);
+
+    summary.bets += 1;
+    summary.totalStake += Number.isFinite(stake) ? stake : 0;
+    if (settled) {
+      summary.settled += 1;
+      summary.settledStake += Number.isFinite(stake) ? stake : 0;
+      summary.pnl += Number.isFinite(pnl) ? pnl : 0;
+    } else {
+      summary.open += 1;
+    }
+    if (hasEv && Number.isFinite(ev)) {
+      summary.evTotal += ev;
+      summary.evCount += 1;
+    }
+    if (Number.isFinite(clvOdds) && clvOdds > 1 && Number.isFinite(clv)) {
+      summary.clvTotal += clv;
+      summary.clvCount += 1;
+    }
+    days.set(key, summary);
+  });
+
+  return new Map(Array.from(days, ([key, summary]) => [key, {
+    ...summary,
+    roi: summary.settledStake > 0 ? (summary.pnl / summary.settledStake) * 100 : null,
+    avgEv: summary.evCount ? summary.evTotal / summary.evCount : null,
+    avgClv: summary.clvCount ? summary.clvTotal / summary.clvCount : null,
+  }]));
+}
+
 function dayBounds(offsetDays) {
   const start = new Date();
   start.setHours(0, 0, 0, 0);

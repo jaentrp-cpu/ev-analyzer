@@ -2,8 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   betInAnalyticsRange,
+  buildDailyBetSummaries,
   calculateBankrollReturn,
   calculateSettledReturn,
+  localDateKey,
   normalizeAnalyticsRange,
 } from './portfolio-analytics.js';
 
@@ -102,4 +104,39 @@ test('bankroll return follows the selected range and requires a positive startin
   assert.equal(calculateBankrollReturn(10, 0), null);
   assert.equal(calculateBankrollReturn(10, null), null);
   assert.equal(calculateBankrollReturn(10, 'not-a-number'), null);
+});
+
+test('daily summaries use local match day and aggregate settled and open bets separately', () => {
+  const day = localDate(0);
+  const key = localDateKey(day);
+  const summaries = buildDailyBetSummaries([
+    { status: 'won', stake: 20, pnl: 18, ev: 5, clvOdds: 2.1, clvPct: 3, dateValue: day.toISOString() },
+    { status: 'lost', stake: 10, pnl: -10, ev: 3, clvOdds: 2.2, clvPct: -1, dateValue: day.toISOString() },
+    { status: 'pending', stake: 15, pnl: 999, ev: 4, clvOdds: null, clvPct: null, dateValue: day.toISOString() },
+  ]);
+  const summary = summaries.get(key);
+
+  assert.equal(summary.bets, 3);
+  assert.equal(summary.settled, 2);
+  assert.equal(summary.open, 1);
+  assert.equal(summary.totalStake, 45);
+  assert.equal(summary.settledStake, 30);
+  assert.equal(summary.pnl, 8);
+  assert.ok(Math.abs(summary.roi - (8 / 30) * 100) < 1e-12);
+  assert.equal(summary.avgEv, 4);
+  assert.equal(summary.avgClv, 1);
+  assert.equal(summary.clvCount, 2);
+});
+
+test('daily summaries ignore missing CLV and fall back to creation time', () => {
+  const day = localDate(-2);
+  const summary = buildDailyBetSummaries([
+    { status: 'pending', stake: 12, ev: 0, clvOdds: null, clvPct: null, createdAt: day.toISOString() },
+  ]).get(localDateKey(day));
+
+  assert.equal(summary.avgClv, null);
+  assert.equal(summary.clvCount, 0);
+  assert.equal(summary.avgEv, 0);
+  assert.equal(summary.open, 1);
+  assert.equal(summary.pnl, 0);
 });
