@@ -35,4 +35,7 @@ const html = renderToStaticMarkup(
 if (!html.includes('EV-odotusarvo') || !html.includes('CLV-proxy')) {
   throw new Error('Projection curves did not render');
 }
+if (!html.includes('CLV 239/955')) {
+  throw new Error('Stored CLV coverage did not render');
+}
 console.log('PortfolioAnalytics 955-row render passed');

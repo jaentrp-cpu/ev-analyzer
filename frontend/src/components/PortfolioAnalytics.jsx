@@ -314,7 +314,7 @@ function PnlCurve({ settled, allSettled, totalBankroll }) {
   const allChronological = [...allSettled].sort(compareBetChronology);
   const series = buildPortfolioCurveSeries(chronological.map(bet => ({
     ...bet,
-    clvUsable: hasVerifiedClv(bet),
+    clvUsable: hasStoredClv(bet),
   })));
   const values = series.actual;
   if (values.length < 2) return <div className="portfolio-chart-empty">Ei ratkaistuja vetoja valitulla aikavälillä.</div>;
@@ -383,12 +383,12 @@ function PnlCurve({ settled, allSettled, totalBankroll }) {
           <button type="button" className={visible.ev ? 'active ev' : 'ev'} onClick={() => toggleCurve('ev')}>EV-odotusarvo</button>
           <button type="button" className={visible.clv ? 'active clv' : 'clv'} onClick={() => toggleCurve('clv')}>CLV-proxy</button>
         </div>
-        <span>Peitto: EV {series.evRows}/{chronological.length} ({coveragePct(series.evRows)}) · varmennettu CLV {series.clvRows}/{chronological.length} ({coveragePct(series.clvRows)})</span>
+        <span>Peitto: EV {series.evRows}/{chronological.length} ({coveragePct(series.evRows)}) · CLV {series.clvRows}/{chronological.length} ({coveragePct(series.clvRows)})</span>
       </div>
       <svg
         viewBox={`0 0 ${width} ${height}`}
         role="img"
-        aria-label="Valitun aikavälin toteutunut PnL, EV-odotusarvo ja varmennettuun CLV-dataan perustuva CLV-proxy."
+        aria-label="Valitun aikavälin toteutunut PnL, EV-odotusarvo ja tallennettuun CLV-dataan perustuva CLV-proxy."
         onPointerMove={setHoveredBetFromPointer}
         onPointerLeave={() => setHoveredIndex(null)}
       >
@@ -832,7 +832,7 @@ export default function PortfolioAnalytics({
                 Kassatuotto {bankrollReturn === null ? '—' : formatPct(bankrollReturn)}
               </span>
             </div>
-            <p>Lähtötaso on 0 {EURO}. Toteutunut perustuu ratkaistujen vetojen PnL:ään, EV panokseen ja tallennettuun EV-%:iin sekä CLV-proxy panokseen ja varmennettuun CLV-%:iin. Tooltipin kokonaiskassa säilyttää nykyisen kassalaskennan.</p>
+            <p>Lähtötaso on 0 {EURO}. Toteutunut perustuu ratkaistujen vetojen PnL:ään, EV panokseen ja tallennettuun EV-%:iin sekä CLV-proxy panokseen ja saatavilla olevaan tallennettuun CLV-%:iin. Tooltipin kokonaiskassa säilyttää nykyisen kassalaskennan.</p>
           </div>
         </div>
         <PortfolioCurveBoundary>
