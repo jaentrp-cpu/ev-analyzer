@@ -3901,3 +3901,35 @@ body {
   color: var(--tx3); background: var(--bg3);
   padding: 4px 8px; border-radius: 6px;
 }
+
+.vdx .portfolio-curve-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0 4px;
+  color: var(--tx3);
+  font-size: 11px;
+}
+.vdx .portfolio-curve-controls > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.vdx .portfolio-curve-controls button {
+  border: 1px solid var(--bd);
+  border-radius: 999px;
+  background: var(--bg3);
+  color: var(--tx3);
+  padding: 6px 10px;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+.vdx .portfolio-curve-controls button.active.actual { border-color: var(--blue); color: var(--blue); }
+.vdx .portfolio-curve-controls button.active.ev { border-color: #d19a2c; color: #d19a2c; }
+.vdx .portfolio-curve-controls button.active.clv { border-color: #2ecc8e; color: #2ecc8e; }
+.vdx.is-mobile .portfolio-curve-controls {
+  align-items: flex-start;
+  flex-direction: column;
+}
