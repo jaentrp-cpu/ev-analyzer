@@ -77,7 +77,7 @@ function marketOf(bet) {
 }
 
 function summarize(bets, label = '') {
-  const settled = bets.filter(isSettled);
+  const settled = bets.filter(isSettledBet);
   const decided = settled.filter(b => isWin(b) || isLoss(b));
   const wins = decided.filter(isWin).length;
   const stake = settled.reduce((sum, bet) => sum + (Number(bet.stake) || 0), 0);
