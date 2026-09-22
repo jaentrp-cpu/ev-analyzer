@@ -43,4 +43,10 @@ if (!html.includes('CLV 239/955')) {
 if (!html.includes('Päiväkohtainen tulos') || !html.includes('Valittu päivä')) {
   throw new Error('Analytics calendar and selected-day summary did not render');
 }
+if (!html.includes('<summary aria-label="Kumulatiivinen PnL: lisätiedot"')
+  || !html.includes('<summary aria-label="Päiväkohtainen tulos: lisätiedot"')
+  || !html.includes('CLV 239/955')
+  || !html.includes('Ajankohta tunnetaan')) {
+  throw new Error('Analytics explanations or visible coverage did not render');
+}
 console.log('PortfolioAnalytics 955-row render passed');

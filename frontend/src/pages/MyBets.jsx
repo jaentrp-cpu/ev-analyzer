@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useVedox } from '../context/VedoxContext.jsx';
+import AnalyticsInfo from '../components/AnalyticsInfo.jsx';
 import DatePicker from '../components/DatePicker.jsx';
 import LockedView from '../components/LockedView.jsx';
 import LoadingView from '../components/LoadingView.jsx';
@@ -276,8 +277,16 @@ export default function MyBets() {
     <div className="page-body">
       <div className="ph">
         <div>
-          <h1>{view === 'analytics' ? 'Analytiikka' : view === 'balances' ? 'Kassat' : 'Omat vedot'}</h1>
-          <div className="sub">Tulokset, CLV, ROI ja muokattava vetohistoria &middot; {timeSelectedBets.length}/{userBets.length} vetoa valitulla aikav&auml;lill&auml;</div>
+          <div className="analytics-page-title-row">
+            <h1>{view === 'analytics' ? 'Analytiikka' : view === 'balances' ? 'Kassat' : 'Omat vedot'}</h1>
+            {view === 'analytics' && (
+              <AnalyticsInfo label="Analytiikka">Tulokset, CLV, ROI ja muokattava vetohistoria.</AnalyticsInfo>
+            )}
+          </div>
+          <div className="sub">
+            {view !== 'analytics' && <>Tulokset, CLV, ROI ja muokattava vetohistoria &middot; </>}
+            {timeSelectedBets.length}/{userBets.length} vetoa valitulla aikav&auml;lill&auml;
+          </div>
         </div>
         <div className="actions">
           <div className="seg">

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import AnalyticsInfo from './AnalyticsInfo.jsx';
 import DatePicker from './DatePicker.jsx';
 import {
   clvPhaseFromSource,
@@ -115,8 +116,12 @@ function AnalyticsCalendar({ userBets, selectedKey, onSelectDay }) {
       <div className="analytics-calendar-head">
         <div>
           <span>Kalenteri</span>
-          <h3>Päiväkohtainen tulos</h3>
-          <p>Valitse päivä nähdäksesi koko analytiikan kyseiseltä päivältä.</p>
+          <div className="analytics-calendar-title-row">
+            <h3>Päiväkohtainen tulos</h3>
+            <AnalyticsInfo label="Päiväkohtainen tulos">
+              Valitse päivä nähdäksesi koko analytiikan kyseiseltä päivältä.
+            </AnalyticsInfo>
+          </div>
         </div>
         <div className="analytics-calendar-actions" aria-label="Kalenterin selaus">
           <button type="button" onClick={() => setAnchorMonth(value => shiftMonth(value, -1))} aria-label="Edellinen kuukausi">&#8592;</button>
@@ -242,10 +247,13 @@ function bucketSummaries(bets, definitions) {
   ));
 }
 
-function SectionTitle({ children, meta }) {
+function SectionTitle({ children, meta, info }) {
   return (
     <div className="portfolio-section-title">
-      <span>{children}</span>
+      <div className="portfolio-section-heading">
+        <span>{children}</span>
+        {info && <AnalyticsInfo label={children}>{info}</AnalyticsInfo>}
+      </div>
       {meta && <span>{meta}</span>}
     </div>
   );
@@ -681,7 +689,7 @@ function TimingTable({ bets }) {
   return (
     <div className="portfolio-timing-table">
       <div className="portfolio-coverage-note">
-        Ajankohta tunnetaan {timed.length}/{bets.filter(hasStoredClv).length} CLV-rivillä. Aika = vedon lisäyshetki suhteessa ottelun alkuun.
+        Ajankohta tunnetaan {timed.length}/{bets.filter(hasStoredClv).length} CLV-rivillä.
       </div>
       {rows.length === 0 ? (
         <div className="portfolio-empty">Tarkkaa veto- ja alkamisaikaa ei ole vielä riittävästi.</div>
@@ -873,8 +881,13 @@ export default function PortfolioAnalytics({
       <div className="portfolio-toolbar">
         <div>
           <span>Analytiikka</span>
-          <h2>Omat tulokset</h2>
-          <p>Kaikki luvut perustuvat vain omiin tallennettuihin vetoihisi · {rangeLabel} · {rangeBets.length}/{userBets.length} vetoa valittuna · tallennetun otteluajan mukaan, puuttuessa lisäysajan mukaan</p>
+          <div className="portfolio-toolbar-title-row">
+            <h2>Omat tulokset</h2>
+            <AnalyticsInfo label="Omat tulokset">
+              Kaikki luvut perustuvat vain omiin tallennettuihin vetoihisi. Aikaväli määräytyy tallennetun otteluajan mukaan, puuttuessa lisäysajan mukaan.
+            </AnalyticsInfo>
+          </div>
+          <p>{rangeLabel} · {rangeBets.length}/{userBets.length} vetoa valittuna</p>
         </div>
         <div className="filters compact analytics-range">
           <label className="filter-field narrow">
@@ -913,9 +926,8 @@ export default function PortfolioAnalytics({
           <div className={'d ' + (totalPnl >= 0 ? 'g' : 'r')}>{totalPnl >= 0 ? '+' : ''}{formatEuro(totalPnl)} · ROI {roi === null ? '—' : formatPct(roi)}</div>
         </div>
         <div className="s portfolio-total-bankroll">
-          <div className="l">Koko kassa</div>
+          <div className="l portfolio-stat-label">Koko kassa <AnalyticsInfo label="Koko kassa">Kassa nyt + avoimet panokset.</AnalyticsInfo></div>
           <div className="v">{bankroll > 0 ? formatEuro(visibleTotalBankroll) : '—'}</div>
-          <div className="d">Kassa nyt + avoimet panokset</div>
         </div>
         <div className="s">
           <div className="l">Osumisprosentti</div>
@@ -947,16 +959,15 @@ export default function PortfolioAnalytics({
           <OutcomeDonut bets={rangeBets} />
         </div>
         <div className="card portfolio-panel">
-          <SectionTitle meta="Osuma = W/L-ratkaisut">ROI per EV-taso</SectionTitle>
+          <SectionTitle info="Osuma lasketaan voitto- ja tappioratkaisuista. Manuaalivedon puuttuva EV tallentuu nykyisessä datassa arvoksi 0%.">ROI per EV-taso</SectionTitle>
           <MetricRows rows={evRows} />
-          <div className="portfolio-coverage-note">Manuaalivedon puuttuva EV tallentuu nykyisessä datassa arvoksi 0%.</div>
         </div>
       </div>
 
       <div className="card portfolio-panel portfolio-curve-card">
         <div className="portfolio-curve-head">
           <div>
-            <SectionTitle meta={`${settled.length} ratkennutta`}>Kumulatiivinen PnL</SectionTitle>
+            <SectionTitle meta={`${settled.length} ratkennutta`} info={`Lähtötaso on 0 ${EURO}. Toteutunut perustuu ratkaistujen vetojen PnL:ään, EV panokseen ja tallennettuun EV-%:iin sekä CLV-proxy panokseen ja saatavilla olevaan tallennettuun CLV-%:iin. Käyrän vetokohtainen kokonaiskassa säilyttää nykyisen kassalaskennan.`}>Kumulatiivinen PnL</SectionTitle>
             <div className="portfolio-curve-summary">
               <strong className={totalPnl < 0 ? 'bad' : 'g'}>{totalPnl >= 0 ? '+' : ''}{formatEuro(totalPnl)}</strong>
               <span className={roi === null ? '' : (roi < 0 ? 'bad' : 'g')}>ROI {roi === null ? '—' : formatPct(roi)}</span>
@@ -965,7 +976,6 @@ export default function PortfolioAnalytics({
                 Kassatuotto {bankrollReturn === null ? '—' : formatPct(bankrollReturn)}
               </span>
             </div>
-            <p>Lähtötaso on 0 {EURO}. Toteutunut perustuu ratkaistujen vetojen PnL:ään, EV panokseen ja tallennettuun EV-%:iin sekä CLV-proxy panokseen ja saatavilla olevaan tallennettuun CLV-%:iin. Tooltipin kokonaiskassa säilyttää nykyisen kassalaskennan.</p>
           </div>
         </div>
         <PortfolioCurveBoundary>
@@ -979,13 +989,13 @@ export default function PortfolioAnalytics({
           <MetricRows rows={marketRows} />
         </div>
         <div className="card portfolio-panel">
-          <SectionTitle meta={`${steamDisplayWithClv}/${steamDisplayBets.length} Steam-vetoa CLV:llä · ${steamDisplayWithVerifiedClv} varmennettua`}>
+          <SectionTitle
+            meta={`${steamDisplayWithClv}/${steamDisplayBets.length} Steam-vetoa CLV:llä · ${steamDisplayWithVerifiedClv} varmennettua`}
+            info="Tallennettu CLV käytössä. Varmennettu lähde korvaa aina saman vedon historiallisen arvon. Opittu rating näytetään ensisijaisena. Muuten reaaliaikainen 0–58 signaali skaalataan kaavalla arvo / 58 × 100; lähteet pidetään erillisinä."
+          >
             CLV per Steam-arvo
           </SectionTitle>
           <SteamClvRows rows={steamClvRows} />
-          <div className="portfolio-coverage-note">
-            Tallennettu CLV käytössä. Varmennettu lähde korvaa aina saman vedon historiallisen arvon. Opittu rating näytetään ensisijaisena. Muuten reaaliaikainen 0–58 signaali skaalataan kaavalla arvo / 58 × 100; lähteet pidetään erillisinä.
-          </div>
         </div>
       </div>
 
@@ -1004,11 +1014,14 @@ export default function PortfolioAnalytics({
 
       <div className="portfolio-grid two">
         <div className="card portfolio-panel">
-          <SectionTitle meta="Viite-CLV · closing ensisijainen">CLV tuloksen mukaan</SectionTitle>
+          <SectionTitle info="Viite-CLV: closing-arvo on ensisijainen.">CLV tuloksen mukaan</SectionTitle>
           <ClvResultRows bets={rangeBets} />
         </div>
         <div className="card portfolio-panel">
-          <SectionTitle meta={`${clvBets.length}/${rangeBets.length} vetoa`}>CLV-yhteenveto</SectionTitle>
+          <SectionTitle
+            meta={`${clvBets.length}/${rangeBets.length} vetoa`}
+            info="Uusi varmennettu lähde korvaa aina saman vedon historiallisen arvon. Steam–CLV käyttää samaa tallennettua CLV-sarjaa kuin yhteenveto."
+          >CLV-yhteenveto</SectionTitle>
           <div className="portfolio-summary-grid">
             <div><span>AVG CLV</span><b className={avgClv !== null && avgClv < 0 ? 'bad' : 'g'}>{avgClv === null ? '-' : formatPct(avgClv, 2)}</b><small>{clvBets.length} vetoa</small></div>
             <div><span>CLV+</span><b>{clvBets.length ? `${((positiveClv.length / clvBets.length) * 100).toFixed(0)}%` : '-'}</b><small>positiivinen viite-CLV</small></div>
@@ -1017,7 +1030,6 @@ export default function PortfolioAnalytics({
           </div>
           <div className="portfolio-coverage-note">
             Viitelähteet: closing {closingClvCount}, pre-start {preStartClvCount}, historiallinen {historicalClvCount}, muu tallennettu {otherStoredClvCount}.
-            {' '}Uusi varmennettu lähde korvaa aina saman vedon historiallisen arvon. Steam–CLV käyttää samaa tallennettua CLV-sarjaa kuin yhteenveto.
           </div>
         </div>
       </div>
@@ -1032,7 +1044,7 @@ export default function PortfolioAnalytics({
       </div>
 
       <div className="card portfolio-panel">
-        <SectionTitle meta="Vetohetki suhteessa ottelun alkuun">CLV aikavälin mukaan</SectionTitle>
+        <SectionTitle info="Aika = vedon lisäyshetki suhteessa ottelun alkuun.">CLV aikavälin mukaan</SectionTitle>
         <TimingTable bets={rangeBets} />
       </div>
 

@@ -2594,6 +2594,80 @@ body {
 .vdx .clv-table .mono { font-family: 'Geist Mono', monospace; font-weight: 600; }
 
 /* --- Unified My bets + analytics --- */
+.vdx .analytics-page-title-row,
+.vdx .portfolio-toolbar-title-row,
+.vdx .analytics-calendar-title-row,
+.vdx .portfolio-section-title,
+.vdx .portfolio-stat-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vdx .analytics-info {
+  display: inline-flex;
+  flex: none;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.vdx .analytics-info summary {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--bd2);
+  border-radius: 50%;
+  background: var(--bg3);
+  color: var(--tx3);
+  cursor: pointer;
+  font: 700 12px 'Geist Mono', monospace;
+  list-style: none;
+}
+.vdx .analytics-info summary::-webkit-details-marker { display: none; }
+.vdx .analytics-info summary:hover,
+.vdx .analytics-info summary:focus-visible,
+.vdx .analytics-info[open] summary {
+  border-color: var(--blue);
+  color: var(--blue);
+  outline: none;
+}
+.vdx .analytics-info-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 40;
+  width: min(340px, calc(100vw - 40px));
+  max-height: min(300px, calc(100vh - 100px));
+  overflow-y: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--bd2);
+  border-radius: 9px;
+  background: var(--bg2);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .28);
+  color: var(--tx2);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.5;
+  text-align: left;
+  text-transform: none;
+}
+.vdx .analytics-info-panel strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--tx);
+  font-size: 12px;
+}
+.vdx .ph:has(.analytics-info[open]),
+.vdx .portfolio-toolbar:has(.analytics-info[open]),
+.vdx .analytics-calendar-card:has(.analytics-info[open]),
+.vdx .portfolio-panel:has(.analytics-info[open]),
+.vdx .portfolio-stats .s:has(.analytics-info[open]) {
+  position: relative;
+  z-index: 30;
+}
 .vdx .portfolio-analytics {
   display: flex;
   flex-direction: column;
@@ -2626,7 +2700,7 @@ body {
 }
 .vdx .analytics-calendar-card {
   padding: 17px 18px 18px;
-  overflow: hidden;
+  overflow: visible;
 }
 .vdx .analytics-calendar-head {
   display: flex;
@@ -2827,8 +2901,6 @@ body {
   padding: 16px 18px;
 }
 .vdx .portfolio-section-title {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 14px;
@@ -3501,6 +3573,12 @@ body {
 .vdx.is-mobile .portfolio-league-head {
   align-items: stretch;
   flex-direction: column;
+}
+.vdx .portfolio-section-heading {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
 }
 .vdx.is-mobile .analytics-calendar-head {
   align-items: stretch;
