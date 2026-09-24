@@ -2604,6 +2604,19 @@ body {
   align-items: center;
   gap: 8px;
 }
+.vdx .arb-track-tabs, .vdx .arb-track-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 12px 0;
+}
+.vdx .arb-track-tabs { margin: 18px 0; }
+.vdx .arb-track-panel { padding: 18px; margin-bottom: 14px; }
+.vdx .arb-track-panel h2 { font-size: 17px; margin: 0; }
+.vdx .arb-track-panel p { color: var(--tx3); font-size: 12px; line-height: 1.5; }
+.vdx .arb-track-leg { padding: 12px 0; border-top: 1px solid var(--bd); }
+.vdx .arb-track-leg input, .vdx .arb-track-row input {
+  max-width: 180px; padding: 8px; color: var(--tx); background: var(--bg);
+  border: 1px solid var(--bd); border-radius: 7px;
+}
+.vdx .arb-track-row label { display: grid; gap: 4px; font-size: 12px; color: var(--tx3); }
 .vdx .analytics-info {
   display: inline-flex;
   flex: none;

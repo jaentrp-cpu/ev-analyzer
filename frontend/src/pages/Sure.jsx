@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useVedox } from '../context/VedoxContext.jsx';
 import { Icon } from '../components/Icon.jsx';
 import DatePicker from '../components/DatePicker.jsx';
 import LockedView from '../components/LockedView.jsx';
 import LoadingView from '../components/LoadingView.jsx';
+import ArbTracker, { useArbTracker } from '../components/ArbTracker.jsx';
+import { createArbAttempt } from '../arb-tracker.js';
 
 const EURO = '\u20ac';
 
@@ -38,6 +40,13 @@ export default function Sure() {
   const [timeFilter, setTimeFilter] = useState('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [tab, setTab] = useState('offers');
+  const [freshnessNow, setFreshnessNow] = useState(Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setFreshnessNow(Date.now()), 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const tracker = useArbTracker(Boolean(session && permissionsReady && canAccess('sure')), session?.user?.id);
 
   if (!authReady || (session && !permissionsReady && arbitrages.length === 0)) {
     return <LoadingView title="Varmavedot" />;
@@ -70,6 +79,17 @@ export default function Sure() {
           </button>
         </div>
       </div>
+
+      <nav className="arb-track-tabs" aria-label="Varmavetojen osiot">
+        {[['offers', 'Tarjoukset'], ['attempts', 'Omat yritykset'], ['wallets', 'Virtuaalikassat'], ['analytics', 'Analytiikka']].map(([id, label]) =>
+          <button className={'btn' + (tab === id ? ' p' : '')} key={id} onClick={() => setTab(id)}>{label}</button>)}
+      </nav>
+      {tab === 'offers' && tracker.error &&
+        <div className="card arb-track-panel" role="status">{tracker.error} <button className="btn" onClick={tracker.reload}>Yritä uudelleen</button></div>}
+      {tab === 'offers' && tracker.actionError &&
+        <div className="card arb-track-panel" role="alert">Kirjaus epäonnistui: {tracker.actionError}</div>}
+      {tab !== 'offers' && <ArbTracker tracker={tracker} offers={arbitrages} tab={tab} />}
+      {tab === 'offers' && <>
 
       <div className="card" style={{ padding: '14px 18px', display: 'flex', gap: 14, alignItems: 'center' }}>
         <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--blue-soft)', color: 'var(--blue)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
@@ -141,7 +161,9 @@ export default function Sure() {
       )}
 
       {filteredArbs.map((s, idx) => {
-        const stake = stakes[idx] ?? 200;
+        const seenMs = Date.parse(s.sourceUpdatedAt || '');
+        const staleOffer = !Number.isFinite(seenMs) || freshnessNow - seenMs > 5 * 60_000;
+        const stake = stakes[s.id] ?? 200;
         const profitEur = stake * (s.profit / 100);
         const impliedSum = s.legs.reduce((a, l) => a + (l.odds > 0 ? 1 / l.odds : 0), 0);
         const legs = s.legs.map(l => {
@@ -151,7 +173,7 @@ export default function Sure() {
         });
 
         return (
-          <div className="card arb-card" key={idx}>
+          <div className="card arb-card" key={s.id}>
             <div className="left">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
@@ -167,9 +189,20 @@ export default function Sure() {
               <div className="stake-input">
                 <span className="l">Kokonaispanos</span>
                 <span className="grow" />
-                <input value={stake} onChange={e => setStakes(prev => ({ ...prev, [idx]: parseFloat(e.target.value) || 0 }))} type="number" min={1} />
+                <input value={stake} onChange={e => setStakes(prev => ({ ...prev, [s.id]: parseFloat(e.target.value) || 0 }))} type="number" min={1} />
                 <span className="u">{EURO}</span>
               </div>
+              <div className="arb-track-row">
+                <button className="btn p" disabled={tracker.busy || Boolean(tracker.error)} onClick={async () => {
+                  if (staleOffer && !window.confirm('Tarjous on yli 5 minuuttia vanha tai ilman aikaleimaa. Tarkista kaikki jalat bookkereilta ennen aloitusta. Jatketaanko?')) return;
+                  if (await tracker.run(() => createArbAttempt(s.id, s.sourceUpdatedAt))) setTab('attempts');
+                }}>Aloita yritys</button>
+                <button className="btn" disabled={tracker.busy || Boolean(tracker.error)} onClick={() => {
+                  const reason = window.prompt('Miksi hylkäsit tarjouksen?');
+                  if (reason?.trim()) tracker.run(() => createArbAttempt(s.id, s.sourceUpdatedAt, reason));
+                }}>Hylkää</button>
+              </div>
+              <div className="lg">{staleOffer ? 'Tieto epävarma · ' : ''}Tarjous havaittu: {s.sourceUpdatedAt ? new Date(s.sourceUpdatedAt).toLocaleString('fi-FI') : 'ei aikaleimaa'} · vahvista kertoimet bookkerilta</div>
             </div>
 
             <div className="right">
@@ -198,6 +231,7 @@ export default function Sure() {
           </div>
         );
       })}
+      </>}
     </div>
   );
 }

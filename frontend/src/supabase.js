@@ -315,16 +315,21 @@ export async function fetchArbitrages(tierCode) {
     }
     return {
       id:       String(a.id),
+      sourceUpdatedAt: a.paivitetty || null,
+      eventId:  a.event_id || null,
+      arbKey:   a.arb_key || null,
+      line:     a.line || null,
+      wave:     a.aalto || null,
       match:    a.ottelu || '',
       league:   formatLeague(a.liiga) || a.liiga || '',
       market:   a.markkina || a.market || 'h2h',
       startsAt: a.alkaa,
       profit:   parseFloat(a.profit_pct) || 0,
       legs:     outcomes.map(o => ({
-        outcome: o.outcome || o.kohde  || '',
+        outcome: o.outcome || o.kohde || o.side || '',
         book:    normalizeBookName(o.book || o.kirja),
         odds:    parseFloat(o.odds   || o.kerroin) || 0,
-        share:   parseFloat(o.share  || o.osuus)   || 0,
+        share:   parseFloat(o.stake_pct ?? o.share ?? o.osuus) || 0,
         market:  a.markkina || a.market || 'h2h',
       })),
     };
