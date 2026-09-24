@@ -2612,11 +2612,12 @@ body {
 .vdx .arb-track-panel h2 { font-size: 17px; margin: 0; }
 .vdx .arb-track-panel p { color: var(--tx3); font-size: 12px; line-height: 1.5; }
 .vdx .arb-track-leg { padding: 12px 0; border-top: 1px solid var(--bd); }
-.vdx .arb-track-leg input, .vdx .arb-track-row input {
+.vdx .arb-track-leg input, .vdx .arb-track-row input, .vdx .arb-track-row select {
   max-width: 180px; padding: 8px; color: var(--tx); background: var(--bg);
   border: 1px solid var(--bd); border-radius: 7px;
 }
 .vdx .arb-track-row label { display: grid; gap: 4px; font-size: 12px; color: var(--tx3); }
+.vdx .arb-cash-entry { border-top: 1px solid var(--bd); padding-top: 8px; font-size: 12px; }
 .vdx .analytics-info {
   display: inline-flex;
   flex: none;

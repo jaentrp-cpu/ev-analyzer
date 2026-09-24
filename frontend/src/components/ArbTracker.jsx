@@ -1,13 +1,20 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  closeArbAttempt, correctArbLeg, createArbAttempt, loadArbTracker, markArbLegUnavailable,
-  openArbWallet, placeArbLeg, settleArbLeg, setArbAnalyticsConsent,
+  adjustArbWallet, closeArbAttempt, correctArbLeg, createArbAttempt, loadArbTracker,
+  markArbLegUnavailable, openArbWallet, placeArbLeg, settleArbLeg,
+  setArbAnalyticsConsent, transferArbWallet,
 } from '../arb-tracker.js';
 import { arbAttemptMetrics, arbOfferTermsChanged, arbPlacedScenario, describeArbOfferChange } from '../arb-metrics.js';
 import { createArbTrackerRequestScope } from '../arb-tracker-request-scope.js';
+import { canRecordWalletMovement } from '../arb-wallet-input.js';
 import { normalizeBookName } from '../supabase.js';
 
 const money = n => Number(n || 0).toLocaleString('fi-FI', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+const cashKindLabel = {
+  opening: 'Alkusaldo', stake: 'Arbitraasivedon panos', return: 'Arbitraasivedon palautus',
+  correction: 'Vedon oikaisu', deposit: 'Lisäys', withdrawal: 'Vähennys',
+  transfer_out: 'Siirto ulos', transfer_in: 'Siirto sisään', reconcile: 'Saldon täsmäytys',
+};
 const fmt = date => date ? new Date(date).toLocaleString('fi-FI') : 'ei mitattu';
 const attemptStatusLabel = {
   started: 'Kesken', partial: 'Osittain toteutunut', placed: 'Kaikki jalat asetettu',
@@ -19,7 +26,13 @@ const arbErrorMessage = error => {
   if (code.includes('offer_changed_refresh_required') || code.includes('offer_not_active'))
     return 'Tarjous muuttui tai poistui. Päivitä tarjouslista ennen uutta yritystä.';
   if (code.includes('insufficient_virtual_balance'))
-    return 'Bookkerin virtuaalisaldo ei riitä tälle panokselle. Veloitusta ei tehty.';
+    return 'Kassassa ei ole riittävästi seurantasaldoa. Kirjausta ei tehty.';
+  if (code.includes('virtual_wallet_missing'))
+    return 'Virtuaalikassaa ei löytynyt. Päivitä kassalista ja yritä uudelleen.';
+  if (code.includes('wallet_balance_unchanged'))
+    return 'Täsmäytys ei muuttaisi saldoa. Kirjausta ei tehty.';
+  if (code.includes('invalid_wallet_movement'))
+    return 'Tarkista kassamuutoksen summa, kohde ja perustelu.';
   if (code.includes('leg_not_placeable') || code.includes('leg_not_settleable'))
     return 'Jalan tila muuttui jo. Päivitä yritykset ennen uutta kirjausta.';
   if (code.includes('duplicate key'))
@@ -31,7 +44,7 @@ export function useArbTracker(enabled, userId) {
   const scopeRef = useRef(null);
   if (!scopeRef.current) scopeRef.current = createArbTrackerRequestScope(enabled, userId);
   else scopeRef.current.update(enabled, userId);
-  const emptyData = { attempts: [], legs: [], corrections: [], wallets: [], consent: false };
+  const emptyData = { attempts: [], legs: [], corrections: [], wallets: [], cashEntries: [], consent: false };
   const [data, setData] = useState({ ...emptyData, ownerId: null });
   const [loadError, setLoadError] = useState('');
   const [actionError, setActionError] = useState('');
@@ -165,6 +178,17 @@ function LegEditor({ leg, tracker, attemptStatus }) {
 export default function ArbTracker({ tracker, offers, tab }) {
   const [book, setBook] = useState('');
   const [opening, setOpening] = useState('');
+  const [movementBook, setMovementBook] = useState('');
+  const [movementKind, setMovementKind] = useState('deposit');
+  const [movementTarget, setMovementTarget] = useState('');
+  const [movementAmount, setMovementAmount] = useState('');
+  const [movementReason, setMovementReason] = useState('');
+  useEffect(() => {
+    setMovementBook('');
+    setMovementTarget('');
+    setMovementAmount('');
+    setMovementReason('');
+  }, [tracker.ownerId]);
   const metrics = useMemo(() => arbAttemptMetrics(tracker.attempts, tracker.legs), [tracker.attempts, tracker.legs]);
   if (tracker.error) return <div className="card arb-track-panel" role="status">{tracker.error}<button className="btn" onClick={tracker.reload}>Yritä uudelleen</button></div>;
   const actionMessage = tracker.actionError && <div className="card arb-track-panel" role="alert">Kirjaus epäonnistui: {tracker.actionError}</div>;
@@ -172,13 +196,51 @@ export default function ArbTracker({ tracker, offers, tab }) {
     <div className="card arb-track-panel">
       {actionMessage}
       <h2>Omat virtuaalikassat</h2>
-      <p>Nämä ovat omia seurantatietojasi, eivät oikeita bookkerisaldoja. Alkusaldo voidaan antaa kullekin bookkerille vain kerran.</p>
+      <p>Nämä ovat itse kirjaamiasi seurantasaldoja, eivät bookkerilta automaattisesti luettuja saldoja. Alkusaldo annetaan kerran; myöhemmät muutokset kirjataan erikseen.</p>
       <div className="arb-track-row">
         <label>Bookkeri<input value={book} onChange={e => setBook(e.target.value)} /></label>
         <label>Alkusaldo €<input type="number" min="0" step=".01" value={opening} onChange={e => setOpening(e.target.value)} /></label>
         <button className="btn p" disabled={tracker.busy || !book.trim() || opening === ''} onClick={() => tracker.run(() => openArbWallet(book, Number(opening)))}>Aseta alkusaldo</button>
       </div>
       {tracker.wallets.map(w => <div className="arb-track-row" key={w.bookmaker}><b>{w.bookmaker}</b><span>Alku {money(w.opening_balance)}</span><span>Nykyinen {money(w.balance)}{Number(w.balance) < 0 ? ' · oikaisun jälkeinen alijäämä' : ''}</span></div>)}
+      {tracker.wallets.length > 0 && <>
+        <h3>Kirjaa kassamuutos</h3>
+        <p>Lisäys ja vähennys kuvaavat kassaan tekemääsi muuta rahaliikettä. Siirto muuttaa kahta omaa kassaa samalla kirjauksella. Täsmäytys asettaa seurantasaldon syöttämääsi lukemaan ja tallentaa erotuksen historiaan.</p>
+        <div className="arb-track-row">
+          <label>Toiminto<select value={movementKind} onChange={e => setMovementKind(e.target.value)}>
+            <option value="deposit">Lisäys</option><option value="withdrawal">Vähennys</option>
+            <option value="transfer">Siirto kassojen välillä</option><option value="reconcile">Täsmäytä saldo</option>
+          </select></label>
+          <label>{movementKind === 'transfer' ? 'Lähtökassa' : 'Kassa'}<select value={movementBook} onChange={e => setMovementBook(e.target.value)}>
+            <option value="">Valitse kassa</option>{tracker.wallets.map(w => <option key={w.bookmaker} value={w.bookmaker}>{w.bookmaker}</option>)}
+          </select></label>
+          {movementKind === 'transfer' && <label>Kohdekassa<select value={movementTarget} onChange={e => setMovementTarget(e.target.value)}>
+            <option value="">Valitse kassa</option>{tracker.wallets.filter(w => w.bookmaker !== movementBook).map(w => <option key={w.bookmaker} value={w.bookmaker}>{w.bookmaker}</option>)}
+          </select></label>}
+          <label>{movementKind === 'reconcile' ? 'Uusi seurantasaldo €' : 'Summa €'}<input type="number" min={movementKind === 'reconcile' ? '0' : '.01'} max="100000000" step=".01" value={movementAmount} onChange={e => setMovementAmount(e.target.value)} /></label>
+          <label>Perustelu<input maxLength="500" value={movementReason} onChange={e => setMovementReason(e.target.value)} placeholder="Esim. talletus, nosto tai saldon tarkistus" /></label>
+          <button className="btn p" disabled={tracker.busy || !canRecordWalletMovement(tracker.wallets, {
+            book: movementBook, kind: movementKind, target: movementTarget,
+            amount: movementAmount, reason: movementReason,
+          })}
+            onClick={async () => {
+              if (!window.confirm('Kirjataanko tämä virtuaalikassan muutos? Kirjaus jää historiaan eikä muuta aiempia vetoja.')) return;
+              const success = await tracker.run(() => movementKind === 'transfer'
+                ? transferArbWallet(movementBook, movementTarget, Number(movementAmount), movementReason)
+                : adjustArbWallet(movementBook, movementKind, Number(movementAmount), movementReason));
+              if (success) { setMovementAmount(''); setMovementReason(''); }
+            }}>Kirjaa muutos</button>
+        </div>
+        <h3>Viimeisimmät kassakirjaukset</h3>
+        <p>Enintään 50 uusinta kirjausta. Vedot ja käsin tehdyt muutokset näkyvät erillisinä.</p>
+        {tracker.cashEntries.map(entry => <div className="arb-track-row arb-cash-entry" key={entry.id}>
+          <span>{fmt(entry.created_at)}</span><b>{entry.bookmaker}</b>
+          <span>{cashKindLabel[entry.kind] || entry.kind}</span>
+          <span>{Number(entry.amount) > 0 ? '+' : ''}{money(entry.amount)}</span>
+          {entry.balance_after != null && <span>Saldo {money(entry.balance_after)}</span>}
+          {entry.note && <span>{entry.note}</span>}
+        </div>)}
+      </>}
     </div>
   );
   if (tab === 'analytics') return (
@@ -189,9 +251,12 @@ export default function ArbTracker({ tracker, offers, tab }) {
       <div className="arb-track-row"><span>Aika aloituksesta viimeiseen jalkaan: {metrics.averageSeconds == null ? 'ei aineistoa' : Math.round(metrics.averageSeconds) + ' s keskimäärin'}</span><span>Ratkaistuja jalkoja: {metrics.settledLegs}</span><span>Toteutunut jalkojen PnL: {money(metrics.realizedPnl)}</span></div>
       <div className="arb-track-row"><span>Osittain asetettuja: {metrics.partialWithStake}</span><span>Suoraan hylättyjä: {metrics.rejectedWithoutTimer}</span><span>Kertoimen muutos tarjouksesta: {metrics.averageOddsChangePct == null ? 'ei aineistoa' : metrics.averageOddsChangePct.toFixed(2) + ' % / jalka'}</span></div>
       <p>Suoraan hylättyihin tarjouksiin ei kirjata yrittämisaikaa. Toteutunut PnL kattaa vain ratkaistut jalat; avoimia vetoja ei lasketa voitoksi.</p>
-      <label className="arb-track-row"><input type="checkbox" checked={tracker.consent} disabled={tracker.busy}
-        onChange={e => tracker.run(() => setArbAnalyticsConsent(e.target.checked))} />
-        Salli anonymisoidun datani käyttö Vedoxin sisäisessä perustajatiimin yhteenvetoanalyysissä. Oletus on pois päältä.</label>
+      {tracker.consent
+        ? <div className="arb-track-row"><span>Yhteenvetoanalyysin suostumus on voimassa.</span>
+          <button className="btn" disabled={tracker.busy} onClick={() => tracker.run(() => setArbAnalyticsConsent(false))}>Peru suostumus</button></div>
+        : <label className="arb-track-row"><input type="checkbox" checked={false} disabled={tracker.busy}
+          onChange={() => tracker.run(() => setArbAnalyticsConsent(true))} />
+          Salli anonymisoidun datani käyttö Vedoxin sisäisessä perustajatiimin yhteenvetoanalyysissä. Oletus on pois päältä.</label>}
     </div>
   );
   return (

@@ -9,7 +9,7 @@ function check({ error, data }) {
 }
 
 export async function loadArbTracker() {
-  const [attempts, legs, corrections, wallets, consent] = await Promise.all([
+  const [attempts, legs, corrections, wallets, cashEntries, consent] = await Promise.all([
     loadPagedRows((from, to) => sbClient.from('user_arb_attempts')
       .select('*').order('created_at', { ascending: false })
       .order('id', { ascending: false }).range(from, to)),
@@ -19,6 +19,9 @@ export async function loadArbTracker() {
       .select('*').order('created_at', { ascending: false })
       .order('id', { ascending: false }).range(from, to)),
     sbClient.from('user_arb_wallets').select('*').order('bookmaker'),
+    sbClient.from('user_arb_cash_entries')
+      .select('id,bookmaker,kind,amount,note,operation_id,balance_after,created_at')
+      .order('created_at', { ascending: false }).order('id', { ascending: false }).limit(50),
     sbClient.from('user_arb_analytics_consent').select('founder_aggregate_opt_in').maybeSingle(),
   ]);
   return {
@@ -26,6 +29,7 @@ export async function loadArbTracker() {
     legs: applyArbCorrections(check(legs) || [], check(corrections) || []),
     corrections: check(corrections) || [],
     wallets: check(wallets) || [],
+    cashEntries: check(cashEntries) || [],
     consent: check(consent)?.founder_aggregate_opt_in === true,
   };
 }
@@ -39,6 +43,20 @@ export async function createArbAttempt(offerId, expectedUpdatedAt, rejectReason 
 
 export async function openArbWallet(book, amount) {
   return check(await sbClient.rpc('arb_set_opening_balance', { p_book: book, p_amount: amount }));
+}
+
+export async function adjustArbWallet(book, kind, amount, reason) {
+  return check(await sbClient.rpc('arb_adjust_wallet', {
+    p_book: book, p_kind: kind, p_amount: amount, p_reason: reason,
+    p_request_id: crypto.randomUUID(),
+  }));
+}
+
+export async function transferArbWallet(fromBook, toBook, amount, reason) {
+  return check(await sbClient.rpc('arb_transfer_wallet', {
+    p_from_book: fromBook, p_to_book: toBook, p_amount: amount, p_reason: reason,
+    p_request_id: crypto.randomUUID(),
+  }));
 }
 
 export async function placeArbLeg(legId, book, odds, stake) {
