@@ -23,6 +23,7 @@ const fixture = {
     {
       id: "done",
       status: "settled",
+      net_return_verified: true,
       started_at: "2026-09-29T10:01:00Z",
       source_updated_at: "2026-09-29T10:00:00Z",
       offer_snapshot: {
@@ -60,6 +61,7 @@ const fixture = {
       attempt_id: "done",
       ordinal: 0,
       status: "settled",
+      net_return_verified: true,
       offered_outcome: "Joukkue C",
       offered_book: "Coolbet",
       offered_odds: 2.04,
@@ -76,6 +78,7 @@ const fixture = {
       attempt_id: "done",
       ordinal: 1,
       status: "settled",
+      net_return_verified: true,
       offered_outcome: "Joukkue D",
       offered_book: "Pinnacle",
       offered_odds: 2.04,
@@ -117,8 +120,8 @@ export async function createArbAttempt(){throw Error('Preview: no real offer wri
 export async function recordArbLeg(id,action,v){
  const leg=data.legs.find(l=>l.id===id);
  if(action==='place')Object.assign(leg,{actual_book:v.book,actual_odds:v.odds,actual_stake:v.stake,status:'placed',placed_at:new Date().toISOString()});
- if(action==='settle')Object.assign(leg,{result:v.result,returned_amount:v.returned,status:'settled',settled_at:new Date().toISOString()});
- if(action==='edit')Object.assign(leg,{actual_book:v.book,actual_odds:v.odds,actual_stake:v.stake,...(v.returned!=null?{returned_amount:v.returned,result:v.result}:{})});
+ if(action==='settle')Object.assign(leg,{result:v.result,returned_amount:v.returned,status:'settled',net_return_verified:true,settled_at:new Date().toISOString()});
+ if(action==='edit')Object.assign(leg,{actual_book:v.book,actual_odds:v.odds,actual_stake:v.stake,...(v.returned!=null?{returned_amount:v.returned,result:v.result,net_return_verified:true}:{})});
 }
 `;
 await build({

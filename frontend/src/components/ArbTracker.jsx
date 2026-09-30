@@ -131,22 +131,31 @@ export function ArbSummary({ tracker }) {
   );
   if (tracker.error) return null;
   return (
-    <div className="arb-summary">
-      {[
-        [
-          "Kokonaiskassa",
-          tracker.bankroll ? money(s.total) : "Aseta alkukassa",
-        ],
-        ["Kertynyt nettovoitto", money(s.pnl)],
-        ["Avoimissa vedoissa", money(s.committed)],
-        ["Vapaana", tracker.bankroll ? money(s.available) : "—"],
-      ].map(([label, value]) => (
-        <div className="card arb-stat" key={label}>
-          <span>{label}</span>
-          <strong>{value}</strong>
-        </div>
-      ))}
-    </div>
+    <>
+      <div className="arb-summary">
+        {[
+          [
+            "Kokonaiskassa",
+            tracker.bankroll ? money(s.total) : "Aseta alkukassa",
+          ],
+          ["Kertynyt nettovoitto", money(s.pnl)],
+          ["Avoimissa vedoissa", money(s.committed)],
+          ["Vapaana", tracker.bankroll ? money(s.available) : "—"],
+        ].map(([label, value]) => (
+          <div className="card arb-stat" key={label}>
+            <span>{label}</span>
+            <strong>{value}</strong>
+          </div>
+        ))}
+      </div>
+      {s.unverifiedReturns > 0 && (
+        <p role="status" className="arb-warning">
+          {s.unverifiedReturns} aiemman vedon palautusta ei ole vahvistettu
+          nettomääräksi. Tarkista ne Muokkaa-toiminnolla. Siihen asti kassaluvut
+          ja käyrä perustuvat vanhoihin kirjattuihin palautuksiin.
+        </p>
+      )}
+    </>
   );
 }
 export function ProfitChart({ summary }) {

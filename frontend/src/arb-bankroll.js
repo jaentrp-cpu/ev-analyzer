@@ -54,6 +54,9 @@ export function arbBankroll(attempts, legs, opening = 0) {
     available: (cents(opening) + pnl - committed) / 100,
     curve,
     partialPnl: (pnl - cumulative) / 100,
+    unverifiedReturns: active.filter(
+      (l) => l.status === "settled" && l.net_return_verified !== true,
+    ).length,
     missingResultTimes: active.filter(
       (l) =>
         l.status === "settled" &&

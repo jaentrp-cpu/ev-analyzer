@@ -107,3 +107,10 @@ test("failed checks have their own observed time without inventing placement", (
   assert.equal(row.observationSeconds, 90);
   assert.equal(row.sameOdds, false);
 });
+
+test("legacy returns remain explicitly unverified until net receipts are confirmed", () => {
+  assert.equal(arbBankroll(attempts, legs, 300).unverifiedReturns, 2);
+  const verified = legs.map((l) => ({ ...l, net_return_verified: true }));
+  assert.equal(arbBankroll(attempts, verified, 300).unverifiedReturns, 0);
+  assert.equal(arbBankroll(attempts, verified, 300).pnl, 6);
+});

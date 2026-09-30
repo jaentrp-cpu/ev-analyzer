@@ -3,6 +3,7 @@
 begin;
 alter table public.user_arb_attempts add column if not exists deleted_at timestamptz;
 alter table public.user_arb_legs add column if not exists checked_at timestamptz;
+alter table public.user_arb_legs add column if not exists net_return_verified boolean not null default false;
 drop index public.user_arb_one_open_source;
 create unique index user_arb_one_open_source
   on public.user_arb_attempts(user_id,source_arb_id,source_terms_md5)
@@ -94,7 +95,7 @@ begin
       or p_return<0 or p_return>100000000 or p_return<>round(p_return,2)
       or (p_result='lose' and p_return<>0) then raise exception 'invalid_result'; end if;
     update public.user_arb_legs set status='settled',result=p_result,
-      returned_amount=p_return,settled_at=now() where id=p_leg_id;
+      returned_amount=p_return,settled_at=now(),net_return_verified=true where id=p_leg_id;
   else
     if v_leg.status not in ('placed','settled') then raise exception 'leg_not_correctable'; end if;
     if nullif(btrim(p_reason),'') is null or length(p_reason)>500 then raise exception 'reason_required'; end if;
@@ -105,6 +106,9 @@ begin
     insert into public.user_arb_leg_corrections(user_id,leg_id,reason,actual_book,
       actual_odds,actual_stake,result,returned_amount)
       values(v_user,p_leg_id,btrim(p_reason),btrim(p_book),p_odds,p_stake,p_result,p_return);
+    if v_leg.status='settled' then
+      update public.user_arb_legs set net_return_verified=true where id=p_leg_id;
+    end if;
   end if;
   -- Editing a settled receipt must supersede earlier receipt corrections too.
   if p_action='settle' and exists(select 1 from public.user_arb_leg_corrections where leg_id=p_leg_id) then
