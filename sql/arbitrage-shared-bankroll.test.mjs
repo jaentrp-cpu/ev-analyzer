@@ -29,12 +29,16 @@ await db.exec(
     "utf8",
   ),
 );
+const preflight = await db.query(await readFile(new URL("./2026-09-30-arbitrage-shared-bankroll-preflight.sql", import.meta.url), "utf8"));
+assert.ok(Object.values(preflight.rows[0]).every(v => v === true), "preflight gates");
 await db.exec(
   await readFile(
     new URL("./2026-09-30-arbitrage-shared-bankroll.sql", import.meta.url),
     "utf8",
   ),
 );
+const verification = await db.query(await readFile(new URL("./2026-09-30-arbitrage-shared-bankroll-verify.sql", import.meta.url), "utf8"));
+assert.ok(Object.values(verification.rows[0]).every(v => v === true), "post-migration catalog gates");
 await db.exec(`set "test.user"='${a}'; insert into public.arbitrages values('offer',true,true,now(),
  '[{"book":"A","outcome":"Home","odds":2.04},{"book":"B","outcome":"Away","odds":2.04}]');`);
 await db.exec(`set role authenticated; select public.arb_set_bankroll(300);`);

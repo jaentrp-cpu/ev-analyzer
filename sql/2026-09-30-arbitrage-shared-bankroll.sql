@@ -1,6 +1,8 @@
 -- REVIEW ONLY: separate owner approval required before production application.
 -- Additive migration. Original bets, legacy wallet ledger and timestamps remain.
 begin;
+set local lock_timeout = '5s';
+set local statement_timeout = '30s';
 alter table public.user_arb_attempts add column if not exists deleted_at timestamptz;
 alter table public.user_arb_legs add column if not exists checked_at timestamptz;
 alter table public.user_arb_legs add column if not exists net_return_verified boolean not null default false;

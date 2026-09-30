@@ -40,7 +40,9 @@ SQL-testi: asenna PGlite erilliseen työkalukansioon, aseta `ARB_PGLITE_MODULE` 
 
 ## Julkaisu ja rollback
 
-**Ei julkaistu.** Rootin `index.html` ja nykyiset GitHub Pages -assetit säilyvät. Paikallinen build todistaa lähdekoodin kääntymisen; se ei ole tuotantokonfiguroitu static-release. Migraatio ja lopullinen public-bundle julkaistaan erillisen hyväksynnän jälkeen tunnistettuun kohteeseen, tarkalla commitilla ja tuotantovarmennuksella. Main-merge voi käynnistää Pages-buildin, vaikka tässä lähdekoodiehdokkaassa rootin vanha bundle säilyy.
+**Ei vielä julkaistu.** AJ hyväksyi tuotantojulkaisun tässä chatissa 30.9.2026. Live-tarkistus: `ev-analyzer` Pages käyttää main-haaran juurta, viimeisin onnistunut build ja main ovat `12d424412fd297cb5023719cedfd37a98aacb81d`. Vedox.fi:n nykyinen JS-bundle vastasi paikallista palautusversiota SHA256-tarkistuksessa. Tuotantokonfiguroitu uusi bundle käyttää vain aiemman julkisen selaimbundlen publishable-projektiasetuksia; runtime-salaisuuksia tai env-tiedostoja ei luettu. Uusi root `index.html` viittaa `index-D0aE_J37.js`- ja `index-xFK3EuRJ.css`-assetteihin. Aiemmat assetit säilytetään.
+
+Migraatio odottaa AJ:n SQL Editor -ajoa. Preflight-tiedoston seitsemän arvoa ja verify-tiedoston kolmetoista arvoa tulee olla true. Migraatio suoritetaan transaktiona, lock timeout 5 s ja statement timeout 30 s. Mainiin ei siirretä uutta sivua ennen migraation varmennusta. Main-merge käynnistää Pages-julkaisun; valmis build ja vedox.fi:n assetit varmennetaan erikseen.
 
 Rollback alkaa aiemman static-releasen palautuksella. Uudet sarakkeet/taulu/RPC:t ja käyttäjädata säilytetään; tietokantaan ei tehdä tuhoavaa rollbackia. Vanhan UI:n kirjakohtaiset saldot eivät enää kuvaa uuden yhteiskassan kirjauksia, joten uuden mallin kirjaamista pitää tauottaa UI-rollbackin aikana. Pelkkä vanhan bundlen palautus ei todista kirjauspolun palautumista oikein.
 
