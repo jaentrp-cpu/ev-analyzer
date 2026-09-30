@@ -4239,3 +4239,20 @@ body {
   align-items: flex-start;
   flex-direction: column;
 }
+
+/* Shared arbitrage bankroll and readable tracking tables. */
+.arb-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin:16px 0; }
+.arb-stat { padding:20px; }
+.arb-summary span { display:block; color:var(--tx3); font-size:13px; }
+.arb-summary strong { display:block; font-size:24px; margin-top:8px; }
+.arb-table-wrap { overflow-x:auto; min-width:0; max-width:100%; }
+.arb-table { width:100%; border-collapse:collapse; text-align:left; font-size:14px; }
+.arb-table th { font-size:12px; color:var(--tx3); font-weight:600; white-space:nowrap; }
+.arb-table th,.arb-table td { padding:16px 14px; border-bottom:1px solid var(--border, #242630); vertical-align:top; }
+.arb-table small { display:block; color:var(--tx3); font-size:12px; margin-top:5px; }
+.vdx .arb-table input { max-width:145px; min-width:85px; padding:8px 10px; border:1px solid var(--bd2); background:var(--bg3); color:var(--tx); border-radius:7px; font:inherit; }
+.arb-offer-leg + .arb-offer-leg { margin-top:12px; }
+.arb-chart { width:100%; height:auto; min-height:180px; color:var(--tx3); font-size:12px; }
+.arb-empty { padding:45px 20px; text-align:center; color:var(--tx3); }
+.arb-track-panel details { margin-top:18px; }
+@media(max-width:760px) { .arb-summary { grid-template-columns:repeat(2,minmax(0,1fr)); } .arb-stat { padding:14px; } .arb-summary strong { font-size:20px; } .arb-table { min-width:720px; } }
