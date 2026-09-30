@@ -2609,6 +2609,10 @@ body {
 }
 .vdx .arb-track-tabs { margin: 18px 0; }
 .vdx .arb-track-panel { padding: 18px; margin-bottom: 14px; }
+.vdx .arb-analytics-heading { position: relative; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.vdx .arb-analytics-heading .analytics-info { position: static; }
+.vdx .arb-analytics-heading h3 { margin: 16px 0 0; }
+.vdx .arb-analytics-note { color: var(--tx3); font-size: 12px; }
 .vdx .arb-track-panel h2 { font-size: 17px; margin: 0; }
 .vdx .arb-track-panel p { color: var(--tx3); font-size: 12px; line-height: 1.5; }
 .vdx .arb-track-leg { padding: 12px 0; border-top: 1px solid var(--bd); }

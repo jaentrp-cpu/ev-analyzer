@@ -22,6 +22,7 @@ import {
 } from "../arb-metrics.js";
 import { arbBankroll, arbTiming } from "../arb-bankroll.js";
 import { createArbTrackerRequestScope } from "../arb-tracker-request-scope.js";
+import AnalyticsInfo from "./AnalyticsInfo.jsx";
 const money = (n) =>
   Number(n || 0).toLocaleString("fi-FI", {
     minimumFractionDigits: 2,
@@ -166,11 +167,13 @@ export function ProfitChart({ summary }) {
   const x = (i) => 55 + (i / Math.max(1, points.length - 1)) * 680;
   return (
     <section className="card arb-track-panel">
-      <h2>Voittokäyrä</h2>
-      <p>
-        Ratkaistujen yritysten kertynyt nettotulos. Voitot nostavat ja tappiot
-        laskevat käyrää. Alkukassa ja rahansiirrot eivät ole voittoa.
-      </p>
+      <div className="arb-analytics-heading">
+        <h2>Voittokäyrä</h2>
+        <AnalyticsInfo label="Voittokäyrä">
+          Ratkaistujen yritysten kertynyt nettotulos. Voitot nostavat ja tappiot
+          laskevat käyrää. Alkukassa ja rahansiirrot eivät ole voittoa.
+        </AnalyticsInfo>
+      </div>
       {!summary.curve.length ? (
         <div className="arb-empty">
           Käyrä muodostuu, kun kirjaat ensimmäisen vedon tuloksen.
@@ -247,17 +250,22 @@ export function ProfitChart({ summary }) {
         </>
       )}
       {summary.partialPnl !== 0 && (
-        <p>
-          Avoimien yritysten osatuloksia tai ilman ratkaisuhetkeä olevia
-          tuloksia: {money(summary.partialPnl)}. Ne sisältyvät kassaan; käyrä
-          näyttää kokonaan ratkaistut yritykset, joiden ratkaisuhetki tunnetaan.
-        </p>
+        <div className="arb-analytics-heading arb-analytics-note">
+          <span>Muut kirjatut tulokset: {money(summary.partialPnl)}</span>
+          <AnalyticsInfo label="Muut kirjatut tulokset">
+            Avoimien yritysten osatuloksia tai ilman ratkaisuhetkeä olevia
+            tuloksia. Ne sisältyvät kassaan; käyrä näyttää kokonaan ratkaistut
+            yritykset, joiden ratkaisuhetki tunnetaan.
+          </AnalyticsInfo>
+        </div>
       )}
       {summary.missingResultTimes > 0 && (
-        <p>
-          {summary.missingResultTimes} tuloksesta puuttuu ratkaisuhetki. Ne
-          sisältyvät nettotulokseen, mutta eivät käyrään.
-        </p>
+        <div className="arb-analytics-heading arb-analytics-note">
+          <span>Ratkaisuhetki puuttuu: {summary.missingResultTimes}</span>
+          <AnalyticsInfo label="Puuttuvat ratkaisuhetket">
+            Nämä tulokset sisältyvät nettotulokseen, mutta eivät käyrään.
+          </AnalyticsInfo>
+        </div>
       )}
     </section>
   );
@@ -598,12 +606,14 @@ export default function ArbTracker({ tracker, offers, tab, compact = false }) {
               </div>
             ))}
           </div>
-          <h3>Kirjakohtainen havaittu viive</h3>
-          <p>
-            Aika tarjouksen päivityksestä vedon vahvistamiseen. Tämä on
-            kirjaushavainto, ei automaattisesti mitattu kertoimen koko
-            voimassaoloaika.
-          </p>
+          <div className="arb-analytics-heading">
+            <h3>Kirjakohtainen havaittu viive</h3>
+            <AnalyticsInfo label="Kirjakohtainen havaittu viive">
+              Aika tarjouksen päivityksestä vedon vahvistamiseen. Tämä on
+              kirjaushavainto, ei automaattisesti mitattu kertoimen koko
+              voimassaoloaika.
+            </AnalyticsInfo>
+          </div>
           <div className="arb-table-wrap">
             <table className="arb-table">
               <thead>

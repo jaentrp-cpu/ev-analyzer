@@ -80,6 +80,29 @@ try {
   });
   await page.getByRole("button", { name: "Analytiikka", exact: true }).click();
   await page.getByRole("img", { name: /Kertynyt nettotulos/ }).waitFor();
+  const curveInfo = page.getByLabel("Voittokäyrä: lisätiedot", { exact: true });
+  const curveExplanation = page.getByText(
+    "Ratkaistujen yritysten kertynyt nettotulos.",
+    { exact: false },
+  );
+  assert.equal(await curveExplanation.isVisible(), false);
+  await curveInfo.focus();
+  await page.keyboard.press("Enter");
+  assert.equal(await curveExplanation.isVisible(), true);
+  await page.keyboard.press("Enter");
+  assert.equal(await curveExplanation.isVisible(), false);
+  const delayInfo = page.getByLabel(
+    "Kirjakohtainen havaittu viive: lisätiedot",
+    { exact: true },
+  );
+  const delayExplanation = page.getByText(
+    "Aika tarjouksen päivityksestä vedon vahvistamiseen.",
+    { exact: false },
+  );
+  assert.equal(await delayExplanation.isVisible(), false);
+  await delayInfo.click();
+  assert.equal(await delayExplanation.isVisible(), true);
+  await delayInfo.click();
   assert.equal(await page.locator(".arb-chart circle").count(), 1);
   await page.screenshot({
     path: path.join(root, "analytiikka-desktop.png"),
