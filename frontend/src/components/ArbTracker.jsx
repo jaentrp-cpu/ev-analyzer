@@ -1,53 +1,73 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
-  adjustArbWallet, closeArbAttempt, correctArbLeg, createArbAttempt, loadArbTracker,
-  markArbLegUnavailable, openArbWallet, placeArbLeg, settleArbLeg,
-  setArbAnalyticsConsent, transferArbWallet,
-} from '../arb-tracker.js';
-import { arbAttemptMetrics, arbOfferTermsChanged, arbPlacedScenario, describeArbOfferChange } from '../arb-metrics.js';
-import { createArbTrackerRequestScope } from '../arb-tracker-request-scope.js';
-import { canRecordWalletMovement } from '../arb-wallet-input.js';
-import { normalizeBookName } from '../supabase.js';
-
-const money = n => Number(n || 0).toLocaleString('fi-FI', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
-const cashKindLabel = {
-  opening: 'Alkusaldo', stake: 'Arbitraasivedon panos', return: 'Arbitraasivedon palautus',
-  correction: 'Vedon oikaisu', deposit: 'Lisäys', withdrawal: 'Vähennys',
-  transfer_out: 'Siirto ulos', transfer_in: 'Siirto sisään', reconcile: 'Saldon täsmäytys',
+  loadArbTracker,
+  createArbAttempt,
+  closeArbAttempt,
+  markArbLegUnavailable,
+  recordArbLeg,
+  setArbBankroll,
+  setArbAttemptDeleted,
+  setArbAnalyticsConsent,
+} from "../arb-tracker.js";
+import {
+  arbAttemptMetrics,
+  arbOfferTermsChanged,
+  describeArbOfferChange,
+} from "../arb-metrics.js";
+import { arbBankroll, arbTiming } from "../arb-bankroll.js";
+import { createArbTrackerRequestScope } from "../arb-tracker-request-scope.js";
+import AnalyticsInfo from "./AnalyticsInfo.jsx";
+const money = (n) =>
+  Number(n || 0).toLocaleString("fi-FI", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }) + " €";
+const fmt = (date) =>
+  date ? new Date(date).toLocaleString("fi-FI") : "Ei mitattu";
+const labels = {
+  started: "Aloitettu",
+  partial: "Osittain asetettu",
+  placed: "Odottaa tuloksia",
+  rejected: "Hylätty",
+  abandoned: "Keskeytetty",
+  settled: "Ratkaistu",
+  failed: "Ei toteutunut kokonaan",
+  pending: "Asettamatta",
+  unavailable: "Ei onnistunut",
 };
-const fmt = date => date ? new Date(date).toLocaleString('fi-FI') : 'ei mitattu';
-const attemptStatusLabel = {
-  started: 'Kesken', partial: 'Osittain toteutunut', placed: 'Kaikki jalat asetettu',
-  rejected: 'Hylätty', abandoned: 'Keskeytetty', settled: 'Ratkaistu',
-  failed: 'Ei toteutunut kokonaan',
+const arbErrorMessage = (e) => {
+  const code = String(e?.message || "");
+  if (code.includes("insufficient_shared_balance"))
+    return "Yhteisessä kassassa ei ole riittävästi vapaata rahaa.";
+  if (code.includes("shared_bankroll_missing"))
+    return "Aseta ensin yhteisen kassan alkusumma Kassa-osiossa.";
+  if (code.includes("offer_"))
+    return "Kohde muuttui tai poistui. Päivitä kohteet.";
+  return "Kirjaus epäonnistui. Tarkista tiedot ja päivitä näkymä ennen uutta yritystä.";
 };
-const arbErrorMessage = error => {
-  const code = String(error?.message || '');
-  if (code.includes('offer_changed_refresh_required') || code.includes('offer_not_active'))
-    return 'Tarjous muuttui tai poistui. Päivitä tarjouslista ennen uutta yritystä.';
-  if (code.includes('insufficient_virtual_balance'))
-    return 'Kassassa ei ole riittävästi seurantasaldoa. Kirjausta ei tehty.';
-  if (code.includes('virtual_wallet_missing'))
-    return 'Virtuaalikassaa ei löytynyt. Päivitä kassalista ja yritä uudelleen.';
-  if (code.includes('wallet_balance_unchanged'))
-    return 'Täsmäytys ei muuttaisi saldoa. Kirjausta ei tehty.';
-  if (code.includes('invalid_wallet_movement'))
-    return 'Tarkista kassamuutoksen summa, kohde ja perustelu.';
-  if (code.includes('leg_not_placeable') || code.includes('leg_not_settleable'))
-    return 'Jalan tila muuttui jo. Päivitä yritykset ennen uutta kirjausta.';
-  if (code.includes('duplicate key'))
-    return 'Sama kirjaus on jo tehty. Päivitä tiedot ja tarkista yrityksen tila.';
-  return 'Kirjaus epäonnistui. Päivitä tiedot ennen kuin yrität uudelleen.';
-};
-
 export function useArbTracker(enabled, userId) {
   const scopeRef = useRef(null);
-  if (!scopeRef.current) scopeRef.current = createArbTrackerRequestScope(enabled, userId);
+  if (!scopeRef.current)
+    scopeRef.current = createArbTrackerRequestScope(enabled, userId);
   else scopeRef.current.update(enabled, userId);
-  const emptyData = { attempts: [], legs: [], corrections: [], wallets: [], cashEntries: [], consent: false };
+  const emptyData = {
+    attempts: [],
+    legs: [],
+    corrections: [],
+    wallets: [],
+    cashEntries: [],
+    consent: false,
+    bankroll: null,
+  };
   const [data, setData] = useState({ ...emptyData, ownerId: null });
-  const [loadError, setLoadError] = useState('');
-  const [actionError, setActionError] = useState('');
+  const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [busy, setBusy] = useState(false);
   const reload = useCallback(async () => {
     if (!enabled) return;
@@ -56,17 +76,19 @@ export function useArbTracker(enabled, userId) {
       const loaded = await loadArbTracker();
       if (!scopeRef.current.ownsLoad(ticket)) return;
       setData({ ...loaded, ownerId: userId });
-      setLoadError('');
+      setLoadError("");
     } catch {
       if (scopeRef.current.ownsLoad(ticket))
-        setLoadError('Arbitraasiseuranta ei ole vielä käytettävissä. Tarjouslista toimii edelleen.');
+        setLoadError(
+          "Arbitraasiseuranta ei ole vielä käytettävissä. Tarjouslista toimii edelleen.",
+        );
     }
   }, [enabled, userId]);
   useEffect(() => {
     setBusy(false);
     setData({ ...emptyData, ownerId: userId });
-    setLoadError('');
-    setActionError('');
+    setLoadError("");
+    setActionError("");
     void reload();
   }, [reload, userId]);
   async function run(action) {
@@ -74,20 +96,19 @@ export function useArbTracker(enabled, userId) {
     const ticket = scopeRef.current.beginAction();
     if (!ticket) return false;
     setBusy(true);
-    setActionError('');
+    setActionError("");
     try {
       await action();
       if (!scopeRef.current.ownsAction(ticket)) return false;
       await reload();
       return true;
-    }
-    catch (e) {
+    } catch (e) {
       if (!scopeRef.current.ownsAction(ticket)) return false;
       await reload();
-      if (scopeRef.current.ownsAction(ticket)) setActionError(arbErrorMessage(e));
+      if (scopeRef.current.ownsAction(ticket))
+        setActionError(arbErrorMessage(e));
       return false;
-    }
-    finally {
+    } finally {
       if (scopeRef.current.finishAction(ticket)) {
         setBusy(false);
       }
@@ -95,201 +116,798 @@ export function useArbTracker(enabled, userId) {
   }
   return {
     ...(enabled && data.ownerId === userId ? data : emptyData),
-    error: loadError, actionError, busy, reload, run,
+    error: loadError,
+    actionError,
+    busy,
+    reload,
+    run,
   };
 }
 
-function LegEditor({ leg, tracker, attemptStatus }) {
-  const [book, setBook] = useState(leg.actual_book || normalizeBookName(leg.offered_book));
-  const [odds, setOdds] = useState(leg.actual_odds || leg.offered_odds);
-  const [stake, setStake] = useState('');
-  const [reason, setReason] = useState('');
-  const [changedOdds, setChangedOdds] = useState('');
-  const [correcting, setCorrecting] = useState(false);
-  const [correctionBook, setCorrectionBook] = useState(leg.actual_book || '');
-  const [correctionOdds, setCorrectionOdds] = useState(leg.actual_odds || '');
-  const [correctionStake, setCorrectionStake] = useState(leg.actual_stake || '');
-  const [correctionResult, setCorrectionResult] = useState(leg.result || '');
-  const [correctionReason, setCorrectionReason] = useState('');
-  useEffect(() => {
-    setCorrectionBook(leg.actual_book || '');
-    setCorrectionOdds(leg.actual_odds || '');
-    setCorrectionStake(leg.actual_stake || '');
-    setCorrectionResult(leg.result || '');
-  }, [leg.effectiveCorrectionId, leg.status, leg.result, leg.returned_amount]);
-  const history = tracker.corrections.filter(c => c.leg_id === leg.id)
-    .sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+export function ArbSummary({ tracker }) {
+  const s = arbBankroll(
+    tracker.attempts,
+    tracker.legs,
+    tracker.bankroll?.opening_amount,
+  );
+  if (tracker.error) return null;
   return (
-    <div className="arb-track-leg">
-      <div><b>{leg.offered_outcome}</b> · {leg.offered_book} @ {leg.offered_odds} · {leg.status}</div>
-      {leg.status === 'pending' && ['started', 'partial'].includes(attemptStatus) && <>
-        <div className="arb-track-row">
-          <label>Bookkeri<input value={book} onChange={e => setBook(e.target.value)} /></label>
-          <label>Todellinen kerroin<input type="number" step=".01" min="1.01" value={odds} onChange={e => setOdds(e.target.value)} /></label>
-          <label>Todellinen panos €<input type="number" step=".01" min=".01" value={stake} onChange={e => setStake(e.target.value)} /></label>
-          <button className="btn p" disabled={tracker.busy || !Number(stake)} onClick={() => tracker.run(() => placeArbLeg(leg.id, book, Number(odds), Number(stake)))}>Laitoin vedon</button>
-        </div>
-        <div className="arb-track-row">
-          <input aria-label="Miksi jalka jäi pelaamatta" placeholder="Syy: kerroin muuttui, kohde suljettu..." value={reason} onChange={e => setReason(e.target.value)} />
-          <input aria-label="Havaittu muuttunut kerroin" type="number" step=".01" min="1.01" placeholder="Uusi kerroin" value={changedOdds} onChange={e => setChangedOdds(e.target.value)} />
-          <button className="btn" disabled={tracker.busy || !reason.trim()} onClick={() => tracker.run(() => markArbLegUnavailable(leg.id, reason, changedOdds ? Number(changedOdds) : null))}>Ei onnistunut</button>
-        </div>
-      </>}
-      {leg.status === 'placed' && <>
-        <div>Toteutui: {leg.actual_book} @ {leg.actual_odds}, {money(leg.actual_stake)} · {fmt(leg.placed_at)}</div>
-        <div className="arb-track-row">{[['win', 'Voitto'], ['lose', 'Tappio'], ['void', 'Mitätöity']].map(([value, label]) =>
-          <button className="btn" key={value} disabled={tracker.busy} onClick={() => tracker.run(() => settleArbLeg(leg.id, value))}>{label}</button>)}</div>
-      </>}
-      {leg.status === 'settled' && <div>Tulos: {leg.result} · palautus {money(leg.returned_amount)}</div>}
-      {leg.status === 'unavailable' && <div>Ei toteutunut: {leg.failure_reason}{leg.actual_odds ? ` · havaittu kerroin ${leg.actual_odds}` : ''}</div>}
-      {['placed', 'settled'].includes(leg.status) && <>
-        <button className="btn" disabled={tracker.busy} onClick={() => setCorrecting(value => !value)}>
-          {correcting ? 'Sulje oikaisu' : 'Tee erillinen oikaisumerkintä'}
-        </button>
-        {correcting && <div className="arb-track-row">
-          <label>Oikaistu bookkeri<input value={correctionBook} onChange={e => setCorrectionBook(e.target.value)} /></label>
-          <label>Oikaistu kerroin<input type="number" min="1.01" step=".01" value={correctionOdds} onChange={e => setCorrectionOdds(e.target.value)} /></label>
-          <label>Oikaistu panos €<input type="number" min=".01" step=".01" value={correctionStake} onChange={e => setCorrectionStake(e.target.value)} /></label>
-          {leg.status === 'settled' && <label>Oikaistu tulos<select value={correctionResult} onChange={e => setCorrectionResult(e.target.value)}>
-            <option value="win">Voitto</option><option value="lose">Tappio</option><option value="void">Mitätöity</option>
-          </select></label>}
-          <label>Oikaisun syy<input value={correctionReason} onChange={e => setCorrectionReason(e.target.value)} /></label>
-          <button className="btn p" disabled={tracker.busy || !correctionReason.trim() || !correctionBook.trim() ||
-            !(Number(correctionOdds) > 1) || !(Number(correctionStake) > 0) || (leg.status === 'settled' && !correctionResult)}
-            onClick={async () => {
-              if (!window.confirm('Kirjataanko erillinen oikaisu? Alkuperäinen jalka ja aiemmat oikaisut säilyvät. Virtuaalikassa muuttuu erotuksen verran.')) return;
-              if (await tracker.run(() => correctArbLeg(leg.id, correctionReason, correctionBook,
-                Number(correctionOdds), Number(correctionStake), leg.status === 'settled' ? correctionResult : null))) {
-                setCorrectionReason('');
-                setCorrecting(false);
-              }
-            }}>Kirjaa oikaisu</button>
-        </div>}
-        {history.length > 0 && <div className="arb-track-history">
-          <b>Oikaisuhistoria ({history.length})</b>
-          {history.map(c => <div key={c.id}>{fmt(c.created_at)} · {c.reason} · {c.actual_book} @ {c.actual_odds},
-            {' '}{money(c.actual_stake)}{c.result ? ` · ${c.result} · palautus ${money(c.returned_amount)}` : ''}</div>)}
-        </div>}
-      </>}
-    </div>
+    <>
+      <div className="arb-summary">
+        {[
+          [
+            "Kokonaiskassa",
+            tracker.bankroll ? money(s.total) : "Aseta alkukassa",
+          ],
+          ["Kertynyt nettovoitto", money(s.pnl)],
+          ["Avoimissa vedoissa", money(s.committed)],
+          ["Vapaana", tracker.bankroll ? money(s.available) : "—"],
+        ].map(([label, value]) => (
+          <div className="card arb-stat" key={label}>
+            <span>{label}</span>
+            <strong>{value}</strong>
+          </div>
+        ))}
+      </div>
+      {s.unverifiedReturns > 0 && (
+        <p role="status" className="arb-warning">
+          {s.unverifiedReturns} aiemman vedon palautusta ei ole vahvistettu
+          nettomääräksi. Tarkista ne Muokkaa-toiminnolla. Siihen asti kassaluvut
+          ja käyrä perustuvat vanhoihin kirjattuihin palautuksiin.
+        </p>
+      )}
+    </>
   );
 }
-
-export default function ArbTracker({ tracker, offers, tab }) {
-  const [book, setBook] = useState('');
-  const [opening, setOpening] = useState('');
-  const [movementBook, setMovementBook] = useState('');
-  const [movementKind, setMovementKind] = useState('deposit');
-  const [movementTarget, setMovementTarget] = useState('');
-  const [movementAmount, setMovementAmount] = useState('');
-  const [movementReason, setMovementReason] = useState('');
-  useEffect(() => {
-    setMovementBook('');
-    setMovementTarget('');
-    setMovementAmount('');
-    setMovementReason('');
-  }, [tracker.ownerId]);
-  const metrics = useMemo(() => arbAttemptMetrics(tracker.attempts, tracker.legs), [tracker.attempts, tracker.legs]);
-  if (tracker.error) return <div className="card arb-track-panel" role="status">{tracker.error}<button className="btn" onClick={tracker.reload}>Yritä uudelleen</button></div>;
-  const actionMessage = tracker.actionError && <div className="card arb-track-panel" role="alert">Kirjaus epäonnistui: {tracker.actionError}</div>;
-  if (tab === 'wallets') return (
-    <div className="card arb-track-panel">
-      {actionMessage}
-      <h2>Omat virtuaalikassat</h2>
-      <p>Nämä ovat itse kirjaamiasi seurantasaldoja, eivät bookkerilta automaattisesti luettuja saldoja. Alkusaldo annetaan kerran; myöhemmät muutokset kirjataan erikseen.</p>
-      <div className="arb-track-row">
-        <label>Bookkeri<input value={book} onChange={e => setBook(e.target.value)} /></label>
-        <label>Alkusaldo €<input type="number" min="0" step=".01" value={opening} onChange={e => setOpening(e.target.value)} /></label>
-        <button className="btn p" disabled={tracker.busy || !book.trim() || opening === ''} onClick={() => tracker.run(() => openArbWallet(book, Number(opening)))}>Aseta alkusaldo</button>
-      </div>
-      {tracker.wallets.map(w => <div className="arb-track-row" key={w.bookmaker}><b>{w.bookmaker}</b><span>Alku {money(w.opening_balance)}</span><span>Nykyinen {money(w.balance)}{Number(w.balance) < 0 ? ' · oikaisun jälkeinen alijäämä' : ''}</span></div>)}
-      {tracker.wallets.length > 0 && <>
-        <h3>Kirjaa kassamuutos</h3>
-        <p>Lisäys ja vähennys kuvaavat kassaan tekemääsi muuta rahaliikettä. Siirto muuttaa kahta omaa kassaa samalla kirjauksella. Täsmäytys asettaa seurantasaldon syöttämääsi lukemaan ja tallentaa erotuksen historiaan.</p>
-        <div className="arb-track-row">
-          <label>Toiminto<select value={movementKind} onChange={e => setMovementKind(e.target.value)}>
-            <option value="deposit">Lisäys</option><option value="withdrawal">Vähennys</option>
-            <option value="transfer">Siirto kassojen välillä</option><option value="reconcile">Täsmäytä saldo</option>
-          </select></label>
-          <label>{movementKind === 'transfer' ? 'Lähtökassa' : 'Kassa'}<select value={movementBook} onChange={e => setMovementBook(e.target.value)}>
-            <option value="">Valitse kassa</option>{tracker.wallets.map(w => <option key={w.bookmaker} value={w.bookmaker}>{w.bookmaker}</option>)}
-          </select></label>
-          {movementKind === 'transfer' && <label>Kohdekassa<select value={movementTarget} onChange={e => setMovementTarget(e.target.value)}>
-            <option value="">Valitse kassa</option>{tracker.wallets.filter(w => w.bookmaker !== movementBook).map(w => <option key={w.bookmaker} value={w.bookmaker}>{w.bookmaker}</option>)}
-          </select></label>}
-          <label>{movementKind === 'reconcile' ? 'Uusi seurantasaldo €' : 'Summa €'}<input type="number" min={movementKind === 'reconcile' ? '0' : '.01'} max="100000000" step=".01" value={movementAmount} onChange={e => setMovementAmount(e.target.value)} /></label>
-          <label>Perustelu<input maxLength="500" value={movementReason} onChange={e => setMovementReason(e.target.value)} placeholder="Esim. talletus, nosto tai saldon tarkistus" /></label>
-          <button className="btn p" disabled={tracker.busy || !canRecordWalletMovement(tracker.wallets, {
-            book: movementBook, kind: movementKind, target: movementTarget,
-            amount: movementAmount, reason: movementReason,
-          })}
-            onClick={async () => {
-              if (!window.confirm('Kirjataanko tämä virtuaalikassan muutos? Kirjaus jää historiaan eikä muuta aiempia vetoja.')) return;
-              const success = await tracker.run(() => movementKind === 'transfer'
-                ? transferArbWallet(movementBook, movementTarget, Number(movementAmount), movementReason)
-                : adjustArbWallet(movementBook, movementKind, Number(movementAmount), movementReason));
-              if (success) { setMovementAmount(''); setMovementReason(''); }
-            }}>Kirjaa muutos</button>
-        </div>
-        <h3>Viimeisimmät kassakirjaukset</h3>
-        <p>Enintään 50 uusinta kirjausta. Vedot ja käsin tehdyt muutokset näkyvät erillisinä.</p>
-        {tracker.cashEntries.map(entry => <div className="arb-track-row arb-cash-entry" key={entry.id}>
-          <span>{fmt(entry.created_at)}</span><b>{entry.bookmaker}</b>
-          <span>{cashKindLabel[entry.kind] || entry.kind}</span>
-          <span>{Number(entry.amount) > 0 ? '+' : ''}{money(entry.amount)}</span>
-          {entry.balance_after != null && <span>Saldo {money(entry.balance_after)}</span>}
-          {entry.note && <span>{entry.note}</span>}
-        </div>)}
-      </>}
-    </div>
-  );
-  if (tab === 'analytics') return (
-    <div className="card arb-track-panel">
-      {actionMessage}
-      <h2>Oma arbitraasianalytiikka</h2>
-      <div className="arb-track-row"><span>Aloitettuja yrityksiä: {metrics.started}</span><span>Kaikki jalat asetettu: {metrics.fullyPlaced}</span><span>Osuus: {metrics.successPct == null ? 'ei aineistoa' : metrics.successPct.toFixed(1) + ' %'}</span></div>
-      <div className="arb-track-row"><span>Aika aloituksesta viimeiseen jalkaan: {metrics.averageSeconds == null ? 'ei aineistoa' : Math.round(metrics.averageSeconds) + ' s keskimäärin'}</span><span>Ratkaistuja jalkoja: {metrics.settledLegs}</span><span>Toteutunut jalkojen PnL: {money(metrics.realizedPnl)}</span></div>
-      <div className="arb-track-row"><span>Osittain asetettuja: {metrics.partialWithStake}</span><span>Suoraan hylättyjä: {metrics.rejectedWithoutTimer}</span><span>Kertoimen muutos tarjouksesta: {metrics.averageOddsChangePct == null ? 'ei aineistoa' : metrics.averageOddsChangePct.toFixed(2) + ' % / jalka'}</span></div>
-      <p>Suoraan hylättyihin tarjouksiin ei kirjata yrittämisaikaa. Toteutunut PnL kattaa vain ratkaistut jalat; avoimia vetoja ei lasketa voitoksi.</p>
-      {tracker.consent
-        ? <div className="arb-track-row"><span>Yhteenvetoanalyysin suostumus on voimassa.</span>
-          <button className="btn" disabled={tracker.busy} onClick={() => tracker.run(() => setArbAnalyticsConsent(false))}>Peru suostumus</button></div>
-        : <label className="arb-track-row"><input type="checkbox" checked={false} disabled={tracker.busy}
-          onChange={() => tracker.run(() => setArbAnalyticsConsent(true))} />
-          Salli anonymisoidun datani käyttö Vedoxin sisäisessä perustajatiimin yhteenvetoanalyysissä. Oletus on pois päältä.</label>}
-    </div>
-  );
+export function ProfitChart({ summary }) {
+  const points = [{ pnl: 0 }, ...summary.curve];
+  const low = Math.min(0, ...points.map((p) => p.pnl)),
+    high = Math.max(0, ...points.map((p) => p.pnl));
+  const y = (n) => 180 - ((n - low) / (high - low || 1)) * 150;
+  const x = (i) => 55 + (i / Math.max(1, points.length - 1)) * 680;
   return (
-    <div className="arb-track-list">
-      {actionMessage}
-      {tracker.attempts.length === 0 && <div className="card arb-track-panel">Et ole vielä kirjannut arbitraasiyrityksiä.</div>}
-      {tracker.attempts.map(a => {
-        const snapshot = a.offer_snapshot || {};
-        const ownLegs = tracker.legs.filter(l => l.attempt_id === a.id).sort((x, y) => x.ordinal - y.ordinal);
-        const scenario = arbPlacedScenario(ownLegs);
-        const replacement = offers.filter(o => o.eventId && o.eventId === snapshot.event_id &&
-          o.market === (snapshot.markkina || snapshot.market) && String(o.line || '') === String(snapshot.line || '') &&
-          arbOfferTermsChanged(snapshot, o));
-        return <section className="card arb-track-panel" key={a.id}>
-          <div className="arb-track-row"><h2>{snapshot.ottelu || 'Arbitraasiyritys'}</h2><span>{attemptStatusLabel[a.status] || a.status} · aloitettu {fmt(a.started_at)}</span></div>
-          <p>Alkuperäinen tarjous: {Number(snapshot.profit_pct || 0).toFixed(2)} % · havaittu {fmt(a.source_updated_at)}. Tarjouksen tilanne voi muuttua; tarkista aina bookkerilta.</p>
-          {a.previous_attempt_id && <p>Tämä on uusi yritys aiemman tarjouksen jälkeen. Aiemmat jalat säilyvät omassa yrityksessään.</p>}
-          {ownLegs.map(l => <LegEditor key={l.id} leg={l} tracker={tracker} attemptStatus={a.status} />)}
-          {scenario && <p>Teoreettinen minimitulos vahvistetuilla panoksilla ja kertoimilla: {money(scenario.theoreticalWorstPnl)}. Tämä edellyttää että lopputulokset kattavat markkinan ja bookkereiden selvityssäännöt ovat yhtenevät; se ei ole toteutunut voitto.</p>}
-          {a.reason && <p>Syy: {a.reason}</p>}
-          {['started', 'partial'].includes(a.status) && ownLegs.every(l => l.status !== 'placed') &&
-            <button className="btn" disabled={tracker.busy} onClick={() => { const reason = window.prompt('Miksi keskeytit yrityksen?'); if (reason !== null) tracker.run(() => closeArbAttempt(a.id, reason)); }}>Keskeytä</button>}
-          {replacement.length === 1 && <div>
-            <p>Uusi tarjous samasta tapahtumasta ja markkinasta: {replacement[0].profit.toFixed(2)} %. Havaitut muutokset:</p>
-            <ul>{describeArbOfferChange(snapshot, replacement[0]).map(change => <li key={change}>{change}</li>)}</ul>
-            <button className="btn" disabled={tracker.busy} onClick={() => {
-            if (window.confirm('Aloitetaanko uusi, erillinen yritys muuttuneesta tarjouksesta? Vanha yritys ja sen jalat säilyvät.'))
-              tracker.run(() => createArbAttempt(replacement[0].id, replacement[0].sourceUpdatedAt, null, a.id));
-            }}>Aloita erillinen uusi yritys</button>
-          </div>}
-          {replacement.length > 1 && <p>Samasta kohteesta löytyi useita uusia tarjouksia. Valitse uusi tarjous tarjouslistasta; automaattista vaihtoa ei tehdä.</p>}
-        </section>;
-      })}
-    </div>
+    <section className="card arb-track-panel">
+      <div className="arb-analytics-heading">
+        <h2>Voittokäyrä</h2>
+        <AnalyticsInfo label="Voittokäyrä">
+          Ratkaistujen yritysten kertynyt nettotulos. Voitot nostavat ja tappiot
+          laskevat käyrää. Alkukassa ja rahansiirrot eivät ole voittoa.
+        </AnalyticsInfo>
+      </div>
+      {!summary.curve.length ? (
+        <div className="arb-empty">
+          Käyrä muodostuu, kun kirjaat ensimmäisen vedon tuloksen.
+        </div>
+      ) : (
+        <>
+          <svg
+            className="arb-chart"
+            viewBox="0 0 780 225"
+            role="img"
+            aria-label={`Kertynyt nettotulos ${money(summary.curve.at(-1)?.pnl || 0)}`}
+          >
+            <line
+              x1="55"
+              x2="735"
+              y1={y(0)}
+              y2={y(0)}
+              stroke="currentColor"
+              opacity=".25"
+            />
+            <text x="5" y="25" fill="currentColor">
+              {money(high)}
+            </text>
+            <text x="5" y="200" fill="currentColor">
+              {money(low)}
+            </text>
+            <polyline
+              points={points.map((p, i) => `${x(i)},${y(p.pnl)}`).join(" ")}
+              fill="none"
+              stroke="var(--blue)"
+              strokeWidth="3"
+            />
+            {summary.curve.map((p, i) => (
+              <circle
+                key={p.id}
+                cx={x(i + 1)}
+                cy={y(p.pnl)}
+                r="4"
+                fill="var(--blue)"
+              >
+                <title>
+                  {fmt(p.at)}: {money(p.pnl)}
+                </title>
+              </circle>
+            ))}
+            <text x="55" y="220" fill="currentColor">
+              Aloitus
+            </text>
+            <text x="735" y="220" textAnchor="end" fill="currentColor">
+              Viimeisin tulos
+            </text>
+          </svg>
+          <details>
+            <summary>Näytä käyrän tapahtumat</summary>
+            <table className="arb-table">
+              <thead>
+                <tr>
+                  <th>Ratkaistu</th>
+                  <th>Nettotulos</th>
+                  <th>Kertynyt</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.curve.map((p) => (
+                  <tr key={p.id}>
+                    <td>{fmt(p.at)}</td>
+                    <td>{money(p.delta / 100)}</td>
+                    <td>{money(p.pnl)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </details>
+        </>
+      )}
+      {summary.partialPnl !== 0 && (
+        <div className="arb-analytics-heading arb-analytics-note">
+          <span>Muut kirjatut tulokset: {money(summary.partialPnl)}</span>
+          <AnalyticsInfo label="Muut kirjatut tulokset">
+            Avoimien yritysten osatuloksia tai ilman ratkaisuhetkeä olevia
+            tuloksia. Ne sisältyvät kassaan; käyrä näyttää kokonaan ratkaistut
+            yritykset, joiden ratkaisuhetki tunnetaan.
+          </AnalyticsInfo>
+        </div>
+      )}
+      {summary.missingResultTimes > 0 && (
+        <div className="arb-analytics-heading arb-analytics-note">
+          <span>Ratkaisuhetki puuttuu: {summary.missingResultTimes}</span>
+          <AnalyticsInfo label="Puuttuvat ratkaisuhetket">
+            Nämä tulokset sisältyvät nettotulokseen, mutta eivät käyrään.
+          </AnalyticsInfo>
+        </div>
+      )}
+    </section>
+  );
+}
+function LegRow({ leg, attempt, tracker }) {
+  const [editing, setEditing] = useState(false);
+  const [book, setBook] = useState(leg.actual_book || leg.offered_book);
+  const [odds, setOdds] = useState(leg.actual_odds || leg.offered_odds);
+  const [stake, setStake] = useState(leg.actual_stake || "");
+  const [result, setResult] = useState(leg.result || "win");
+  const [returned, setReturned] = useState(leg.returned_amount ?? "");
+  const [reason, setReason] = useState("");
+  useEffect(() => {
+    setBook(leg.actual_book || leg.offered_book);
+    setOdds(leg.actual_odds || leg.offered_odds);
+    setStake(leg.actual_stake || "");
+    setResult(leg.result || "win");
+    setReturned(leg.returned_amount ?? "");
+  }, [leg.effectiveCorrectionId, leg.status]);
+  const timing = arbTiming(attempt, [leg])[0];
+  const canPlace =
+    leg.status === "pending" && ["started", "partial"].includes(attempt.status);
+  const canEdit = ["placed", "settled"].includes(leg.status);
+  const valid = book.trim() && Number(odds) > 1 && Number(stake) > 0;
+  const validResult =
+    returned !== "" &&
+    Number(returned) >= 0 &&
+    (result !== "lose" || Number(returned) === 0);
+  const save = async () => {
+    const values = { book, odds: Number(odds), stake: Number(stake), reason };
+    if (leg.status === "settled")
+      Object.assign(values, { result, returned: Number(returned) });
+    if (
+      await tracker.run(() =>
+        recordArbLeg(leg.id, canPlace ? "place" : "edit", values),
+      )
+    ) {
+      setEditing(false);
+      setReason("");
+    }
+  };
+  return (
+    <React.Fragment>
+      <tr>
+        <td>
+          <b>{leg.offered_outcome}</b>
+          <small>
+            Tarjous {leg.offered_book} @ {leg.offered_odds}
+          </small>
+        </td>
+        <td>
+          {canPlace || editing ? (
+            <input
+              aria-label="Kirja"
+              value={book}
+              onChange={(e) => setBook(e.target.value)}
+            />
+          ) : (
+            leg.actual_book || leg.offered_book
+          )}
+        </td>
+        <td>
+          {canPlace || editing ? (
+            <input
+              aria-label="Todellinen kerroin"
+              type="number"
+              min="1.01"
+              step=".01"
+              value={odds}
+              onChange={(e) => setOdds(e.target.value)}
+            />
+          ) : (
+            leg.actual_odds || leg.offered_odds
+          )}
+        </td>
+        <td>
+          {canPlace || editing ? (
+            <input
+              aria-label="Todellinen panos euroina"
+              type="number"
+              min=".01"
+              step=".01"
+              value={stake}
+              onChange={(e) => setStake(e.target.value)}
+            />
+          ) : leg.actual_stake ? (
+            money(leg.actual_stake)
+          ) : (
+            "—"
+          )}
+        </td>
+        <td>
+          {labels[leg.status]}
+          {leg.status === "settled" && (
+            <small>
+              {{ win: "Voitto", lose: "Tappio", void: "Mitätöity" }[leg.result]}{" "}
+              · {money(Number(leg.returned_amount) - Number(leg.actual_stake))}
+            </small>
+          )}
+        </td>
+        <td>
+          {timing.attemptSeconds == null
+            ? "—"
+            : Math.round(timing.attemptSeconds) + " s"}
+          <small>{fmt(leg.checked_at || leg.placed_at)}</small>
+        </td>
+        <td>
+          {canPlace ? (
+            <button
+              className="btn p"
+              disabled={tracker.busy || !valid}
+              onClick={save}
+            >
+              Veto asetettu
+            </button>
+          ) : (
+            canEdit && (
+              <button
+                className="btn"
+                disabled={tracker.busy}
+                onClick={() => setEditing(!editing)}
+              >
+                {editing ? "Peru muokkaus" : "Muokkaa"}
+              </button>
+            )
+          )}
+        </td>
+      </tr>
+      {(canPlace || editing || leg.status === "placed") && (
+        <tr>
+          <td colSpan="7">
+            <div className="arb-track-row">
+              {(editing || canPlace) && (
+                <label>
+                  {editing ? "Muutoksen syy" : "Jos veto ei onnistunut: syy"}
+                  <input
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="Esimerkiksi kerroin muuttui"
+                  />
+                </label>
+              )}
+              {canPlace && (
+                <button
+                  className="btn"
+                  disabled={tracker.busy || !reason.trim()}
+                  onClick={() =>
+                    tracker.run(() =>
+                      markArbLegUnavailable(
+                        leg.id,
+                        reason,
+                        Number(odds) > 1 ? Number(odds) : null,
+                      ),
+                    )
+                  }
+                >
+                  Ei onnistunut
+                </button>
+              )}
+              {((leg.status === "placed" && !editing) ||
+                (leg.status === "settled" && editing)) && (
+                <>
+                  <label>
+                    Tulos
+                    <select
+                      value={result}
+                      onChange={(e) => {
+                        setResult(e.target.value);
+                        setReturned(
+                          e.target.value === "lose"
+                            ? 0
+                            : e.target.value === "void"
+                              ? stake
+                              : "",
+                        );
+                      }}
+                    >
+                      <option value="win">Voitto</option>
+                      <option value="lose">Tappio</option>
+                      <option value="void">Mitätöity</option>
+                    </select>
+                  </label>
+                  <label>
+                    Todellinen palautus €
+                    <input
+                      type="number"
+                      min="0"
+                      step=".01"
+                      value={returned}
+                      onChange={(e) => setReturned(e.target.value)}
+                    />
+                  </label>
+                  <span>
+                    Kirjaa maksettu palautus komission ja kulujen jälkeen.
+                  </span>
+                  {!editing && (
+                    <button
+                      className="btn p"
+                      disabled={tracker.busy || !validResult}
+                      onClick={() =>
+                        tracker.run(() =>
+                          recordArbLeg(leg.id, "settle", {
+                            result,
+                            returned: Number(returned),
+                          }),
+                        )
+                      }
+                    >
+                      Kirjaa tulos
+                    </button>
+                  )}
+                </>
+              )}
+              {editing && (
+                <button
+                  className="btn p"
+                  disabled={
+                    tracker.busy ||
+                    !valid ||
+                    !reason.trim() ||
+                    (leg.status === "settled" && !validResult)
+                  }
+                  onClick={save}
+                >
+                  Tallenna muutos
+                </button>
+              )}
+            </div>
+          </td>
+        </tr>
+      )}
+      {leg.failure_reason && (
+        <tr>
+          <td colSpan="7">Ei onnistunut: {leg.failure_reason}</td>
+        </tr>
+      )}
+    </React.Fragment>
+  );
+}
+export default function ArbTracker({ tracker, offers, tab, compact = false }) {
+  const [opening, setOpening] = useState("");
+  const [showDeleted, setShowDeleted] = useState(false);
+  const [expanded, setExpanded] = useState(null);
+  useEffect(() => {
+    setOpening(tracker.bankroll?.opening_amount ?? "");
+    setExpanded(null);
+    setShowDeleted(false);
+  }, [tracker.ownerId, tracker.bankroll?.opening_amount]);
+  const active = tracker.attempts.filter((a) => !a.deleted_at);
+  const legs = tracker.legs.filter((l) =>
+    active.some((a) => a.id === l.attempt_id),
+  );
+  const metrics = arbAttemptMetrics(active, legs);
+  const summary = arbBankroll(
+    tracker.attempts,
+    tracker.legs,
+    tracker.bankroll?.opening_amount,
+  );
+  if (tracker.error)
+    return (
+      <div className="card arb-track-panel" role="status">
+        {tracker.error}
+        <button className="btn" onClick={tracker.reload}>
+          Yritä uudelleen
+        </button>
+      </div>
+    );
+  const error = tracker.actionError && (
+    <div role="alert">{tracker.actionError}</div>
+  );
+  if (tab === "wallets")
+    return (
+      <section className="card arb-track-panel">
+        {error}
+        <h2>Yhteinen arbitraasikassa</h2>
+        <p>
+          Yksi alkukassa kaikille yrityksille. Rahansiirto pankkitilin ja
+          kirjojen välillä ei muuta tätä kassaa.
+        </p>
+        <div className="arb-track-row">
+          <label>
+            Alkukassa €
+            <input
+              type="number"
+              min="0"
+              step=".01"
+              value={opening}
+              onChange={(e) => setOpening(e.target.value)}
+            />
+          </label>
+          <button
+            className="btn p"
+            disabled={tracker.busy || opening === "" || Number(opening) < 0}
+            onClick={() => tracker.run(() => setArbBankroll(Number(opening)))}
+          >
+            Tallenna alkukassa
+          </button>
+        </div>
+        <p>
+          Alkukassa + toteutunut nettotulos = kokonaiskassa. Alkukassan
+          korjaaminen ei muuta nettovoittokäyrää.
+        </p>
+        {summary.available < 0 && (
+          <p role="alert">
+            Vapaana oleva saldo on negatiivinen. Tarkista alkukassa ja
+            kirjaukset.
+          </p>
+        )}
+      </section>
+    );
+  if (tab === "analytics")
+    return (
+      <>
+        {error}
+        <ProfitChart summary={summary} />
+        <section className="card arb-track-panel">
+          <h2>Yritysten onnistuminen</h2>
+          <div className="arb-summary">
+            {[
+              ["Aloitettuja", metrics.started],
+              ["Kaikki vedot asetettu", metrics.fullyPlaced],
+              [
+                "Onnistumisosuus",
+                metrics.successPct == null
+                  ? "—"
+                  : metrics.successPct.toFixed(1) + " %",
+              ],
+              [
+                "Keskimääräinen kirjausaika",
+                metrics.averageSeconds == null
+                  ? "—"
+                  : Math.round(metrics.averageSeconds) + " s",
+              ],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <span>{label}</span>
+                <strong>{value}</strong>
+              </div>
+            ))}
+          </div>
+          <div className="arb-analytics-heading">
+            <h3>Kirjakohtainen havaittu viive</h3>
+            <AnalyticsInfo label="Kirjakohtainen havaittu viive">
+              Aika tarjouksen päivityksestä vedon vahvistamiseen. Tämä on
+              kirjaushavainto, ei automaattisesti mitattu kertoimen koko
+              voimassaoloaika.
+            </AnalyticsInfo>
+          </div>
+          <div className="arb-table-wrap">
+            <table className="arb-table">
+              <thead>
+                <tr>
+                  <th>Kirja</th>
+                  <th>Havaintoja</th>
+                  <th>Sama kerroin</th>
+                  <th>Keskim. viive</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ...new Set(
+                    legs
+                      .filter((l) => l.checked_at || l.placed_at)
+                      .map((l) => l.actual_book || l.offered_book),
+                  ),
+                ].map((book) => {
+                  const rows = active
+                    .flatMap((a) =>
+                      arbTiming(
+                        a,
+                        legs.filter((l) => l.attempt_id === a.id),
+                      ),
+                    )
+                    .filter(
+                      (l) =>
+                        (l.actual_book || l.offered_book) === book &&
+                        l.observationSeconds != null,
+                    );
+                  return (
+                    <tr key={book}>
+                      <td>{book}</td>
+                      <td>{rows.length}</td>
+                      <td>{rows.filter((l) => l.sameOdds).length}</td>
+                      <td>
+                        {rows.length
+                          ? Math.round(
+                              rows.reduce(
+                                (s, l) => s + l.observationSeconds,
+                                0,
+                              ) / rows.length,
+                            ) + " s"
+                          : "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <details>
+            <summary>Yhteenvetoanalyysin suostumus</summary>
+            <label>
+              <input
+                type="checkbox"
+                checked={tracker.consent}
+                disabled={tracker.busy}
+                onChange={(e) =>
+                  tracker.run(() => setArbAnalyticsConsent(e.target.checked))
+                }
+              />{" "}
+              Salli anonymisoitu perustajatiimin yhteenvetoanalyysi
+            </label>
+          </details>
+        </section>
+      </>
+    );
+  const visible = tracker.attempts.filter((a) =>
+    showDeleted ? Boolean(a.deleted_at) : !a.deleted_at,
+  );
+  const rows = compact
+    ? visible.filter((a) => ["started", "partial", "placed"].includes(a.status))
+    : visible;
+  return (
+    <section className="card arb-track-panel">
+      {error}
+      <div className="arb-track-row">
+        <h2>{compact ? "Keskeneräiset yritykset" : "Omat yritykset"}</h2>
+        {!compact && (
+          <button
+            className="btn"
+            onClick={() => {
+              setShowDeleted(!showDeleted);
+              setExpanded(null);
+            }}
+          >
+            {showDeleted ? "Takaisin historiaan" : "Poistetut yritykset"}
+          </button>
+        )}
+      </div>
+      {!rows.length ? (
+        <p>Ei yrityksiä tässä näkymässä.</p>
+      ) : (
+        <div className="arb-table-wrap">
+          <table className="arb-table">
+            <thead>
+              <tr>
+                <th>Ottelu / markkina</th>
+                <th>Aloitettu</th>
+                <th>Tila</th>
+                <th>Asetettu</th>
+                <th>Nettotulos</th>
+                <th>Toiminnot</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((a) => {
+                const own = tracker.legs
+                  .filter((l) => l.attempt_id === a.id)
+                  .sort((x, y) => x.ordinal - y.ordinal);
+                const replacement = offers.filter(
+                  (o) =>
+                    o.eventId &&
+                    o.eventId === a.offer_snapshot?.event_id &&
+                    o.market ===
+                      (a.offer_snapshot?.markkina ||
+                        a.offer_snapshot?.market) &&
+                    String(o.line || "") ===
+                      String(a.offer_snapshot?.line || "") &&
+                    arbOfferTermsChanged(a.offer_snapshot, o),
+                );
+                const pnl = own
+                  .filter((l) => l.status === "settled")
+                  .reduce(
+                    (sum, l) =>
+                      sum + Number(l.returned_amount) - Number(l.actual_stake),
+                    0,
+                  );
+                return (
+                  <React.Fragment key={a.id}>
+                    <tr>
+                      <td>
+                        <b>{a.offer_snapshot?.ottelu || "Yritys"}</b>
+                        <small>
+                          {a.offer_snapshot?.markkina} · tarjous{" "}
+                          {Number(a.offer_snapshot?.profit_pct || 0).toFixed(2)}{" "}
+                          %
+                        </small>
+                      </td>
+                      <td>{fmt(a.started_at)}</td>
+                      <td>{a.deleted_at ? "Poistettu" : labels[a.status]}</td>
+                      <td>
+                        {
+                          own.filter((l) =>
+                            ["placed", "settled"].includes(l.status),
+                          ).length
+                        }
+                        /{own.length}
+                      </td>
+                      <td>
+                        {own.some((l) => l.status === "settled")
+                          ? money(pnl)
+                          : "—"}
+                      </td>
+                      <td>
+                        <div className="arb-track-row">
+                          <button
+                            className="btn"
+                            onClick={() =>
+                              setExpanded(expanded === a.id ? null : a.id)
+                            }
+                          >
+                            {expanded === a.id ? "Sulje" : "Avaa"}
+                          </button>
+                          <button
+                            className="btn"
+                            disabled={tracker.busy}
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  a.deleted_at
+                                    ? "Palautetaanko yritys historiaan ja kassalaskentaan?"
+                                    : "Poistetaanko yritys historiasta ja laskelmista? Tämä ei peru oikeaa vetoa. Tallenne on palautettavissa.",
+                                )
+                              )
+                                tracker.run(() =>
+                                  setArbAttemptDeleted(a.id, !a.deleted_at),
+                                );
+                            }}
+                          >
+                            {a.deleted_at ? "Palauta" : "Poista"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {expanded === a.id && (
+                      <tr>
+                        <td colSpan="6">
+                          <p>
+                            Tarjous havaittu {fmt(a.source_updated_at)}.
+                            Ajanotto alkaa yrityksen aloituksesta. Kirjaa
+                            jokainen veto erikseen.
+                          </p>
+                          <table className="arb-table">
+                            <thead>
+                              <tr>
+                                <th>Valinta</th>
+                                <th>Kirja</th>
+                                <th>Kerroin</th>
+                                <th>Panos</th>
+                                <th>Tila / tulos</th>
+                                <th>Aloituksesta</th>
+                                <th>Kirjaus</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {own.map((l) =>
+                                a.deleted_at ? (
+                                  <tr key={l.id}>
+                                    <td>{l.offered_outcome}</td>
+                                    <td>{l.actual_book || l.offered_book}</td>
+                                    <td>{l.actual_odds || l.offered_odds}</td>
+                                    <td>{money(l.actual_stake)}</td>
+                                    <td>{labels[l.status]}</td>
+                                    <td>{fmt(l.placed_at)}</td>
+                                    <td>Palauta yritys muokataksesi</td>
+                                  </tr>
+                                ) : (
+                                  <LegRow
+                                    key={l.id}
+                                    leg={l}
+                                    attempt={a}
+                                    tracker={tracker}
+                                  />
+                                ),
+                              )}
+                            </tbody>
+                          </table>
+                          {!a.deleted_at &&
+                            ["started", "partial"].includes(a.status) &&
+                            own.every((l) => l.status !== "placed") && (
+                              <button
+                                className="btn"
+                                disabled={tracker.busy}
+                                onClick={() => {
+                                  const reason =
+                                    window.prompt("Keskeytyksen syy");
+                                  if (reason !== null)
+                                    tracker.run(() =>
+                                      closeArbAttempt(a.id, reason),
+                                    );
+                                }}
+                              >
+                                Keskeytä yritys
+                              </button>
+                            )}
+                          {!a.deleted_at && replacement.length === 1 && (
+                            <details>
+                              <summary>Kohteen ehdot ovat muuttuneet</summary>
+                              {describeArbOfferChange(
+                                a.offer_snapshot,
+                                replacement[0],
+                              ).map((text, i) => (
+                                <p key={i}>{text}</p>
+                              ))}
+                              <button
+                                className="btn"
+                                disabled={tracker.busy}
+                                onClick={() => {
+                                  if (
+                                    window.confirm(
+                                      "Aloitetaanko muuttuneesta kohteesta uusi erillinen yritys?",
+                                    )
+                                  )
+                                    tracker.run(() =>
+                                      createArbAttempt(
+                                        replacement[0].id,
+                                        replacement[0].sourceUpdatedAt,
+                                        null,
+                                        a.id,
+                                      ),
+                                    );
+                                }}
+                              >
+                                Aloita uusi yritys
+                              </button>
+                            </details>
+                          )}
+                          <p>
+                            Laskennallinen tuotto edellyttää yhteensopivia
+                            markkinoita ja selvityssääntöjä. Se ei ole
+                            toteutunut voitto.
+                          </p>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }

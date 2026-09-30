@@ -9,7 +9,7 @@ function check({ error, data }) {
 }
 
 export async function loadArbTracker() {
-  const [attempts, legs, corrections, wallets, cashEntries, consent] = await Promise.all([
+  const [attempts, legs, corrections, consent, bankroll] = await Promise.all([
     loadPagedRows((from, to) => sbClient.from('user_arb_attempts')
       .select('*').order('created_at', { ascending: false })
       .order('id', { ascending: false }).range(from, to)),
@@ -18,20 +18,30 @@ export async function loadArbTracker() {
     loadPagedRows((from, to) => sbClient.from('user_arb_leg_corrections')
       .select('*').order('created_at', { ascending: false })
       .order('id', { ascending: false }).range(from, to)),
-    sbClient.from('user_arb_wallets').select('*').order('bookmaker'),
-    sbClient.from('user_arb_cash_entries')
-      .select('id,bookmaker,kind,amount,note,operation_id,balance_after,created_at')
-      .order('created_at', { ascending: false }).order('id', { ascending: false }).limit(50),
     sbClient.from('user_arb_analytics_consent').select('founder_aggregate_opt_in').maybeSingle(),
+    sbClient.from('user_arb_bankroll').select('opening_amount').maybeSingle(),
   ]);
   return {
     attempts: check(attempts) || [],
     legs: applyArbCorrections(check(legs) || [], check(corrections) || []),
     corrections: check(corrections) || [],
-    wallets: check(wallets) || [],
-    cashEntries: check(cashEntries) || [],
     consent: check(consent)?.founder_aggregate_opt_in === true,
+    bankroll: check(bankroll),
   };
+}
+
+export async function setArbBankroll(amount) {
+  return check(await sbClient.rpc('arb_set_bankroll', { p_amount: amount }));
+}
+export async function setArbAttemptDeleted(id, deleted) {
+  return check(await sbClient.rpc('arb_set_attempt_deleted', { p_attempt_id: id, p_deleted: deleted }));
+}
+export async function recordArbLeg(legId, action, values = {}) {
+  return check(await sbClient.rpc('arb_record_leg_v2', {
+    p_leg_id: legId, p_action: action,
+    p_book: values.book ?? null, p_odds: values.odds ?? null, p_stake: values.stake ?? null,
+    p_result: values.result ?? null, p_return: values.returned ?? null, p_reason: values.reason ?? null,
+  }));
 }
 
 export async function createArbAttempt(offerId, expectedUpdatedAt, rejectReason = null, previousAttemptId = null) {
@@ -66,9 +76,7 @@ export async function placeArbLeg(legId, book, odds, stake) {
 }
 
 export async function markArbLegUnavailable(legId, reason, actualOdds = null) {
-  return check(await sbClient.rpc('arb_mark_leg_unavailable', {
-    p_leg_id: legId, p_reason: reason, p_actual_odds: actualOdds,
-  }));
+  return recordArbLeg(legId, 'unavailable', { reason, odds: actualOdds });
 }
 
 export async function settleArbLeg(legId, result) {
