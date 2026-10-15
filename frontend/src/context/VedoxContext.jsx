@@ -12,6 +12,7 @@ import {
 } from '../supabase.js';
 import { DEFAULT_KELLY_FRACTION, normalizeKellyFraction } from '../staking.js';
 import { createSteamBetSnapshot } from '../steam-bet-snapshot.js';
+import { loadBrowserSession } from '../auth-session.js';
 
 const Ctx = createContext(null);
 export const useVedox = () => useContext(Ctx);
@@ -84,6 +85,7 @@ export function VedoxProvider({ children }) {
   const [authReady, setAuthReady] = useState(false);
   const [permissionsReady, setPermissionsReady] = useState(false);
   const [profileError, setProfileError] = useState(false);
+  const [authNotice, setAuthNotice] = useState('');
   const [showAuth,  setShowAuth]  = useState(false);
 
   // Profile
@@ -284,12 +286,27 @@ export function VedoxProvider({ children }) {
 
   // â”€â”€â”€ Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
-    sbClient.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setAuthReady(true);
+    let active = true;
+    void loadBrowserSession(sbClient)
+      .then(({ session: nextSession, expired }) => {
+        if (!active) return;
+        setSession(nextSession);
+        if (expired) setAuthNotice('Istuntosi vanheni. Kirjaudu uudelleen.');
+      })
+      .catch(() => {
+        if (active) setSession(null);
+      })
+      .finally(() => {
+        if (active) setAuthReady(true);
+      });
+    const { data: { subscription } } = sbClient.auth.onAuthStateChange((event, nextSession) => {
+      setSession(nextSession);
+      if (event === 'SIGNED_IN') setAuthNotice('');
     });
-    const { data: { subscription } } = sbClient.auth.onAuthStateChange((_e, s) => setSession(s));
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -837,6 +854,7 @@ export function VedoxProvider({ children }) {
   async function signIn(email, password) {
     const { error } = await sbClient.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    setAuthNotice('');
   }
   async function signUp(email, password, initialSettings = null) {
     const { data, error } = await sbClient.auth.signUp({ email, password });
@@ -851,7 +869,10 @@ export function VedoxProvider({ children }) {
     const { error } = await sbClient.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) throw error;
   }
-  async function signOut() { await sbClient.auth.signOut(); }
+  async function signOut() {
+    setAuthNotice('');
+    await sbClient.auth.signOut();
+  }
 
   // â”€â”€â”€ Enriched ev bets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const addedIds = new Set(userBets.map(b => b.sourceBetId).filter(Boolean));
@@ -1001,7 +1022,7 @@ export function VedoxProvider({ children }) {
 
   return (
     <Ctx.Provider value={{
-      session, authReady, permissionsReady, profileError, retryProfile, showAuth, setShowAuth, signIn, signUp, resetPassword, signOut,
+      session, authReady, permissionsReady, profileError, retryProfile, authNotice, showAuth, setShowAuth, signIn, signUp, resetPassword, signOut,
       profile, tierCode,
       tierLabel: tierLabel(tierCode),
       canAccess: (pageId) => canAccess(tierCode, pageId),

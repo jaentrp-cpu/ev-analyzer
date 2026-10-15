@@ -18,7 +18,7 @@ const pageHints = {
 
 export default function LockedView({ pageId, session, setShowAuth }) {
   const title = pageNames[pageId] || 'Tämä näkymä';
-  const { profileError, retryProfile } = useVedox();
+  const { authNotice, profileError, retryProfile } = useVedox();
   if (session && profileError) {
     return (
       <div className="page-body">
@@ -37,7 +37,7 @@ export default function LockedView({ pageId, session, setShowAuth }) {
       <div className="ph">
         <div>
           <h1>{title}</h1>
-          <div className="sub">{session ? 'Näkymä ei kuulu nykyiseen Vedox-tasoosi' : 'Kirjaudu sisään nähdäksesi tämän näkymän'}</div>
+          <div className="sub">{session ? 'Näkymä ei kuulu nykyiseen Vedox-tasoosi' : (authNotice || 'Kirjaudu sisään nähdäksesi tämän näkymän')}</div>
         </div>
       </div>
       <section className="card locked-card">

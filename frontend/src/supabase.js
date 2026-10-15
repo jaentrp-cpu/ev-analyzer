@@ -1186,12 +1186,12 @@ export async function loadBankrollSnapshots(userId, tierCode) {
   if (!userId || !canAccess(tierCode, 'analytics')) return [];
   const { data, error } = await sbClient
     .from('bankroll_snapshots')
-    .select('bankroll, created_at')
+    .select('bankroll, snap_at')
     .eq('user_id', userId)
-    .order('created_at', { ascending: true })
+    .order('snap_at', { ascending: true })
     .limit(60);
   if (error) { console.warn('[Vedox] snapshots load failed:', error.message); return []; }
-  return (data || []).map(r => ({ amount: parseFloat(r.bankroll), date: r.created_at?.slice(0, 10) }));
+  return (data || []).map(r => ({ amount: parseFloat(r.bankroll), date: r.snap_at?.slice(0, 10) }));
 }
 
 export async function addBankrollSnapshot(userId, bankroll) {

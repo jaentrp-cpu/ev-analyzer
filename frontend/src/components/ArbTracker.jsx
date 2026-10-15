@@ -524,6 +524,7 @@ export default function ArbTracker({ tracker, offers, tab, compact = false }) {
     tracker.legs,
     tracker.bankroll?.opening_amount,
   );
+  if (tracker.error && compact) return null;
   if (tracker.error)
     return (
       <div className="card arb-track-panel" role="status">
