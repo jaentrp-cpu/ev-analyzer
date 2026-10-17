@@ -62,8 +62,11 @@ if (!html.includes('Päiväkohtainen tulos') || !html.includes('Valittu päivä'
 if (!html.includes('<strong>+203,86 €</strong>')) {
   throw new Error('Calendar PnL did not render the exact amount and euro sign');
 }
-if (!html.includes('<i>Tänään</i>')) {
-  throw new Error('Today marker did not render');
+if (html.includes('<i>Tänään</i>') || html.includes('>TÄNÄÄN<')) {
+  throw new Error('Calendar rendered a redundant today text marker');
+}
+if (!html.includes('class="calendar-stake">100,00 € panos</small>')) {
+  throw new Error('Calendar stake did not render fully with cents and euro sign');
 }
 if (!html.includes('class="calendar-toggle on"')
   || !html.includes('aria-expanded="true"')

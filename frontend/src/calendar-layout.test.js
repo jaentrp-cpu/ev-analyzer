@@ -5,20 +5,30 @@ import test from 'node:test';
 const component = await readFile(new URL('./components/PortfolioAnalytics.jsx', import.meta.url), 'utf8');
 const styles = await readFile(new URL('./styles.css', import.meta.url), 'utf8');
 
-test('calendar PnL keeps the exact cents and euro sign without ellipsis', () => {
+test('calendar PnL is exact and readable without ellipsis on desktop and mobile', () => {
   assert.match(component, /formatCalendarPnl\(summary\.pnl\)/);
   assert.doesNotMatch(component, /formatCalendarPnl\(summary\.pnl, 0\)/);
   const rule = styles.match(/\.analytics-calendar-day strong \{[\s\S]*?\}/)?.[0] || '';
-  assert.match(rule, /font: 750 clamp\(6px, 13cqi, 11px\)/);
+  assert.match(rule, /font: 750 11px/);
   assert.match(rule, /overflow-wrap: anywhere/);
   assert.match(rule, /white-space: normal/);
   assert.doesNotMatch(rule, /text-overflow:\s*ellipsis/);
+  assert.match(styles, /\.vdx\.is-mobile \.analytics-calendar-day strong \{[\s\S]*?font-size: 9\.5px/);
 });
 
-test('today marker is constrained to its calendar cell', () => {
-  const rule = styles.match(/\.analytics-calendar-date i \{[\s\S]*?\}/)?.[0] || '';
-  assert.match(rule, /flex: 0 0 100%/);
-  assert.match(rule, /max-width: 100%/);
-  assert.match(rule, /overflow: hidden/);
-  assert.match(rule, /white-space: nowrap/);
+test('calendar keeps the today border without rendering a today text marker', () => {
+  assert.match(component, /key === todayKey \? ' today' : ''/);
+  assert.doesNotMatch(component, /<i>Tänään<\/i>/);
+  assert.match(styles, /\.analytics-calendar-day\.today \{[\s\S]*?box-shadow:/);
+});
+
+test('calendar stake is complete and visible on desktop and mobile', () => {
+  assert.match(component, /className="calendar-stake">\{formatEuro\(summary\.totalStake\)\} panos/);
+  const rule = styles.match(/\.analytics-calendar-day \.calendar-stake \{[\s\S]*?\}/)?.[0] || '';
+  assert.match(rule, /overflow: visible/);
+  assert.match(rule, /overflow-wrap: anywhere/);
+  assert.match(rule, /text-overflow: clip/);
+  assert.match(rule, /white-space: normal/);
+  assert.match(styles, /\.vdx\.is-mobile \.analytics-calendar-day \.calendar-stake \{[\s\S]*?display: block/);
+  assert.doesNotMatch(styles, /\.vdx\.is-mobile \.analytics-calendar-day small:last-child/);
 });

@@ -2801,7 +2801,6 @@ body {
 }
 .vdx .analytics-calendar-day {
   position: relative;
-  container-type: inline-size;
   min-width: 0;
   min-height: 88px;
   display: flex;
@@ -2838,7 +2837,6 @@ body {
   max-width: 100%;
   min-height: 16px;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 3px;
@@ -2884,23 +2882,12 @@ body {
 .vdx .bet-pagination button:disabled { cursor: default; opacity: .4; }
 .vdx .bet-pagination label { display: flex; align-items: center; gap: 6px; color: var(--tx3); font: 650 11px 'Geist Mono', monospace; }
 .vdx .bet-pagination input { font: 650 11px 'Geist Mono', monospace; }
-.vdx .analytics-calendar-date i {
-  flex: 0 0 100%;
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
-  color: var(--blue);
-  font: 750 6px inherit;
-  letter-spacing: .04em;
-  white-space: nowrap;
-  text-transform: uppercase;
-}
 .vdx .analytics-calendar-day strong {
   margin-top: 5px;
   max-width: 100%;
   color: var(--tx);
-  font: 750 clamp(6px, 13cqi, 11px) 'Geist Mono', monospace;
-  line-height: 1.05;
+  font: 750 11px 'Geist Mono', monospace;
+  line-height: 1.15;
   overflow-wrap: anywhere;
   white-space: normal;
 }
@@ -2913,6 +2900,13 @@ body {
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.vdx .analytics-calendar-day .calendar-stake {
+  overflow: visible;
+  font: 650 8px/1.15 'Geist Mono', monospace;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  white-space: normal;
 }
 .vdx .analytics-calendar-day .analytics-calendar-empty {
   margin: auto 0;
@@ -3670,7 +3664,7 @@ body {
 .vdx.is-mobile .analytics-calendar-month.month-offset--1 { order: 2; }
 .vdx.is-mobile .analytics-calendar-month.month-offset-1 { order: 3; }
 .vdx.is-mobile .analytics-calendar-day {
-  min-height: 70px;
+  min-height: 92px;
   padding: 4px;
 }
 .vdx.is-mobile .analytics-calendar-date {
@@ -3680,8 +3674,13 @@ body {
   opacity: 1;
 }
 .vdx.is-mobile .analytics-calendar-day.outside { opacity: .55; }
-.vdx.is-mobile .analytics-calendar-day small:last-child {
-  display: none;
+.vdx.is-mobile .analytics-calendar-day strong {
+  font-size: 9.5px;
+  line-height: 1.15;
+}
+.vdx.is-mobile .analytics-calendar-day .calendar-stake {
+  display: block;
+  font-size: 7.5px;
 }
 .vdx.is-mobile .analytics-calendar-selection {
   grid-template-columns: repeat(2, minmax(0, 1fr));
