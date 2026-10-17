@@ -3677,10 +3677,12 @@ body {
 .vdx.is-mobile .analytics-calendar-day strong {
   font-size: 9.5px;
   line-height: 1.15;
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
+.vdx.is-mobile .analytics-calendar-day .calendar-bet-count,
 .vdx.is-mobile .analytics-calendar-day .calendar-stake {
-  display: block;
-  font-size: 7.5px;
+  display: none;
 }
 .vdx.is-mobile .analytics-calendar-selection {
   grid-template-columns: repeat(2, minmax(0, 1fr));

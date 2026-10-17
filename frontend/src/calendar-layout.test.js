@@ -22,13 +22,13 @@ test('calendar keeps the today border without rendering a today text marker', ()
   assert.match(styles, /\.analytics-calendar-day\.today \{[\s\S]*?box-shadow:/);
 });
 
-test('calendar stake is complete and visible on desktop and mobile', () => {
+test('calendar stake stays visible on desktop but mobile shows only the PnL line', () => {
   assert.match(component, /className="calendar-stake">\{formatEuro\(summary\.totalStake\)\} panos/);
   const rule = styles.match(/\.analytics-calendar-day \.calendar-stake \{[\s\S]*?\}/)?.[0] || '';
   assert.match(rule, /overflow: visible/);
   assert.match(rule, /overflow-wrap: anywhere/);
   assert.match(rule, /text-overflow: clip/);
   assert.match(rule, /white-space: normal/);
-  assert.match(styles, /\.vdx\.is-mobile \.analytics-calendar-day \.calendar-stake \{[\s\S]*?display: block/);
-  assert.doesNotMatch(styles, /\.vdx\.is-mobile \.analytics-calendar-day small:last-child/);
+  assert.match(styles, /\.vdx\.is-mobile \.analytics-calendar-day \.calendar-bet-count,[\s\S]*?\.calendar-stake \{[\s\S]*?display: none/);
+  assert.match(styles, /\.vdx\.is-mobile \.analytics-calendar-day strong \{[\s\S]*?white-space: nowrap/);
 });
