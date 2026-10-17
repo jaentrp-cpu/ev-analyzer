@@ -43,6 +43,21 @@ if (!html.includes('CLV 239/955')) {
 if (!html.includes('Päiväkohtainen tulos') || !html.includes('Valittu päivä')) {
   throw new Error('Analytics calendar and selected-day summary did not render');
 }
+if (!html.includes('class="calendar-toggle on"')
+  || !html.includes('aria-expanded="true"')
+  || !html.includes('aria-controls="portfolio-calendar"')
+  || !html.includes('id="portfolio-calendar"')) {
+  throw new Error('Calendar show/hide control did not render in its open state');
+}
+const currentMonth = new Intl.DateTimeFormat('fi-FI', { month: 'long', year: 'numeric' }).format(new Date());
+const currentMonthPosition = html.indexOf(`class="analytics-calendar-month month-offset-0"`);
+const previousMonthPosition = html.indexOf(`class="analytics-calendar-month month-offset--1"`);
+if (currentMonthPosition < 0
+  || previousMonthPosition < 0
+  || currentMonthPosition > previousMonthPosition
+  || !html.slice(currentMonthPosition).includes(`<h4>${currentMonth}</h4>`)) {
+  throw new Error('Calendar did not open on the current month');
+}
 if (!html.includes('<summary aria-label="Kumulatiivinen PnL: lisätiedot"')
   || !html.includes('<summary aria-label="Päiväkohtainen tulos: lisätiedot"')
   || !html.includes('CLV 239/955')

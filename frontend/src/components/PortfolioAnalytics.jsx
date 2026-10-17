@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import AnalyticsInfo from './AnalyticsInfo.jsx';
 import DatePicker from './DatePicker.jsx';
 import {
@@ -93,21 +93,10 @@ function shiftMonth(date, amount) {
 function AnalyticsCalendar({ userBets, selectedKey, onSelectDay }) {
   const today = new Date();
   const todayKey = localDateKey(today);
-  const [anchorMonth, setAnchorMonth] = useState(() => {
-    const selected = selectedKey ? new Date(`${selectedKey}T12:00:00`) : today;
-    const valid = Number.isFinite(selected.getTime()) ? selected : today;
-    return new Date(valid.getFullYear(), valid.getMonth(), 1);
-  });
+  const [anchorMonth, setAnchorMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const summaries = useMemo(() => buildDailyBetSummaries(userBets), [userBets]);
-  useEffect(() => {
-    if (!selectedKey) return;
-    const selected = new Date(`${selectedKey}T12:00:00`);
-    if (Number.isFinite(selected.getTime())) {
-      setAnchorMonth(new Date(selected.getFullYear(), selected.getMonth(), 1));
-    }
-  }, [selectedKey]);
-  const months = [-1, 0, 1].map(offset => shiftMonth(anchorMonth, offset));
-  const visibleKeys = months.flatMap(calendarMonthDays).map(localDateKey);
+  const months = [0, -1, 1].map(offset => ({ offset, date: shiftMonth(anchorMonth, offset) }));
+  const visibleKeys = months.flatMap(({ date }) => calendarMonthDays(date)).map(localDateKey);
   const maxAbsPnl = Math.max(1, ...visibleKeys.map(key => Math.abs(summaries.get(key)?.pnl || 0)));
   const selected = selectedKey ? summaries.get(selectedKey) : null;
 
@@ -131,8 +120,8 @@ function AnalyticsCalendar({ userBets, selectedKey, onSelectDay }) {
       </div>
 
       <div className="analytics-calendar-months">
-        {months.map(month => (
-          <section className="analytics-calendar-month" key={localDateKey(month)} aria-label={MONTH_LABEL.format(month)}>
+        {months.map(({ offset, date: month }) => (
+          <section className={`analytics-calendar-month month-offset-${offset}`} key={localDateKey(month)} aria-label={MONTH_LABEL.format(month)}>
             <h4>{MONTH_LABEL.format(month)}</h4>
             <div className="analytics-calendar-weekdays" aria-hidden="true">
               {WEEKDAYS.map(day => <span key={day}>{day}</span>)}
@@ -532,7 +521,7 @@ function PnlCurve({ settled, allSettled, totalBankroll }) {
         ))}
         <line x1={padding} x2={width - padding} y1={zeroY} y2={zeroY} className="zero-line" />
         {visible.actual && <polygon points={area} fill="url(#portfolioPnlGradient)" />}
-        {visible.actual && <polyline points={line} fill="none" stroke="var(--blue)" strokeWidth="3" vectorEffect="non-scaling-stroke" />}
+        {visible.actual && <polyline className="portfolio-pnl-line" points={line} fill="none" stroke="var(--blue)" strokeWidth="3" vectorEffect="non-scaling-stroke" />}
         {visible.ev && <polyline points={evPoints.map(point => point.join(',')).join(' ')} fill="none" stroke="#d19a2c" strokeWidth="2" strokeDasharray="7 5" vectorEffect="non-scaling-stroke" />}
         {visible.clv && <polyline points={clvPoints.map(point => point.join(',')).join(' ')} fill="none" stroke="#2ecc8e" strokeWidth="2" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />}
 
@@ -789,6 +778,8 @@ export default function PortfolioAnalytics({
   onDateFromChange = () => {},
   onDateToChange = () => {},
 }) {
+  const [showCalendar, setShowCalendar] = useState(true);
+
   if (!canViewAdvanced) {
     return (
       <div className="card portfolio-locked">
@@ -890,6 +881,15 @@ export default function PortfolioAnalytics({
           <p>{rangeLabel} · {rangeBets.length}/{userBets.length} vetoa valittuna</p>
         </div>
         <div className="filters compact analytics-range">
+          <button
+            type="button"
+            className={`calendar-toggle${showCalendar ? ' on' : ''}`}
+            onClick={() => setShowCalendar(value => !value)}
+            aria-expanded={showCalendar}
+            aria-controls="portfolio-calendar"
+          >
+            Kalenteri
+          </button>
           <label className="filter-field narrow">
             <span>Aika</span>
             <select value={range} onChange={event => onRangeChange(event.target.value)}>
@@ -913,11 +913,15 @@ export default function PortfolioAnalytics({
         </div>
       </div>
 
-      <AnalyticsCalendar
-        userBets={userBets}
-        selectedKey={selectedDayKey}
-        onSelectDay={selectCalendarDay}
-      />
+      {showCalendar && (
+        <div id="portfolio-calendar">
+          <AnalyticsCalendar
+            userBets={userBets}
+            selectedKey={selectedDayKey}
+            onSelectDay={selectCalendarDay}
+          />
+        </div>
+      )}
 
       <div className="stat-grid portfolio-stats">
         <div className="s">

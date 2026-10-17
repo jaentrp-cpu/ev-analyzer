@@ -9,6 +9,7 @@ import PortfolioAnalytics, {
   normalizeAnalyticsRange,
 } from '../components/PortfolioAnalytics.jsx';
 import { formatSteamScore100, isTrustedClvTiming } from '../supabase.js';
+import { paginateBets } from '../mybets-pagination.js';
 
 const EURO = '\u20ac';
 
@@ -76,6 +77,7 @@ export default function MyBets() {
   const [editingTerms, setEditingTerms] = useState(null);
   const [betMutationId, setBetMutationId] = useState(null);
   const [mutationError, setMutationError] = useState(null);
+  const [betPage, setBetPage] = useState(1);
 
   if (!authReady || (session && !permissionsReady && userBets.length === 0)) {
     return <LoadingView title="Omat vedot" />;
@@ -120,6 +122,12 @@ export default function MyBets() {
       isLossResult(b);
     return byTab;
   });
+  const { page: currentBetPage, pageCount: betPageCount, items: visibleBets } = paginateBets(bets, betPage);
+  const changeBetPage = nextPage => {
+    const parsed = Number(nextPage);
+    if (!Number.isFinite(parsed)) return;
+    setBetPage(Math.min(Math.max(Math.trunc(parsed), 1), betPageCount));
+  };
 
   const rangeWonCount = timeSelectedBets.filter(isWinResult).length;
   const rangeLostCount = timeSelectedBets.filter(isLossResult).length;
@@ -437,7 +445,7 @@ export default function MyBets() {
             <div className="filters compact">
               <label className="filter-field narrow">
                 <span>Aika</span>
-                <select value={timeFilter} onChange={e => saveTimeFilter(e.target.value)}>
+                <select value={timeFilter} onChange={e => { saveTimeFilter(e.target.value); setBetPage(1); }}>
                   <option value="all">Kaikki</option>
                   <option value="today">T&auml;n&auml;&auml;n</option>
                   <option value="tomorrow">Huomenna</option>
@@ -463,23 +471,23 @@ export default function MyBets() {
               )}
               <label className="filter-field">
                 <span>Bookkeri</span>
-                <select value={bookFilter} onChange={e => setBookFilter(e.target.value)}>
+                <select value={bookFilter} onChange={e => { setBookFilter(e.target.value); setBetPage(1); }}>
                   {books.map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
               </label>
             </div>
             <div className="seg">
-              <button className={tab === 'all' ? 'on' : ''} onClick={() => setTab('all')}>Kaikki ({bookSelectedBets.length})</button>
-              <button className={tab === 'open' ? 'on' : ''} onClick={() => setTab('open')}>Kesken ({selectedOpenCount})</button>
-              <button className={tab === 'won' ? 'on' : ''} onClick={() => setTab('won')}>Voitot ({selectedWonCount})</button>
-              <button className={tab === 'lost' ? 'on' : ''} onClick={() => setTab('lost')}>Tappiot ({selectedLostCount})</button>
+              <button className={tab === 'all' ? 'on' : ''} onClick={() => { setTab('all'); setBetPage(1); }}>Kaikki ({bookSelectedBets.length})</button>
+              <button className={tab === 'open' ? 'on' : ''} onClick={() => { setTab('open'); setBetPage(1); }}>Kesken ({selectedOpenCount})</button>
+              <button className={tab === 'won' ? 'on' : ''} onClick={() => { setTab('won'); setBetPage(1); }}>Voitot ({selectedWonCount})</button>
+              <button className={tab === 'lost' ? 'on' : ''} onClick={() => { setTab('lost'); setBetPage(1); }}>Tappiot ({selectedLostCount})</button>
             </div>
           </div>
 
           <div className="card my-table">
             <div className="card-head">
               <h3>Vetohistoria</h3>
-              <div className="info"><span>{bets.length} n&auml;ytet&auml;&auml;n &middot; {timeSelectedBets.length}/{userBets.length} aikav&auml;lill&auml;</span></div>
+              <div className="info"><span>{bets.length} vetoa &middot; {timeSelectedBets.length}/{userBets.length} aikav&auml;lill&auml;</span></div>
             </div>
             <div className="history-desktop" style={{ overflow: 'auto' }}>
               {bets.length === 0 ? (
@@ -503,7 +511,7 @@ export default function MyBets() {
                     </tr>
                   </thead>
                   <tbody>
-                    {bets.map((b, i) => {
+                    {visibleBets.map((b, i) => {
                       const isEditingTerms = editingTerms?.id === b._dbId;
                       return (
                       <tr key={b._dbId || i}>
@@ -620,7 +628,7 @@ export default function MyBets() {
             </div>
             {bets.length > 0 && (
               <div className="my-cards history-cards">
-                {bets.map((b, i) => {
+                {visibleBets.map((b, i) => {
                   const isEditingTerms = editingTerms?.id === b._dbId;
                   return (
                     <article className="mc" key={`mobile-${b._dbId || i}`}>
@@ -732,6 +740,25 @@ export default function MyBets() {
               </div>
             )}
             {bets.length === 0 && <div className="history-cards history-mobile-empty">Ei vetoja</div>}
+            {bets.length > 0 && (
+              <nav className="bet-pagination" aria-label="Vetohistorian sivutus">
+                <button type="button" onClick={() => changeBetPage(1)} disabled={currentBetPage === 1} aria-label="Ensimmäinen sivu">&#171;</button>
+                <button type="button" onClick={() => changeBetPage(currentBetPage - 1)} disabled={currentBetPage === 1} aria-label="Edellinen sivu">&#8592;</button>
+                <label>
+                  <input
+                    type="number"
+                    min="1"
+                    max={betPageCount}
+                    value={currentBetPage}
+                    onChange={event => changeBetPage(event.target.value)}
+                    aria-label={`Sivu ${currentBetPage}/${betPageCount}`}
+                  />
+                  <span aria-hidden="true">/ {betPageCount}</span>
+                </label>
+                <button type="button" onClick={() => changeBetPage(currentBetPage + 1)} disabled={currentBetPage === betPageCount} aria-label="Seuraava sivu">&#8594;</button>
+                <button type="button" onClick={() => changeBetPage(betPageCount)} disabled={currentBetPage === betPageCount} aria-label="Viimeinen sivu">&#187;</button>
+              </nav>
+            )}
           </div>
         </>
       )}
