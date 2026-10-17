@@ -74,6 +74,15 @@ function formatEuro(value, digits = 2) {
   })} ${EURO}`;
 }
 
+function formatCalendarPnl(value, digits = 2) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return '-';
+  return `${number >= 0 ? '+' : ''}${number.toLocaleString('fi-FI', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  })} ${EURO}`;
+}
+
 function calendarMonthDays(monthDate) {
   const first = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
   const mondayOffset = (first.getDay() + 6) % 7;
@@ -156,7 +165,7 @@ function AnalyticsCalendar({ userBets, selectedKey, onSelectDay }) {
                     <span className="analytics-calendar-date">{date.getDate()}{key === todayKey && <i>Tänään</i>}</span>
                     {summary ? (
                       <>
-                        <strong>{summary.settled ? `${summary.pnl >= 0 ? '+' : ''}${summary.pnl.toFixed(2)} ${EURO}` : 'Avoin'}</strong>
+                        <strong>{summary.settled ? formatCalendarPnl(summary.pnl) : 'Avoin'}</strong>
                         <small>{summary.bets} vetoa</small>
                         <small>{formatEuro(summary.totalStake)} panos</small>
                       </>

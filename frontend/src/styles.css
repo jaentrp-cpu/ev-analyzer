@@ -2801,6 +2801,7 @@ body {
 }
 .vdx .analytics-calendar-day {
   position: relative;
+  container-type: inline-size;
   min-width: 0;
   min-height: 88px;
   display: flex;
@@ -2834,8 +2835,10 @@ body {
   box-shadow: 0 0 0 2px var(--blue-soft), inset 0 0 0 1px var(--blue);
 }
 .vdx .analytics-calendar-date {
+  max-width: 100%;
   min-height: 16px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 3px;
@@ -2882,18 +2885,24 @@ body {
 .vdx .bet-pagination label { display: flex; align-items: center; gap: 6px; color: var(--tx3); font: 650 11px 'Geist Mono', monospace; }
 .vdx .bet-pagination input { font: 650 11px 'Geist Mono', monospace; }
 .vdx .analytics-calendar-date i {
+  flex: 0 0 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   color: var(--blue);
-  font: 750 7px inherit;
+  font: 750 6px inherit;
   letter-spacing: .04em;
+  white-space: nowrap;
   text-transform: uppercase;
 }
 .vdx .analytics-calendar-day strong {
   margin-top: 5px;
-  overflow: hidden;
+  max-width: 100%;
   color: var(--tx);
-  font: 750 11px 'Geist Mono', monospace;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font: 750 clamp(6px, 13cqi, 11px) 'Geist Mono', monospace;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 .vdx .analytics-calendar-day.positive strong { color: var(--green); }
 .vdx .analytics-calendar-day.negative strong { color: var(--red); }
