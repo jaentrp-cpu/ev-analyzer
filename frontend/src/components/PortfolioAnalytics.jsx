@@ -162,12 +162,12 @@ function AnalyticsCalendar({ userBets, selectedKey, onSelectDay }) {
                     aria-label={aria}
                     aria-pressed={key === selectedKey}
                   >
-                    <span className="analytics-calendar-date">{date.getDate()}{key === todayKey && <i>Tänään</i>}</span>
+                    <span className="analytics-calendar-date">{date.getDate()}</span>
                     {summary ? (
                       <>
                         <strong>{summary.settled ? formatCalendarPnl(summary.pnl) : 'Avoin'}</strong>
-                        <small>{summary.bets} vetoa</small>
-                        <small>{formatEuro(summary.totalStake)} panos</small>
+                        <small className="calendar-bet-count">{summary.bets} vetoa</small>
+                        <small className="calendar-stake">{formatEuro(summary.totalStake)} panos</small>
                       </>
                     ) : <small className="analytics-calendar-empty">Ei vetoja</small>}
                   </button>
