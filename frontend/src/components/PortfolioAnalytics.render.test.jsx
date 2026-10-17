@@ -21,6 +21,22 @@ const bets = Array.from({ length: 955 }, (_, index) => ({
   market: 'h2h',
 }));
 
+const today = new Date();
+bets.push({
+  _dbId: 'today-exact-calendar-pnl',
+  sourceBetId: 'today-exact-calendar-pnl',
+  status: 'won',
+  result: 'won',
+  stake: 100,
+  pnl: 203.86,
+  ev: 4,
+  odds: 3.0386,
+  createdAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12).toISOString(),
+  match: 'Calendar exact PnL fixture',
+  bookmaker: 'FixtureBook',
+  market: 'h2h',
+});
+
 const html = renderToStaticMarkup(
   <PortfolioAnalytics
     userBets={bets}
@@ -42,6 +58,12 @@ if (!html.includes('CLV 239/955')) {
 }
 if (!html.includes('Päiväkohtainen tulos') || !html.includes('Valittu päivä')) {
   throw new Error('Analytics calendar and selected-day summary did not render');
+}
+if (!html.includes('<strong>+203,86 €</strong>')) {
+  throw new Error('Calendar PnL did not render the exact amount and euro sign');
+}
+if (!html.includes('<i>Tänään</i>')) {
+  throw new Error('Today marker did not render');
 }
 if (!html.includes('class="calendar-toggle on"')
   || !html.includes('aria-expanded="true"')
