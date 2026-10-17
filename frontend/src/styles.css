@@ -2777,6 +2777,9 @@ body {
   border-radius: 9px;
   background: var(--bg2);
 }
+.vdx .analytics-calendar-month.month-offset--1 { order: 1; }
+.vdx .analytics-calendar-month.month-offset-0 { order: 2; }
+.vdx .analytics-calendar-month.month-offset-1 { order: 3; }
 .vdx .analytics-calendar-month h4 {
   margin: 0 0 9px;
   font-size: 12px;
@@ -2838,6 +2841,46 @@ body {
   gap: 3px;
   font: 700 10px 'Geist Mono', monospace;
 }
+.vdx .calendar-toggle {
+  align-self: end;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--bd);
+  border-radius: 7px;
+  background: var(--bg3);
+  color: var(--tx2);
+  cursor: pointer;
+  font: 650 11px inherit;
+}
+.vdx .calendar-toggle.on,
+.vdx .calendar-toggle:hover,
+.vdx .calendar-toggle:focus-visible {
+  border-color: var(--blue);
+  color: var(--blue);
+  outline: none;
+}
+.vdx .bet-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px;
+  border-top: 1px solid var(--bd);
+}
+.vdx .bet-pagination button,
+.vdx .bet-pagination input {
+  width: 36px;
+  height: 32px;
+  border: 1px solid var(--bd);
+  border-radius: 7px;
+  background: var(--bg3);
+  color: var(--tx);
+  text-align: center;
+}
+.vdx .bet-pagination button { cursor: pointer; }
+.vdx .bet-pagination button:disabled { cursor: default; opacity: .4; }
+.vdx .bet-pagination label { display: flex; align-items: center; gap: 6px; color: var(--tx3); font: 650 11px 'Geist Mono', monospace; }
+.vdx .bet-pagination input { font: 650 11px 'Geist Mono', monospace; }
 .vdx .analytics-calendar-date i {
   color: var(--blue);
   font: 750 7px inherit;
@@ -3614,10 +3657,20 @@ body {
   flex: 0 0 min(88vw, 340px);
   scroll-snap-align: center;
 }
+.vdx.is-mobile .analytics-calendar-month.month-offset-0 { order: 1; }
+.vdx.is-mobile .analytics-calendar-month.month-offset--1 { order: 2; }
+.vdx.is-mobile .analytics-calendar-month.month-offset-1 { order: 3; }
 .vdx.is-mobile .analytics-calendar-day {
   min-height: 70px;
   padding: 4px;
 }
+.vdx.is-mobile .analytics-calendar-date {
+  position: relative;
+  z-index: 1;
+  color: var(--tx);
+  opacity: 1;
+}
+.vdx.is-mobile .analytics-calendar-day.outside { opacity: .55; }
 .vdx.is-mobile .analytics-calendar-day small:last-child {
   display: none;
 }
@@ -3666,6 +3719,7 @@ body {
 .vdx.is-mobile .portfolio-line-chart svg {
   height: 190px;
 }
+.vdx.is-mobile .portfolio-pnl-line { stroke-width: 1.25; }
 .vdx.is-mobile .portfolio-curve-card {
   min-height: 300px;
 }
