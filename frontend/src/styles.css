@@ -2893,6 +2893,7 @@ body {
 }
 .vdx .analytics-calendar-day.positive strong { color: var(--green); }
 .vdx .analytics-calendar-day.negative strong { color: var(--red); }
+.vdx .calendar-pnl-mobile { display: none; }
 .vdx .analytics-calendar-day small {
   overflow: hidden;
   color: var(--tx3);
@@ -3675,10 +3676,21 @@ body {
 }
 .vdx.is-mobile .analytics-calendar-day.outside { opacity: .55; }
 .vdx.is-mobile .analytics-calendar-day strong {
-  font-size: 9.5px;
+  display: block;
+  width: 100%;
+  font-size: clamp(6.5px, 1.8vw, 7.5px);
   line-height: 1.15;
+  letter-spacing: -.05em;
   overflow-wrap: normal;
+  text-align: center;
   white-space: nowrap;
+}
+.vdx.is-mobile .calendar-pnl-desktop { display: none; }
+.vdx.is-mobile .calendar-pnl-mobile {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
 }
 .vdx.is-mobile .analytics-calendar-day .calendar-bet-count,
 .vdx.is-mobile .analytics-calendar-day .calendar-stake {

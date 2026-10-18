@@ -83,6 +83,10 @@ function formatCalendarPnl(value, digits = 2) {
   })} ${EURO}`;
 }
 
+function formatMobileCalendarPnl(value, digits = 2) {
+  return formatCalendarPnl(value, digits).replace(/\s+/g, '');
+}
+
 function calendarMonthDays(monthDate) {
   const first = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
   const mondayOffset = (first.getDay() + 6) % 7;
@@ -165,7 +169,14 @@ function AnalyticsCalendar({ userBets, selectedKey, onSelectDay }) {
                     <span className="analytics-calendar-date">{date.getDate()}</span>
                     {summary ? (
                       <>
-                        <strong>{summary.settled ? formatCalendarPnl(summary.pnl) : 'Avoin'}</strong>
+                        <strong>
+                          {summary.settled ? (
+                            <>
+                              <span className="calendar-pnl-desktop">{formatCalendarPnl(summary.pnl)}</span>
+                              <span className="calendar-pnl-mobile">{formatMobileCalendarPnl(summary.pnl)}</span>
+                            </>
+                          ) : 'Avoin'}
+                        </strong>
                         <small className="calendar-bet-count">{summary.bets} vetoa</small>
                         <small className="calendar-stake">{formatEuro(summary.totalStake)} panos</small>
                       </>
