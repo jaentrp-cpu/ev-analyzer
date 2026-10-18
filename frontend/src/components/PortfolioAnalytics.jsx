@@ -17,6 +17,7 @@ import {
   parseBetTime,
 } from '../portfolio-analytics.js';
 import { buildPortfolioCurveSeries } from '../portfolioCurveSeries.js';
+import { formatMobileCalendarPnl } from '../mobile-calendar-pnl.js';
 
 export { betInAnalyticsRange, normalizeAnalyticsRange } from '../portfolio-analytics.js';
 
@@ -81,10 +82,6 @@ function formatCalendarPnl(value, digits = 2) {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   })} ${EURO}`;
-}
-
-function formatMobileCalendarPnl(value, digits = 2) {
-  return formatCalendarPnl(value, digits).replace(/\s+/g, '');
 }
 
 function calendarMonthDays(monthDate) {

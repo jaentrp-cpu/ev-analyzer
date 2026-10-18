@@ -3664,9 +3664,13 @@ body {
 .vdx.is-mobile .analytics-calendar-month.month-offset-0 { order: 1; }
 .vdx.is-mobile .analytics-calendar-month.month-offset--1 { order: 2; }
 .vdx.is-mobile .analytics-calendar-month.month-offset-1 { order: 3; }
+.vdx.is-mobile .analytics-calendar-weekdays,
+.vdx.is-mobile .analytics-calendar-grid {
+  gap: 2px;
+}
 .vdx.is-mobile .analytics-calendar-day {
   min-height: 92px;
-  padding: 4px;
+  padding: 4px 1px;
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
@@ -3683,7 +3687,7 @@ body {
   min-width: 0;
   width: 100%;
   max-width: 100%;
-  font-size: clamp(6px, 1.55vw, 7px);
+  font-size: clamp(5.5px, 1.4vw, 6px);
   line-height: 1.15;
   letter-spacing: -.05em;
   overflow-wrap: normal;

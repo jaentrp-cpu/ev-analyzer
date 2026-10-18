@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import { formatMobileCalendarPnl } from './mobile-calendar-pnl.js';
 
 const component = await readFile(new URL('./components/PortfolioAnalytics.jsx', import.meta.url), 'utf8');
 const styles = await readFile(new URL('./styles.css', import.meta.url), 'utf8');
@@ -8,7 +9,9 @@ const styles = await readFile(new URL('./styles.css', import.meta.url), 'utf8');
 test('calendar PnL is exact and readable without ellipsis on desktop and mobile', () => {
   assert.match(component, /className="calendar-pnl-desktop">\{formatCalendarPnl\(summary\.pnl\)\}/);
   assert.match(component, /className="calendar-pnl-mobile">\{formatMobileCalendarPnl\(summary\.pnl\)\}/);
-  assert.match(component, /formatCalendarPnl\(value, digits\)\.replace\(\/\\s\+\/g, ''\)/);
+  assert.equal(formatMobileCalendarPnl(203.18), '+203,18');
+  assert.equal(formatMobileCalendarPnl(-60.34), '-60,34');
+  assert.equal(formatMobileCalendarPnl(999.99), '+999,99');
   assert.doesNotMatch(component, /formatCalendarPnl\(summary\.pnl, 0\)/);
   const rule = styles.match(/\.analytics-calendar-day strong \{[\s\S]*?\}/)?.[0] || '';
   assert.match(rule, /font: 750 11px/);
@@ -16,7 +19,9 @@ test('calendar PnL is exact and readable without ellipsis on desktop and mobile'
   assert.match(rule, /white-space: normal/);
   assert.doesNotMatch(rule, /text-overflow:\s*ellipsis/);
   assert.match(styles, /\.vdx\.is-mobile \.analytics-calendar-day \{[\s\S]*?min-width: 0;[\s\S]*?overflow: hidden/);
-  assert.match(styles, /\.vdx\.is-mobile \.analytics-calendar-day strong \{[\s\S]*?max-width: 100%;[\s\S]*?font-size: clamp\(6px, 1\.55vw, 7px\)/);
+  assert.match(styles, /\.vdx\.is-mobile \.analytics-calendar-weekdays,[\s\S]*?\.analytics-calendar-grid \{[\s\S]*?gap: 2px/);
+  assert.match(styles, /\.vdx\.is-mobile \.analytics-calendar-day \{[\s\S]*?padding: 4px 1px/);
+  assert.match(styles, /\.vdx\.is-mobile \.analytics-calendar-day strong \{[\s\S]*?max-width: 100%;[\s\S]*?font-size: clamp\(5\.5px, 1\.4vw, 6px\)/);
   assert.match(styles, /\.vdx\.is-mobile \.calendar-pnl-desktop \{ display: none; \}/);
   assert.match(styles, /\.vdx\.is-mobile \.calendar-pnl-mobile \{[\s\S]*?display: block;[\s\S]*?width: 100%;[\s\S]*?overflow: clip/);
 });
