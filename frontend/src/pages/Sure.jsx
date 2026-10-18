@@ -9,6 +9,7 @@ import ArbTracker, {
   useArbTracker,
 } from "../components/ArbTracker.jsx";
 import { createArbAttempt } from "../arb-tracker.js";
+import { calculateArbitrage } from "../arb-calculator.js";
 
 const EURO = "\u20ac";
 
@@ -52,6 +53,7 @@ export default function Sure() {
     canAccess,
   } = useVedox();
   const [stakes, setStakes] = useState({});
+  const [oddsEdits, setOddsEdits] = useState({});
   const [leagueFilter, setLeagueFilter] = useState("Kaikki");
   const [bookFilter, setBookFilter] = useState("Kaikki");
   const [minProfit, setMinProfit] = useState("0");
@@ -318,10 +320,11 @@ export default function Sure() {
                       !Number.isFinite(seenMs) ||
                       freshnessNow - seenMs > 5 * 60_000;
                     const stake = stakes[s.id] ?? 200;
-                    const impliedSum = s.legs.reduce(
-                      (sum, l) => sum + (l.odds > 0 ? 1 / l.odds : 0),
-                      0,
-                    );
+                    const editedOdds = s.legs.map((leg, index) => {
+                      const value = oddsEdits[`${s.id}:${index}`];
+                      return value === undefined ? leg.odds : Number(value);
+                    });
+                    const calculation = calculateArbitrage(editedOdds, stake);
                     return (
                       <tr key={s.id}>
                         <td>
@@ -345,18 +348,25 @@ export default function Sure() {
                         </td>
                         <td>
                           {s.legs.map((l, i) => {
-                            const share =
-                              l.share > 0
-                                ? l.share
-                                : impliedSum > 0
-                                  ? (1 / l.odds / impliedSum) * 100
-                                  : 0;
+                            const legStake = calculation.stakes[i] || 0;
+                            const share = stake > 0 ? (legStake / stake) * 100 : 0;
                             return (
                               <div className="arb-offer-leg" key={i}>
                                 <b>{l.outcome}</b> · {l.book} @{" "}
-                                {l.odds.toFixed(2)}
+                                <input
+                                  className="arb-odds-input"
+                                  aria-label={`Kerroin: ${s.match}, ${l.outcome}, ${l.book}`}
+                                  type="number"
+                                  min="1.01"
+                                  step="0.01"
+                                  value={oddsEdits[`${s.id}:${i}`] ?? l.odds}
+                                  onChange={(event) => setOddsEdits((previous) => ({
+                                    ...previous,
+                                    [`${s.id}:${i}`]: event.target.value,
+                                  }))}
+                                />
                                 <small>
-                                  Panos {Math.round((stake * share) / 100)} € ·{" "}
+                                  Panos {legStake.toFixed(2)} € ·{" "}
                                   {share.toFixed(1)} %
                                 </small>
                               </div>
@@ -378,10 +388,16 @@ export default function Sure() {
                           />
                         </td>
                         <td>
-                          <strong>{s.profit.toFixed(2)} %</strong>
-                          <small>
-                            {((stake * s.profit) / 100).toFixed(2)} €
-                          </small>
+                          {calculation.valid ? (
+                            <>
+                              <strong className={calculation.isLocked ? "arb-profit-locked" : "arb-profit-lost"}>
+                                {calculation.isLocked ? "Lukittu" : "Ei lukittua tuottoa"} · {calculation.profitPct.toFixed(2)} %
+                              </strong>
+                              <small>{calculation.profit.toFixed(2)} € · palautus {calculation.payout.toFixed(2)} €</small>
+                            </>
+                          ) : (
+                            <strong className="arb-profit-lost">Tarkista kertoimet</strong>
+                          )}
                         </td>
                         <td>
                           <div className="arb-track-row">

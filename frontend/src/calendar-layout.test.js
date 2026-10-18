@@ -15,9 +15,10 @@ test('calendar PnL is exact and readable without ellipsis on desktop and mobile'
   assert.match(rule, /overflow-wrap: anywhere/);
   assert.match(rule, /white-space: normal/);
   assert.doesNotMatch(rule, /text-overflow:\s*ellipsis/);
-  assert.match(styles, /\.vdx\.is-mobile \.analytics-calendar-day strong \{[\s\S]*?font-size: clamp\(6\.5px, 1\.8vw, 7\.5px\)/);
+  assert.match(styles, /\.vdx\.is-mobile \.analytics-calendar-day \{[\s\S]*?min-width: 0;[\s\S]*?overflow: hidden/);
+  assert.match(styles, /\.vdx\.is-mobile \.analytics-calendar-day strong \{[\s\S]*?max-width: 100%;[\s\S]*?font-size: clamp\(6px, 1\.55vw, 7px\)/);
   assert.match(styles, /\.vdx\.is-mobile \.calendar-pnl-desktop \{ display: none; \}/);
-  assert.match(styles, /\.vdx\.is-mobile \.calendar-pnl-mobile \{[\s\S]*?display: block;[\s\S]*?overflow: hidden/);
+  assert.match(styles, /\.vdx\.is-mobile \.calendar-pnl-mobile \{[\s\S]*?display: block;[\s\S]*?width: 100%;[\s\S]*?overflow: clip/);
 });
 
 test('calendar keeps the today border without rendering a today text marker', () => {

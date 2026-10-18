@@ -3667,6 +3667,9 @@ body {
 .vdx.is-mobile .analytics-calendar-day {
   min-height: 92px;
   padding: 4px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 .vdx.is-mobile .analytics-calendar-date {
   position: relative;
@@ -3677,8 +3680,10 @@ body {
 .vdx.is-mobile .analytics-calendar-day.outside { opacity: .55; }
 .vdx.is-mobile .analytics-calendar-day strong {
   display: block;
+  min-width: 0;
   width: 100%;
-  font-size: clamp(6.5px, 1.8vw, 7.5px);
+  max-width: 100%;
+  font-size: clamp(6px, 1.55vw, 7px);
   line-height: 1.15;
   letter-spacing: -.05em;
   overflow-wrap: normal;
@@ -3688,10 +3693,14 @@ body {
 .vdx.is-mobile .calendar-pnl-desktop { display: none; }
 .vdx.is-mobile .calendar-pnl-mobile {
   display: block;
+  width: 100%;
   max-width: 100%;
-  overflow: hidden;
+  overflow: clip;
   font-variant-numeric: tabular-nums;
 }
+
+.vdx .arb-profit-locked { color: var(--green); }
+.vdx .arb-profit-lost { color: var(--red); }
 .vdx.is-mobile .analytics-calendar-day .calendar-bet-count,
 .vdx.is-mobile .analytics-calendar-day .calendar-stake {
   display: none;
@@ -4331,6 +4340,7 @@ body {
 .arb-table th,.arb-table td { padding:16px 14px; border-bottom:1px solid var(--border, #242630); vertical-align:top; }
 .arb-table small { display:block; color:var(--tx3); font-size:12px; margin-top:5px; }
 .vdx .arb-table input { max-width:145px; min-width:85px; padding:8px 10px; border:1px solid var(--bd2); background:var(--bg3); color:var(--tx); border-radius:7px; font:inherit; }
+.vdx .arb-table .arb-odds-input { width:76px; min-width:70px; padding:5px 7px; }
 .arb-offer-leg + .arb-offer-leg { margin-top:12px; }
 .arb-chart { width:100%; height:auto; min-height:180px; color:var(--tx3); font-size:12px; }
 .arb-empty { padding:45px 20px; text-align:center; color:var(--tx3); }
