@@ -88,6 +88,29 @@ for (const page of ['index.html', '404.html']) {
   }
 }
 
+// The public bundle initializes Supabase before React mounts. A Vite build made
+// without the two public runtime variables still succeeds, but createClient()
+// then throws at module evaluation time and the whole site is left blank. Keep
+// the deployment gate beside the artifact allowlist so an invalid prebuilt
+// bundle can never replace the currently working Pages release.
+const indexHtml = await readFile(path.join(target, 'index.html'), 'utf8');
+const entryScriptReferences = [...indexHtml.matchAll(/src=["'](\/assets\/[^"']+\.js)["']/g)]
+  .map((match) => match[1]);
+if (entryScriptReferences.length !== 1) {
+  throw new Error(`Expected exactly one public entry script, found ${entryScriptReferences.length}`);
+}
+const entryScript = await readFile(
+  path.join(target, entryScriptReferences[0].replace(/^\//, '')),
+  'utf8',
+);
+const hasSupabaseUrl = /https:\/\/[^\s"']+\.supabase\.co/.test(entryScript);
+const hasSupabasePublicKey = /(?:eyJ[A-Za-z0-9_-]{20,}|sb_publishable_[A-Za-z0-9_-]{20,})/.test(entryScript);
+if (!hasSupabaseUrl || !hasSupabasePublicKey) {
+  throw new Error(
+    'Public entry bundle is missing its Supabase runtime configuration; refusing Pages deployment',
+  );
+}
+
 const forbiddenTopLevel = new Set([
   '.env', '.git', '.github', 'docs', 'frontend', 'node_modules', 'sql', 'tools',
 ]);
