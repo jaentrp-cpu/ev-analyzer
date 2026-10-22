@@ -205,7 +205,11 @@ function steamInfoForUserBet(row) {
 function isPublicValueBet(row) {
   const odds = Number(row?.odds || 0);
   const edge = Number(row?.edge || 0);
-  return edge >= 3 && edge <= 8 && odds >= 1.8 && odds <= 2.5;
+  // `ev_bets.aktiivinen=true` is the scanner-owned publication decision.
+  // Do not duplicate mutable Telegram EV/odds limits in the static client:
+  // doing so made otherwise valid alerts disappear whenever Hallinta changed
+  // those limits. Keep only a defensive shape check before rendering.
+  return Number.isFinite(edge) && edge > 0 && Number.isFinite(odds) && odds > 1;
 }
 
 // â”€â”€â”€ Profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
